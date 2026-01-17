@@ -1,5 +1,8 @@
 ## The Sixth World in 2088
 
+<img width="601" height="744" alt="Cd0cf73f83cac22a703e9678bbd35cb4" src="https://github.com/user-attachments/assets/ff8a48ce-6659-40d2-92c6-5a236fcfada5" />
+
+
 [![CI Suite](https://github.com/DaedalusDock/daedalusdock/actions/workflows/ci_suite.yml/badge.svg)](https://github.com/DaedalusDock/daedalusdock/actions/workflows/ci_suite.yml)
 [![Percentage of issues still open](https://isitmaintained.com/badge/open/DaedalusDock/daedalusdock.svg)](https://isitmaintained.com/project/DaedalusDock/daedalusdock "Percentage of issues still open")
 [![Average time to resolve an issue](https://isitmaintained.com/badge/resolution/DaedalusDock/daedalusdock.svg)](https://isitmaintained.com/project/DaedalusDock/daedalusdock "Average time to resolve an issue")
