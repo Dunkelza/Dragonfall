@@ -93,19 +93,19 @@
 #define DEPARTMENT_UNASSIGNED "No department assigned"
 
 #define DEPARTMENT_BITFLAG_SECURITY (1<<0)
-#define DEPARTMENT_SECURITY "Mars Private Security"
+#define DEPARTMENT_SECURITY "Lone Star"
 #define DEPARTMENT_BITFLAG_FEDERATION (1<<1)
-#define DEPARTMENT_FEDERATION "The Federation"
+#define DEPARTMENT_FEDERATION "Renraku Corporate"
 #define DEPARTMENT_BITFLAG_SERVICE (1<<2)
-#define DEPARTMENT_SERVICE "Independant"
+#define DEPARTMENT_SERVICE "Independent"
 #define DEPARTMENT_BITFLAG_CARGO (1<<3)
-#define DEPARTMENT_CARGO "Hermes Galactic Freight"
+#define DEPARTMENT_CARGO "Shiawase Logistics"
 #define DEPARTMENT_BITFLAG_ENGINEERING (1<<4)
-#define DEPARTMENT_ENGINEERING "Daedalus Industries"
+#define DEPARTMENT_ENGINEERING "Renraku Facilities"
 #define DEPARTMENT_BITFLAG_SCIENCE (1<<5)
 #define DEPARTMENT_SCIENCE "Science"
 #define DEPARTMENT_BITFLAG_MEDICAL (1<<6)
-#define DEPARTMENT_MEDICAL "Aether Association"
+#define DEPARTMENT_MEDICAL "DocWagon"
 #define DEPARTMENT_BITFLAG_SILICON (1<<7)
 #define DEPARTMENT_SILICON "Silicon"
 #define DEPARTMENT_BITFLAG_ASSISTANT (1<<8)

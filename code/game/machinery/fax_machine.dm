@@ -356,7 +356,7 @@ GLOBAL_LIST_EMPTY(fax_machines)
 			playsound(src, 'sound/machines/terminal_error.ogg', 50)
 			return FALSE
 
-	to_chat(user, span_notice("Fax sent. Dispensing paper for personal record keeping. Thank you for using the Nanotrasen Approved Faxing Device!"))
+	to_chat(user, span_notice("Fax sent. Dispensing paper for personal record keeping. Thank you for using the Renraku Approved Faxing Device!"))
 	eject_stored_paper()
 	playsound(src, 'sound/machines/terminal_processing.ogg', 35)
 	COOLDOWN_START(src, fax_cooldown, FAX_COOLDOWN_TIME)
@@ -420,7 +420,7 @@ GLOBAL_LIST_EMPTY(fax_machines)
 	if(title)
 		sent_paper.name = fax
 
-	var/source = input(user, "Who's sending this fax? Leave blank for default name (\"Central Command\", or \"the Syndicate\" if emagged)", "Send Fax") as null | text
+	var/source = input(user, "Who's sending this fax? Leave blank for default name (\"Sector Control\", or \"the Syndicate\" if emagged)", "Send Fax") as null | text
 	sent_paper.update_appearance()
 	if(receive_paper(sent_paper, source, TRUE))
 		to_chat(user, span_notice("Fax successfully sent."))

@@ -171,7 +171,7 @@
 /datum/map_template/shuttle/emergency/asteroid
 	suffix = "asteroid"
 	name = "Asteroid Station Emergency Shuttle"
-	description = "A respectable mid-sized shuttle that first saw service shuttling Daedalus Industries crew to and from their asteroid belt embedded facilities."
+	description = "A respectable mid-sized transport that first saw service moving Renraku staff to and from remote corporate facilities."
 	credit_cost = CARGO_CRATE_VALUE * 6
 
 /datum/map_template/shuttle/emergency/bar
@@ -364,13 +364,13 @@
 /datum/map_template/shuttle/emergency/goon
 	suffix = "goon"
 	name = "NES Port"
-	description = "The Nanotrasen Emergency Shuttle Port(NES Port for short) is a shuttle used at other less known Daedalus facilities and has a more open inside for larger crowds, but fewer onboard shuttle facilities."
+	description = "A utilitarian emergency transport used at other Renraku facilities. More open inside for larger crowds, but fewer onboard shuttle facilities."
 	credit_cost = CARGO_CRATE_VALUE
 
 /datum/map_template/shuttle/emergency/rollerdome
 	suffix = "rollerdome"
 	name = "Uncle Pete's Rollerdome"
-	description = "Developed by a member of Daedalus' R&D crew that claims to have travelled from the year 2078. \
+	description = "Developed by a Renraku R&D engineer who claims to have travelled from the year 2078. \
 	He says this shuttle is based off an old entertainment complex from the 1990s, though our database has no records on anything pertaining to that decade."
 	admin_notes = "ONLY NINETIES KIDS REMEMBER. Uses the fun balloon and drone from the Emergency Bar."
 	credit_cost = CARGO_CRATE_VALUE * 5

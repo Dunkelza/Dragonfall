@@ -57,7 +57,7 @@
 	cleanspeed = 3 SECONDS // faster than base soap to reward chemists for going to the effort
 
 /obj/item/soap/nanotrasen
-	desc = "A heavy duty bar of Nanotrasen brand soap. Smells of plasma."
+	desc = "A heavy duty bar of Shiawase Industrial brand soap. Smells like chemical disinfectant."
 	grind_results = list(/datum/reagent/toxin/plasma = 10, /datum/reagent/lye = 10)
 	icon_state = "soapnt"
 	cleanspeed = 2.8 SECONDS //janitor gets this

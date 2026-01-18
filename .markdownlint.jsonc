@@ -1,0 +1,25 @@
+{
+	// This repo intentionally uses GitHub-friendly Markdown and allows inline HTML,
+	// non-H1 first headings, and bare URLs in docs.
+	"MD041": false,
+	"MD033": false,
+	"MD034": false,
+
+	// Allow ordered lists to increment naturally.
+	"MD029": false,
+
+	// Allow fenced code blocks without language tags (common in docs).
+	"MD040": false,
+
+	// Allow hard tabs in code snippets.
+	"MD010": false,
+
+	// Allow deeper indentation in nested lists.
+	"MD007": false,
+
+	// Allow trailing punctuation in headings.
+	"MD026": false,
+
+	// Allow bold text as a heading substitute in some docs.
+	"MD036": false,
+}

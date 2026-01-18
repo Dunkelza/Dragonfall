@@ -235,6 +235,8 @@
 	icon_state = "cybernetic_eyeballs"
 	desc = "Your vision is augmented."
 	organ_flags = ORGAN_SYNTHETIC
+	// SR5: sensory replacement has a small Essence impact.
+	essence_base_cost = 0.10
 
 	///Incase the eyes are removed before the timer expires
 	var/emp_timer

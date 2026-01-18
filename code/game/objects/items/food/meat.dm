@@ -258,7 +258,7 @@
 
 /obj/item/food/patty
 	name = "patty"
-	desc = "The Daedalus patty is the patty for you and me!"
+	desc = "The soypatty is the patty for you and me!"
 	icon_state = "patty"
 	food_reagents = list(/datum/reagent/consumable/nutriment/protein = 2)
 	tastes = list("meat" = 1)

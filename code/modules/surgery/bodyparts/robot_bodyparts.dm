@@ -17,6 +17,7 @@ TYPEINFO_DEF(/obj/item/bodypart/arm/left/robot)
 	name = "cyborg left arm"
 	desc = "A skeletal limb wrapped in pseudomuscles, with a low-conductivity case."
 	limb_id = BODYPART_ID_ROBOTIC
+	essence_base_cost = 1.0
 	attack_verb_simple = list("slapped", "punched")
 	inhand_icon_state = "buildpipe"
 	icon = 'icons/mob/augmentation/augments.dmi'
@@ -39,6 +40,18 @@ TYPEINFO_DEF(/obj/item/bodypart/arm/left/robot)
 	medium_burn_msg = ROBOTIC_MEDIUM_BURN_MSG
 	heavy_burn_msg = ROBOTIC_HEAVY_BURN_MSG
 
+/obj/item/bodypart/arm/left/robot/tier2
+	name = "alpha-grade cyborg left arm"
+	essence_grade_multiplier = 0.8
+
+/obj/item/bodypart/arm/left/robot/tier3
+	name = "beta-grade cyborg left arm"
+	essence_grade_multiplier = 0.7
+
+/obj/item/bodypart/arm/left/robot/tier4
+	name = "delta-grade cyborg left arm"
+	essence_grade_multiplier = 0.5
+
 TYPEINFO_DEF(/obj/item/bodypart/arm/right/robot)
 	default_armor = list(BLUNT = 5, PUNCTURE = 5, SLASH = 0, LASER = 5, ENERGY = 0, BOMB = 0, BIO = 100, FIRE = 5, ACID = 10)
 
@@ -50,6 +63,7 @@ TYPEINFO_DEF(/obj/item/bodypart/arm/right/robot)
 	icon_static = 'icons/mob/augmentation/augments.dmi'
 	icon = 'icons/mob/augmentation/augments.dmi'
 	limb_id = BODYPART_ID_ROBOTIC
+	essence_base_cost = 1.0
 	flags_1 = CONDUCT_1
 	icon_state = "borg_r_arm"
 	is_dimorphic = FALSE
@@ -68,6 +82,18 @@ TYPEINFO_DEF(/obj/item/bodypart/arm/right/robot)
 	medium_burn_msg = ROBOTIC_MEDIUM_BURN_MSG
 	heavy_burn_msg = ROBOTIC_HEAVY_BURN_MSG
 
+/obj/item/bodypart/arm/right/robot/tier2
+	name = "alpha-grade cyborg right arm"
+	essence_grade_multiplier = 0.8
+
+/obj/item/bodypart/arm/right/robot/tier3
+	name = "beta-grade cyborg right arm"
+	essence_grade_multiplier = 0.7
+
+/obj/item/bodypart/arm/right/robot/tier4
+	name = "delta-grade cyborg right arm"
+	essence_grade_multiplier = 0.5
+
 TYPEINFO_DEF(/obj/item/bodypart/leg/left/robot)
 	default_armor = list(BLUNT = 5, PUNCTURE = 5, SLASH = 0, LASER = 5, ENERGY = 0, BOMB = 0, BIO = 100, FIRE = 5, ACID = 10)
 
@@ -79,6 +105,7 @@ TYPEINFO_DEF(/obj/item/bodypart/leg/left/robot)
 	icon_static = 'icons/mob/augmentation/augments.dmi'
 	icon = 'icons/mob/augmentation/augments.dmi'
 	limb_id = BODYPART_ID_ROBOTIC
+	essence_base_cost = 1.0
 	flags_1 = CONDUCT_1
 	icon_state = "borg_l_leg"
 	is_dimorphic = FALSE
@@ -97,6 +124,18 @@ TYPEINFO_DEF(/obj/item/bodypart/leg/left/robot)
 	medium_burn_msg = ROBOTIC_MEDIUM_BURN_MSG
 	heavy_burn_msg = ROBOTIC_HEAVY_BURN_MSG
 
+/obj/item/bodypart/leg/left/robot/tier2
+	name = "alpha-grade cyborg left leg"
+	essence_grade_multiplier = 0.8
+
+/obj/item/bodypart/leg/left/robot/tier3
+	name = "beta-grade cyborg left leg"
+	essence_grade_multiplier = 0.7
+
+/obj/item/bodypart/leg/left/robot/tier4
+	name = "delta-grade cyborg left leg"
+	essence_grade_multiplier = 0.5
+
 TYPEINFO_DEF(/obj/item/bodypart/leg/right/robot)
 	default_armor = list(BLUNT = 5, PUNCTURE = 5, SLASH = 0, LASER = 5, ENERGY = 0, BOMB = 0, BIO = 100, FIRE = 5, ACID = 10)
 
@@ -108,6 +147,7 @@ TYPEINFO_DEF(/obj/item/bodypart/leg/right/robot)
 	icon_static =  'icons/mob/augmentation/augments.dmi'
 	icon = 'icons/mob/augmentation/augments.dmi'
 	limb_id = BODYPART_ID_ROBOTIC
+	essence_base_cost = 1.0
 	flags_1 = CONDUCT_1
 	icon_state = "borg_r_leg"
 	is_dimorphic = FALSE
@@ -126,12 +166,25 @@ TYPEINFO_DEF(/obj/item/bodypart/leg/right/robot)
 	medium_burn_msg = ROBOTIC_MEDIUM_BURN_MSG
 	heavy_burn_msg = ROBOTIC_HEAVY_BURN_MSG
 
+/obj/item/bodypart/leg/right/robot/tier2
+	name = "alpha-grade cyborg right leg"
+	essence_grade_multiplier = 0.8
+
+/obj/item/bodypart/leg/right/robot/tier3
+	name = "beta-grade cyborg right leg"
+	essence_grade_multiplier = 0.7
+
+/obj/item/bodypart/leg/right/robot/tier4
+	name = "delta-grade cyborg right leg"
+	essence_grade_multiplier = 0.5
+
 TYPEINFO_DEF(/obj/item/bodypart/chest/robot)
 	default_armor = list(BLUNT = 5, PUNCTURE = 5, SLASH = 0, LASER = 5, ENERGY = 0, BOMB = 0, BIO = 100, FIRE = 5, ACID = 10)
 
 /obj/item/bodypart/chest/robot
 	name = "cyborg torso"
 	desc = "A heavily reinforced case containing cyborg logic boards, with space for a standard power cell."
+	essence_base_cost = 1.5
 	inhand_icon_state = "buildpipe"
 	icon_static =  'icons/mob/augmentation/augments.dmi'
 	icon = 'icons/mob/augmentation/augments.dmi'
@@ -245,6 +298,7 @@ TYPEINFO_DEF(/obj/item/bodypart/head/robot)
 /obj/item/bodypart/head/robot
 	name = "cyborg head"
 	desc = "A standard reinforced braincase, with spine-plugged neural socket and sensor gimbals."
+	essence_base_cost = 0.75
 	inhand_icon_state = "buildpipe"
 	icon_static = 'icons/mob/augmentation/augments.dmi'
 	icon = 'icons/mob/augmentation/augments.dmi'
@@ -341,6 +395,30 @@ TYPEINFO_DEF(/obj/item/bodypart/head/robot)
 		flash2 = null
 	..()
 
+/obj/item/bodypart/chest/robot/tier2
+	name = "alpha-grade cyborg torso"
+	essence_grade_multiplier = 0.8
+
+/obj/item/bodypart/chest/robot/tier3
+	name = "beta-grade cyborg torso"
+	essence_grade_multiplier = 0.7
+
+/obj/item/bodypart/chest/robot/tier4
+	name = "delta-grade cyborg torso"
+	essence_grade_multiplier = 0.5
+
+/obj/item/bodypart/head/robot/tier2
+	name = "alpha-grade cyborg head"
+	essence_grade_multiplier = 0.8
+
+/obj/item/bodypart/head/robot/tier3
+	name = "beta-grade cyborg head"
+	essence_grade_multiplier = 0.7
+
+/obj/item/bodypart/head/robot/tier4
+	name = "delta-grade cyborg head"
+	essence_grade_multiplier = 0.5
+
 
 
 
@@ -351,6 +429,7 @@ TYPEINFO_DEF(/obj/item/bodypart/head/robot)
 	icon_static = 'icons/mob/augmentation/surplus_augments.dmi'
 	limb_id = "surplus"
 	max_damage = 20
+	essence_grade_multiplier = 1.2
 
 /obj/item/bodypart/arm/right/robot/surplus
 	name = "surplus prosthetic right arm"
@@ -359,6 +438,7 @@ TYPEINFO_DEF(/obj/item/bodypart/head/robot)
 	icon_static = 'icons/mob/augmentation/surplus_augments.dmi'
 	limb_id = "surplus"
 	max_damage = 20
+	essence_grade_multiplier = 1.2
 
 /obj/item/bodypart/leg/left/robot/surplus
 	name = "surplus prosthetic left leg"
@@ -367,6 +447,7 @@ TYPEINFO_DEF(/obj/item/bodypart/head/robot)
 	icon_static = 'icons/mob/augmentation/surplus_augments.dmi'
 	limb_id = "surplus"
 	max_damage = 20
+	essence_grade_multiplier = 1.2
 
 /obj/item/bodypart/leg/right/robot/surplus
 	name = "surplus prosthetic right leg"
@@ -375,6 +456,7 @@ TYPEINFO_DEF(/obj/item/bodypart/head/robot)
 	icon_static = 'icons/mob/augmentation/surplus_augments.dmi'
 	limb_id = "surplus"
 	max_damage = 20
+	essence_grade_multiplier = 1.2
 
 
 #undef ROBOTIC_LIGHT_BRUTE_MSG

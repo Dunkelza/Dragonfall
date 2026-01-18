@@ -12,7 +12,7 @@ const Operative: Antagonist = {
     `
       Congratulations, agent. You have been chosen to join the Syndicate
       Nuclear Operative strike team. Your mission, whether or not you choose
-      to accept it, is to destroy Nanotrasen's most advanced research facility!
+  		to accept it, is to destroy Renraku's most advanced research facility!
       That's right, you're going to Space Station 13.
     `,
 

@@ -82,7 +82,7 @@ export const RequestManager = (props) => {
 
 const displayTypeMap = {
   request_prayer: 'PRAYER',
-  request_centcom: 'CENTCOM',
+  request_centcom: 'SECTOR CONTROL',
   request_syndicate: 'SYNDICATE',
   request_nuke: 'NUKE CODE',
 };

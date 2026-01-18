@@ -606,7 +606,7 @@ TYPEINFO_DEF(/obj/item/clothing/head/hooded/cult_hoodie/berserkerhood)
 
 		if(totalcurses >= MAX_SHUTTLE_CURSES && (world.time < first_curse_time + SHUTTLE_CURSE_OMFG_TIMESPAN))
 			var/omfg_message = pick_list(CULT_SHUTTLE_CURSE, "omfg_announce") || "LEAVE US ALONE!"
-			addtimer(CALLBACK(GLOBAL_PROC,PROC_REF(priority_announce),omfg_message,"Daedalus Industries Shuttle Dispatch","FUCK OFF",'sound/misc/notice1.ogg'), rand(2 SECONDS, 6 SECONDS))
+			addtimer(CALLBACK(GLOBAL_PROC,PROC_REF(priority_announce),omfg_message,"Renraku Transport Dispatch","FUCK OFF",'sound/misc/notice1.ogg'), rand(2 SECONDS, 6 SECONDS))
 
 		qdel(src)
 

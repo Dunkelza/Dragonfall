@@ -136,7 +136,7 @@ const CargoStatus = (props) => {
                 disabled={!(away && docked)}
                 onClick={() => act('loan')}
               />
-            )) || <Box color="bad">Loaned to Centcom</Box>}
+            )) || <Box color="bad">Loaned to Sector Control</Box>}
           </LabeledList.Item>
         )}
       </LabeledList>

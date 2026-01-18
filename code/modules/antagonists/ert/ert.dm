@@ -8,7 +8,7 @@
 	can_elimination_hijack = ELIMINATION_PREVENT
 	show_in_antagpanel = FALSE
 	show_to_ghosts = TRUE
-	suicide_cry = "FOR NANOTRASEN!!"
+	suicide_cry = "FOR LONE STAR!!"
 	var/datum/team/ert/ert_team
 	var/leader = FALSE
 	var/datum/outfit/outfit = /datum/outfit/centcom/ert/security
@@ -42,7 +42,7 @@
 	owner.current.fully_replace_character_name(owner.current.real_name,"[role] [pick(name_source)]")
 
 /datum/antagonist/ert/official
-	name = "CentCom Official"
+	name = "Sector Control Official"
 	show_name_in_check_antagonists = TRUE
 	var/datum/objective/mission
 	role = "Inspector"
@@ -52,9 +52,9 @@
 /datum/antagonist/ert/official/greet()
 	. = ..()
 	if (ert_team)
-		to_chat(owner, "<span class='warningplain'>Central Command is sending you to [station_name()] with the task: [ert_team.mission.explanation_text]</span>")
+		to_chat(owner, "<span class='warningplain'>Sector Control is sending you to [station_name()] with the task: [ert_team.mission.explanation_text]</span>")
 	else
-		to_chat(owner, "<span class='warningplain'>Central Command is sending you to [station_name()] with the task: [mission.explanation_text]</span>")
+		to_chat(owner, "<span class='warningplain'>Sector Control is sending you to [station_name()] with the task: [mission.explanation_text]</span>")
 
 /datum/antagonist/ert/official/forge_objectives()
 	if (ert_team)
@@ -150,14 +150,14 @@
 	owner.holy_role = HOLY_ROLE_PRIEST
 
 /datum/antagonist/ert/intern
-	name = "CentCom Intern"
+	name = "Sector Control Intern"
 	outfit = /datum/outfit/centcom/centcom_intern
 	random_names = FALSE
 	role = "Intern"
 	suicide_cry = "FOR MY INTERNSHIP!!"
 
 /datum/antagonist/ert/intern/leader
-	name = "CentCom Head Intern"
+	name = "Sector Control Head Intern"
 	outfit = /datum/outfit/centcom/centcom_intern/leader
 	random_names = FALSE
 	role = "Head Intern"
@@ -230,7 +230,7 @@
 
 	to_chat(owner, "<span class='warningplain'><B><font size=3 color=red>You are [get_name()].</font></B></span>")
 
-	var/missiondesc = "Your squad is being sent on a mission to [station_name()] by Nanotrasen's Security Division."
+	var/missiondesc = "Your squad is being sent on a mission to [station_name()] by Lone Star's High Threat Response Division."
 	if(leader) //If Squad Leader
 		missiondesc += " Lead your squad to ensure the completion of the mission. Board the shuttle when your team is ready."
 	else
@@ -270,7 +270,7 @@
 /datum/antagonist/ert/families/greet()
 	. = ..()
 	var/missiondesc
-	missiondesc += "<BR><B><font size=5 color=red>You are NOT a Nanotrasen Employee. You work for the local government.</font></B>"
+	missiondesc += "<BR><B><font size=5 color=red>You are NOT a Renraku Employee. You work for the local government.</font></B>"
 	missiondesc += "<BR><B><font size=5 color=red>You are NOT a deathsquad. You are here to help innocents escape violence, criminal activity, and other dangerous things.</font></B>"
 	missiondesc += "<BR>After an uptick in gang violence on [station_name()], you are responding to emergency calls from the station for immediate SSC Police assistance!\n"
 	missiondesc += "<BR><B>Your Mission</B>:"
@@ -278,7 +278,7 @@
 	missiondesc += "<BR> <B>2.</B> Protect the innocent."
 	missiondesc += "<BR> <B>3.</B> Uphold the law."
 	missiondesc += "<BR> <B>4.</B> Find the Undercover Cops."
-	missiondesc += "<BR> <B>5.</B> Detain Nanotrasen Security personnel if they harm any citizen."
+	missiondesc += "<BR> <B>5.</B> Detain Renraku security personnel if they harm any citizen."
 	missiondesc += "<BR> You can <B>see gangsters</B> using your <B>special sunglasses</B>.</span>"
 	to_chat(owner,missiondesc)
 	var/policy = get_policy(ROLE_FAMILIES)
@@ -317,12 +317,12 @@
 
 /datum/antagonist/ert/families/undercover_cop/greet()
 	var/missiondesc = "<span class='warningplain'><B><font size=3 color=red>You are [get_name()].</font></B>"
-	missiondesc += "<BR><B><font size=3 color=red>You are NOT a Nanotrasen Employee. You work for the local government.</font></B>"
+	missiondesc += "<BR><B><font size=3 color=red>You are NOT a Renraku Employee. You work for the local government.</font></B>"
 	missiondesc += "<BR>You are an undercover police officer on board [station_name()]. You've been sent here by the Spinward Stellar Coalition because of suspected abusive behavior by the security department, and to keep tabs on a potential criminal organization operation."
 	missiondesc += "<BR><B>Your Mission</B>:"
 	missiondesc += "<BR> <B>1.</B> Keep a close eye on any gangsters you spot. You can view gangsters using your sunglasses in your backpack."
 	missiondesc += "<BR> <B>2.</B> Keep an eye on how Security handles any gangsters, and watch for excessive security brutality."
-	missiondesc += "<BR> <B>3.</B> Remain undercover and do not get found out by Security or any gangs. Nanotrasen does not take kindly to being spied on."
+	missiondesc += "<BR> <B>3.</B> Remain undercover and do not get found out by Security or any gangs. Renraku does not take kindly to being spied on."
 	missiondesc += "<BR> <B>4.</B> When your backup arrives to extract you in 1 hour, inform them of everything you saw of note, and assist them in securing the situation.</span>"
 	to_chat(owner,missiondesc)
 

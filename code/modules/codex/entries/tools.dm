@@ -20,7 +20,7 @@
 
 /datum/codex_entry/tool/multitool
 	name = "Multitool"
-	lore_text = "&nbsp;&nbsp;&nbsp;&nbsp;Produced by Daedalus Industries, to this day, nobody knows what the little green screen is for."
+	lore_text = "&nbsp;&nbsp;&nbsp;&nbsp;Produced by Renraku, to this day, nobody knows what the little green screen is for."
 	mechanics_text = {"
 		&nbsp;&nbsp;&nbsp;&nbsp;Used to manipulate a door’s function by pulsing the wires. Can also be used to reset locks on safes and secure briefcases.
 		<br>
@@ -31,7 +31,7 @@
 
 /datum/codex_entry/tool/wirecutters
 	name = "Wirecutters"
-	lore_text = "&nbsp;&nbsp;&nbsp;&nbsp;Wirecutters with a cheap plastic grip, clearly Daedalus have been cost-cutting."
+	lore_text = "&nbsp;&nbsp;&nbsp;&nbsp;Wirecutters with a cheap plastic grip, clearly Renraku have been cost-cutting."
 	mechanics_text = "&nbsp;&nbsp;&nbsp;&nbsp;Wirecutters are used to remove placed wire, bear in mind you will need insulated gloves to cut a wire with power going through it. \
 	It can also cut the wires of doors, permanently activating the cut wire’s effect."
 	antag_text = "&nbsp;&nbsp;&nbsp;&nbsp;Cutting the AI Control Wires on a door can stop the AI from interacting with the door full-stop, as opposed to the thirty seconds pulsing the wire provides. Use this to your advantage to stop the AI cornering you."

@@ -5,15 +5,15 @@
 #define RADIO_CHANNEL_COMMON "Local"
 #define RADIO_KEY_COMMON ";"
 
-#define RADIO_CHANNEL_SECURITY "Mars"
+#define RADIO_CHANNEL_SECURITY "Lone Star"
 #define RADIO_KEY_SECURITY "s"
 #define RADIO_TOKEN_SECURITY ":s"
 
-#define RADIO_CHANNEL_ENGINEERING "Daedalus"
+#define RADIO_CHANNEL_ENGINEERING "Facilities"
 #define RADIO_KEY_ENGINEERING "e"
 #define RADIO_TOKEN_ENGINEERING ":e"
 
-#define RADIO_CHANNEL_FEDERATION "Federation"
+#define RADIO_CHANNEL_FEDERATION "Corporate"
 #define RADIO_KEY_FEDERATION "c"
 #define RADIO_TOKEN_FEDERATION ":c"
 
@@ -21,11 +21,11 @@
 #define RADIO_KEY_SCIENCE "n"
 #define RADIO_TOKEN_SCIENCE ":n"
 
-#define RADIO_CHANNEL_MEDICAL "Aether"
+#define RADIO_CHANNEL_MEDICAL "DocWagon"
 #define RADIO_KEY_MEDICAL "m"
 #define RADIO_TOKEN_MEDICAL ":m"
 
-#define RADIO_CHANNEL_SUPPLY "Hermes"
+#define RADIO_CHANNEL_SUPPLY "Logistics"
 #define RADIO_KEY_SUPPLY "u"
 #define RADIO_TOKEN_SUPPLY ":u"
 

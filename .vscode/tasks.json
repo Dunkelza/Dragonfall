@@ -12,11 +12,7 @@
 					"DM_EXE": "${config:dreammaker.byondPath}"
 				}
 			},
-			"problemMatcher": [
-				"$dreammaker",
-				"$tsc",
-				"$eslint-stylish"
-			],
+			"problemMatcher": ["$dreammaker", "$tsc", "$eslint-stylish"],
 			"group": {
 				"kind": "build",
 				"isDefault": true
@@ -26,12 +22,10 @@
 		},
 		{
 			"type": "dreammaker",
-			"dme": "daedalus.dme",
-			"problemMatcher": [
-				"$dreammaker"
-			],
+			"dme": "dragonfall.dme",
+			"problemMatcher": ["$dreammaker"],
 			"group": "build",
-			"label": "dm: build - daedalus.dme"
+			"label": "dm: build - dragonfall.dme"
 		},
 		{
 			"command": "${command:dreammaker.reparse}",
@@ -44,10 +38,7 @@
 			"windows": {
 				"command": ".\\bin\\tgui-build.cmd"
 			},
-			"problemMatcher": [
-				"$tsc",
-				"$eslint-stylish"
-			],
+			"problemMatcher": ["$tsc", "$eslint-stylish"],
 			"group": "build",
 			"label": "tgui: build"
 		},
@@ -57,10 +48,7 @@
 			"windows": {
 				"command": ".\\bin\\tgui-dev.cmd"
 			},
-			"problemMatcher": [
-				"$tsc",
-				"$eslint-stylish"
-			],
+			"problemMatcher": ["$tsc", "$eslint-stylish"],
 			"group": "build",
 			"label": "tgui: dev server"
 		},
@@ -70,10 +58,7 @@
 			"windows": {
 				"command": ".\\bin\\tgui-bench.cmd"
 			},
-			"problemMatcher": [
-				"$tsc",
-				"$eslint-stylish"
-			],
+			"problemMatcher": ["$tsc", "$eslint-stylish"],
 			"group": "build",
 			"label": "tgui: bench"
 		},
@@ -83,20 +68,9 @@
 			"windows": {
 				"command": ".\\bin\\tgui-sonar.cmd"
 			},
-			"problemMatcher": [
-				"$tsc",
-				"$eslint-stylish"
-			],
+			"problemMatcher": ["$tsc", "$eslint-stylish"],
 			"group": "build",
 			"label": "tgui: sonar"
-		},
-		{
-			"type": "opendream",
-			"problemMatcher": [
-				"$openDreamCompiler"
-			],
-			"group": "build",
-			"label": "OpenDream: compile daedalus.dme"
 		}
 	]
 }

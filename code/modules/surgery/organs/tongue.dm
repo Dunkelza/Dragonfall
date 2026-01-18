@@ -407,6 +407,8 @@
 	desc = "A voice synthesizer that can interface with organic lifeforms."
 	organ_flags = ORGAN_SYNTHETIC
 	icon_state = "tonguerobot"
+	// SR5: small augmentation.
+	essence_base_cost = 0.10
 
 	tongue_say_verb = "whistles"
 	tongue_ask_verb = "chirps"

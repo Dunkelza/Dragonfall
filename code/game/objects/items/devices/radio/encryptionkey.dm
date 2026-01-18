@@ -38,22 +38,22 @@
 	translate_binary = TRUE
 
 /obj/item/encryptionkey/headset_sec
-	name = "\improper Mars radio encryption key"
+	name = "\improper Lone Star radio encryption key"
 	icon_state = "sec_cypherkey"
 	channels = list(RADIO_CHANNEL_SECURITY = 1)
 
 /obj/item/encryptionkey/headset_eng
-	name = "\improper Daedalus radio encryption key"
+	name = "\improper Facilities radio encryption key"
 	icon_state = "eng_cypherkey"
 	channels = list(RADIO_CHANNEL_ENGINEERING = 1)
 
 /obj/item/encryptionkey/headset_med
-	name = "\improper Aether radio encryption key"
+	name = "\improper DocWagon radio encryption key"
 	icon_state = "med_cypherkey"
 	channels = list(RADIO_CHANNEL_MEDICAL = 1)
 
 /obj/item/encryptionkey/headset_com
-	name = "\improper Federation radio encryption key"
+	name = "\improper Corporate radio encryption key"
 	icon_state = "com_cypherkey"
 	channels = list(RADIO_CHANNEL_FEDERATION = 1)
 

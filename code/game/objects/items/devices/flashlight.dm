@@ -240,7 +240,7 @@ TYPEINFO_DEF(/obj/item/flashlight/lamp)
 
 /obj/item/flashlight/flare
 	name = "flare"
-	desc = "A red Daedalus issued flare. There are instructions on the side, it reads 'pull cord, make light'."
+	desc = "A red Renraku-issued flare. There are instructions on the side; it reads 'pull cord, make light'."
 	w_class = WEIGHT_CLASS_SMALL
 	icon_state = "flare"
 	inhand_icon_state = "flare"

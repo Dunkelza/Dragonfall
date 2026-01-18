@@ -21,10 +21,10 @@ export const brief_outfit: Feature<string> = {
 };
 
 export const bypass_deadmin_in_centcom: FeatureToggle = {
-  name: 'Bypass deadmin options when in CentCom',
+  name: 'Bypass deadmin options when in Sector Control',
   category: 'ADMIN',
   description:
-    'Whether or not to always remain an admin when spawned in CentCom.',
+    'Whether or not to always remain an admin when spawned in Sector Control.',
   component: CheckboxInput,
 };
 

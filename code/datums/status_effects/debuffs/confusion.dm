@@ -18,13 +18,14 @@
 	RegisterSignal(owner, COMSIG_LIVING_POST_FULLY_HEAL, PROC_REF(remove_confusion))
 	RegisterSignal(owner, COMSIG_MOB_CLIENT_PRE_MOVE, PROC_REF(on_move))
 	owner.stats?.set_skill_modifier(-1, /datum/rpg_skill/bloodsport, SKILL_SOURCE_CONFUSION)
-	owner.stats?.set_stat_modifier(-1, /datum/rpg_stat/psyche, SKILL_SOURCE_CONFUSION)
+	// SR5 overhaul: confusion primarily impacts mental resilience.
+	owner.stats?.set_stat_modifier(-1, /datum/rpg_stat/willpower, SKILL_SOURCE_CONFUSION)
 	return TRUE
 
 /datum/status_effect/confusion/on_remove()
 	UnregisterSignal(owner, list(COMSIG_LIVING_POST_FULLY_HEAL, COMSIG_MOB_CLIENT_PRE_MOVE))
 	owner.stats?.remove_skill_modifier(/datum/rpg_skill/bloodsport, SKILL_SOURCE_CONFUSION)
-	owner.stats?.remove_stat_modifier(/datum/rpg_stat/psyche, SKILL_SOURCE_CONFUSION)
+	owner.stats?.remove_stat_modifier(/datum/rpg_stat/willpower, SKILL_SOURCE_CONFUSION)
 
 /// Removes all of our confusion (self terminate) on signal
 /datum/status_effect/confusion/proc/remove_confusion(datum/source)

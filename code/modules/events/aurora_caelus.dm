@@ -19,8 +19,8 @@
 
 /datum/round_event/aurora_caelus/announce()
 	priority_announce(
-		"[station_name()]: A harmless cloud of ions is approaching your station, and will exhaust their energy battering the hull. Daedalus Industries has approved a short break for all employees to relax and observe this very rare event. During this time, starlight will be bright but gentle, shifting between quiet green and blue colors. Any staff who would like to view these lights for themselves may proceed to the area nearest to them with viewing ports to open space. We hope you enjoy the lights.",
-		"Ananke Meteorology Division"
+		"[station_name()]: A geomagnetic storm is passing over the Seattle Metroplex. Renraku has approved a short break for all employees to relax and observe this rare event. During this time, city lights may flicker and the sky may shimmer in muted green-blue hues. Any staff who would like to view the lights for themselves may proceed to the nearest observation deck or atrium skylight. We hope you enjoy the lights.",
+		"Seattle Metroplex Weather Service"
 	)
 	for(var/V in GLOB.player_list)
 		var/mob/M = V
@@ -38,7 +38,7 @@
 /datum/round_event/aurora_caelus/end()
 	priority_announce(
 		"The aurora caelus event is now ending. Starlight conditions will slowly return to normal. When this has concluded, please return to your workplace and continue work as normal. Have a pleasant shift, [station_name()], and thank you for watching with us.",
-		"Ananke Meteorology Division"
+		"Seattle Metroplex Weather Service"
 	)
 	for(var/turf/open/space/S in world)
 		var/area/A = S.loc

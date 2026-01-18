@@ -4,6 +4,7 @@
 	var/name = ""
 	var/desc = ""
 
+	/// Base rating for this skill.
 	var/value = 0
 	var/list/modifiers
 
@@ -18,5 +19,5 @@
 /// Update the modified value with modifiers.
 /datum/rpg_skill/proc/update_modifiers()
 	SHOULD_NOT_OVERRIDE(TRUE)
-	value = 0
+	value = initial(value)
 	value += values_sum(modifiers)

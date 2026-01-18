@@ -1,8 +1,8 @@
-/// Mail is tamper-evident and unresealable, postmarked by CentCom for an individual recepient.
+/// Mail is tamper-evident and unresealable, postmarked by Sector Control for an individual recepient.
 /obj/item/mail
 	name = "mail"
 	gender = NEUTER
-	desc = "An officially postmarked, tamper-evident parcel regulated by CentCom and made of high-quality materials."
+	desc = "An officially postmarked, tamper-evident parcel regulated by Sector Control and made of high-quality materials."
 	icon = 'icons/obj/bureaucracy.dmi'
 	icon_state = "mail_small"
 	inhand_icon_state = "paper"
@@ -118,10 +118,10 @@
 	var/list/msg = list(span_notice("<i>You notice the postmarking on the front of the mail...</i>"))
 	var/datum/mind/recipient = recipient_ref.resolve()
 	if(recipient)
-		msg += "\t[span_info("Certified NT mail for [recipient].")]"
+		msg += "\t" + span_info("Certified Renraku mail for [recipient].")
 	else
-		msg += "\t[span_info("Certified mail for [GLOB.station_name].")]"
-	msg += "\t[span_info("Distribute by hand or via destination tagger using the certified NT disposal system.")]"
+		msg += "\t" + span_info("Certified mail for [GLOB.station_name].")
+	msg += "\t" + span_info("Distribute by hand or via destination tagger using the certified disposal system.")
 	return msg
 
 /// Accepts a mind to initialize goodies for a piece of mail.
@@ -163,8 +163,8 @@
 
 	var/list/junk_names = list(
 		/obj/item/paper/pamphlet/gateway = "[initial(name)] for [pick(GLOB.adjectives)] adventurers",
-		/obj/item/paper/pamphlet/violent_video_games = "[initial(name)] for the truth about the arcade centcom doesn't want to hear",
-		/obj/item/paper/fluff/junkmail_redpill = "[initial(name)] for those feeling [pick(GLOB.adjectives)] working at Daedalus Industries",
+		/obj/item/paper/pamphlet/violent_video_games = "[initial(name)] for the truth about the arcade Sector Control doesn't want to hear",
+		/obj/item/paper/fluff/junkmail_redpill = "[initial(name)] for those feeling [pick(GLOB.adjectives)] working for Renraku",
 		/obj/effect/decal/cleanable/ash = "[initial(name)] with INCREDIBLY IMPORTANT ARTIFACT- DELIVER TO SCIENCE DIVISION. HANDLE WITH CARE.",
 	)
 
@@ -184,10 +184,10 @@
 	. = ..()
 	junk_mail()
 
-/// Crate for mail from CentCom.
+/// Crate for mail from Sector Control.
 /obj/structure/closet/crate/mail
 	name = "mail crate"
-	desc = "A certified post crate from CentCom."
+	desc = "A certified post crate from Sector Control."
 	icon_state = "mail"
 	can_install_electronics = FALSE
 
@@ -209,7 +209,7 @@
 	for(var/mob/living/carbon/human/human in GLOB.player_list)
 		if(human.stat == DEAD || !human.mind)
 			continue
-		// Skip wizards, nuke ops, cyborgs; Centcom does not send them mail
+		// Skip wizards, nuke ops, cyborgs; Sector Control does not send them mail
 		if(!(human.mind.assigned_role.job_flags & JOB_CREW_MEMBER))
 			continue
 
@@ -239,7 +239,7 @@
 /// Crate for mail that automatically generates a lot of mail. Usually only normal mail, but on lowpop it may end up just being junk.
 /obj/structure/closet/crate/mail/full
 	name = "brimming mail crate"
-	desc = "A certified post crate from CentCom. Looks stuffed to the gills."
+	desc = "A certified post crate from Sector Control. Looks stuffed to the gills."
 
 /obj/structure/closet/crate/mail/full/Initialize(mapload)
 	. = ..()

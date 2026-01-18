@@ -850,7 +850,7 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	icon_state = PAINT_PREFIX+"paint_medical"
 
 /obj/effect/mapping_helpers/paint_wall/daedalus
-	name = "Daedalus Wall Paint"
+	name = "Renraku Wall Paint"
 	wall_paint = PAINT_WALL_DAEDALUS
 	stripe_paint = PAINT_STRIPE_DAEDALUS
 	icon_state = PAINT_PREFIX+"paint_daedalus"

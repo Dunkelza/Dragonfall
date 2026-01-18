@@ -19,9 +19,9 @@
 		"some risky housing market outcomes",\
 		"The B.E.P.I.S. team's untimely downfall",\
 		"speculative Terragov grants backfiring",\
-		"greatly exaggerated reports of Daedalus accountancy personnel committing mass suicide")
+		"greatly exaggerated reports of Renraku accountancy personnel committing mass suicide")
 	var/reason = pick(poss_reasons)
-	priority_announce("Due to [reason], prices for on-station vendors will be increased for a short period.", "Daedalus Accounting Division")
+	priority_announce("Due to [reason], prices for local vendors will be increased for a short period.", "Renraku Accounting Division")
 
 /datum/round_event/market_crash/start()
 	. = ..()
@@ -33,5 +33,5 @@
 	. = ..()
 	REMOVE_TRAIT(SSeconomy, TRAIT_MARKET_CRASHING, MARKET_CRASH_EVENT_TRAIT)
 	SSeconomy.price_update()
-	priority_announce("Prices for on-station vendors have now stabilized.", "Daedalus Accounting Division")
+	priority_announce("Prices for local vendors have now stabilized.", "Renraku Accounting Division")
 

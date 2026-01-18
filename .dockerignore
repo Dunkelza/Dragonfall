@@ -22,6 +22,11 @@ daedalus.int
 daedalus.rsc
 daedalus.lk
 daedalus.dyn.rsc
+dragonfall.dmb
+dragonfall.int
+dragonfall.rsc
+dragonfall.lk
+dragonfall.dyn.rsc
 *.dll
 Dockerfile
 tools/bootstrap/.cache

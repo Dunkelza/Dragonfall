@@ -133,9 +133,9 @@ export const PortraitPicker = (props) => {
             </Flex.Item>
             <Flex.Item>
               <NoticeBox danger>
-                WARNING: While Central Command loves art as much as you do,
+                WARNING: While Sector Control loves art as much as you do,
                 choosing erotic art will lead to severe consequences.
-                Additionally, Central Command reserves the right to request you
+                Additionally, Sector Control reserves the right to request you
                 change your display portrait, for any reason.
               </NoticeBox>
             </Flex.Item>

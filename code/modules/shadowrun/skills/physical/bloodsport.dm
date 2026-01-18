@@ -5,7 +5,7 @@
 	name = "Bloodsport"
 	desc = "Fists, pipes, chairs, your brushes for the canvas of violence."
 
-	parent_stat_type = /datum/rpg_stat/soma
+	parent_stat_type = /datum/rpg_stat/agility
 
 /datum/rpg_skill/bloodsport/get(mob/living/user, list/out_sources)
 	. = ..()
@@ -18,7 +18,7 @@
 		out_sources?["Incapacitated"] = -10
 
 	if(user.is_blind())
-		. -= -4
+		. -= 4
 		out_sources?["Blind"] = -4
 
 	else if(user.eye_blurry)

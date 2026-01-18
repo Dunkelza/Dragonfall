@@ -318,7 +318,7 @@
 		<div style='width:100%;height: 100%'>
 			<fieldset class='computerPane'>
 				<div class='computerLegend' style='margin: auto;height: 70%'>
-				Welcome to Daedalus Dock's Test Server<br><br>
+				Welcome to the Renraku Arcology Test Server<br><br>
 				We require discord verification in order to play, as a measure to protect us against griefing.
 				</div>
 			</fieldset>

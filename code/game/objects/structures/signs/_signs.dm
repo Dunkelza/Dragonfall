@@ -220,14 +220,14 @@ TYPEINFO_DEF(/obj/item/sign)
 	set_sign_type(GLOB.editable_sign_types[pick(GLOB.editable_sign_types)])
 
 /obj/structure/sign/nanotrasen
-	name = "\improper Nanotrasen logo sign"
-	sign_change_name = "Corporate Logo - Nanotrasen"
-	desc = "A sign with the Nanotrasen logo on it. Glory to Nanotrasen!"
+	name = "\improper Renraku logo sign"
+	sign_change_name = "Corporate Logo - Renraku"
+	desc = "A sign with the Renraku logo on it. Glory to Renraku!"
 	icon_state = "nanotrasen"
 	is_editable = TRUE
 
 /obj/structure/sign/logo
-	name = "\improper Nanotrasen logo sign"
-	desc = "The Nanotrasen corporate logo."
+	name = "\improper Renraku logo sign"
+	desc = "The Renraku corporate logo."
 	icon_state = "nanotrasen_sign1"
 	buildable_sign = FALSE

@@ -226,8 +226,8 @@ TYPEINFO_DEF(/obj/item/radio/headset)
 	keyslot = new /obj/item/encryptionkey/headset_service
 
 /obj/item/radio/headset/headset_cent
-	name = "\improper CentCom headset"
-	desc = "A headset used by the upper echelons of Nanotrasen."
+	name = "\improper Sector Control headset"
+	desc = "A headset used by the upper echelons of Renraku."
 	icon_state = "cent_headset"
 	keyslot = new /obj/item/encryptionkey/headset_com
 	keyslot2 = new /obj/item/encryptionkey/headset_cent
@@ -240,7 +240,7 @@ TYPEINFO_DEF(/obj/item/radio/headset)
 	keyslot = new /obj/item/encryptionkey/heads/captain
 
 /obj/item/radio/headset/headset_cent/alt
-	name = "\improper CentCom bowman headset"
+	name = "\improper Sector Control bowman headset"
 	desc = "A headset especially for emergency response personnel. Protects ears from flashbangs."
 	icon_state = "cent_headset_alt"
 	inhand_icon_state = "cent_headset_alt"

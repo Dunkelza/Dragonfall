@@ -494,7 +494,7 @@ const PageMain = (props) => {
           {!!canMessageAssociates && (
             <Button
               icon="comment-o"
-              content={`Send message to ${emagged ? '[UNKNOWN]' : 'CentCom'}`}
+              content={`Send message to ${emagged ? '[UNKNOWN]' : 'Sector Control'}`}
               disabled={!importantActionReady}
               onClick={() => setMessagingAssociates(true)}
             />
@@ -522,7 +522,7 @@ const PageMain = (props) => {
       {!!canMessageAssociates && messagingAssociates && (
         <MessageModal
           label={`Message to transmit to ${
-            emagged ? '[ABNORMAL ROUTING COORDINATES]' : 'CentCom'
+            emagged ? '[ABNORMAL ROUTING COORDINATES]' : 'Sector Control'
           } via quantum entanglement`}
           notice="Please be aware that this process is very expensive, and abuse will lead to...termination. Transmission does not guarantee a response."
           icon="bullhorn"

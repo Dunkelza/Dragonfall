@@ -1,4 +1,4 @@
-environment = "daedalus.dme"
+environment = "dragonfall.dme"
 
 [langserver]
 dreamchecker = true

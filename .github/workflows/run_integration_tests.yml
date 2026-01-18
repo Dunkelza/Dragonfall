@@ -23,6 +23,7 @@ jobs:
         with:
           major: ${{ inputs.major }}
           minor: ${{ inputs.minor }}
+        if: ${{ inputs.map != '__skip__' }}
       - name: Setup database
         run: |
           sudo systemctl start mysql
@@ -30,25 +31,29 @@ jobs:
           mysql -u root -proot tg_ci < SQL/tgstation_schema.sql
           mysql -u root -proot -e 'CREATE DATABASE tg_ci_prefixed;'
           mysql -u root -proot tg_ci_prefixed < SQL/tgstation_schema_prefixed.sql
+        if: ${{ inputs.map != '__skip__' }}
       - name: Install rust-g
         run: |
           bash tools/ci/install_rust_g.sh
+        if: ${{ inputs.map != '__skip__' }}
       - name: Configure version
         run: |
           echo "BYOND_MAJOR=${{ inputs.major }}" >> $GITHUB_ENV
           echo "BYOND_MINOR=${{ inputs.minor }}" >> $GITHUB_ENV
-        if: ${{ inputs.major }}
+        if: ${{ inputs.map != '__skip__' && inputs.major }}
       - name: Compile Tests
         run: |
           bash tools/ci/install_byond.sh
           source $HOME/BYOND/byond/bin/byondsetup
           tools/build/build --ci dm -DCIBUILDING -DANSICOLORS -Werror
+        if: ${{ inputs.map != '__skip__' }}
       - name: Run Tests
         run: |
           source $HOME/BYOND/byond/bin/byondsetup
           bash tools/ci/run_server.sh ${{ inputs.map }}
+        if: ${{ inputs.map != '__skip__' }}
       - name: Upload screenshot tests
-        if: always()
+        if: ${{ always() && inputs.map != '__skip__' }}
         uses: actions/upload-artifact@v4
         with:
           name: test_artifacts_${{ inputs.map }}_${{ inputs.major }}_${{ inputs.minor }}

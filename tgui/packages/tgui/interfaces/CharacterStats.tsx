@@ -33,7 +33,10 @@ type Skill = {
   modifiers: SkillModifier[];
   name: string;
   parent_stat_name: string;
+  pool?: number;
+  skill_rating?: number;
   sort_order: number;
+  stat_rating?: number;
   value: number;
 };
 
@@ -42,6 +45,7 @@ type Stat = {
   desc: string;
   modifiers: SkillModifier[];
   name: string;
+  rating?: number;
   sort_order: number;
   value: number;
 };
@@ -236,140 +240,108 @@ type ModalState = undefined | Skill | Stat;
 function StatsPage() {
   const [seeingModalOf, setModal] = useState<ModalState>(undefined);
   const { data } = useBackend<CharacterStatsData>();
+
+  const statsSorted = Object.values(data.stats).sort(
+    (a, b) => a.sort_order - b.sort_order,
+  );
+
+  const [selectedStatName, setSelectedStatName] = useLocalState(
+    'selectedStatName',
+    statsSorted[0]?.name,
+  );
+
+  const selectedStat = statsSorted.find((s) => s.name === selectedStatName);
+  const skillsSorted = data.skills
+    .filter((skill) => skill.parent_stat_name === selectedStatName)
+    .sort((a, b) => a.sort_order - b.sort_order);
+
   return (
-    <Box height="100%" width="100%" className="CharacterStats__statsPage">
+    <Stack fill vertical className="CharacterStats__statsPage">
       {DetailedStatOrSkillModal(seeingModalOf, setModal)}
-      <Flex
-        direction="row"
-        height="660px"
-        width="100%"
-        justify="flex-start"
-        align="flex-start"
-      >
-        {Object.values(data.stats)
-          .sort((a, b) => a.sort_order - b.sort_order)
-          .map((stat) => StatRow(stat, seeingModalOf, setModal))}
-      </Flex>
+      <Stack.Item>
+        <Tabs fluid>
+          {statsSorted.map((stat) => (
+            <Tabs.Tab
+              key={stat.name}
+              selected={stat.name === selectedStatName}
+              onClick={() => setSelectedStatName(stat.name)}
+            >
+              {stat.name}
+            </Tabs.Tab>
+          ))}
+        </Tabs>
+      </Stack.Item>
+
+      <Stack.Item>
+        {selectedStat ? (
+          <Box
+            className={classes([
+              'CharacterStats__attributeHeader',
+              selectedStat.class,
+            ])}
+            onClick={() => setModal(selectedStat)}
+          >
+            <Box className="CharacterStats__attributeHeader_value">
+              {selectedStat.value}
+            </Box>
+            <Box className="CharacterStats__attributeHeader_name">
+              {selectedStat.name}
+            </Box>
+            <Box className="CharacterStats__attributeHeader_desc">
+              <i>{selectedStat.desc}</i>
+            </Box>
+          </Box>
+        ) : (
+          <Box>No attributes available.</Box>
+        )}
+      </Stack.Item>
+
+      <Stack.Item grow>
+        <Section
+          fill
+          scrollable
+          title={selectedStat ? `${selectedStat.name} Skills` : 'Skills'}
+        >
+          <Stack vertical>
+            {skillsSorted.map((skill) => (
+              <Stack.Item key={skill.name}>
+                {SkillListRow(skill, setModal)}
+              </Stack.Item>
+            ))}
+            {!skillsSorted.length && <Box italic>No skills in this group.</Box>}
+          </Stack>
+        </Section>
+      </Stack.Item>
+    </Stack>
+  );
+}
+
+function SkillListRow(skill: Skill, setModal) {
+  const pool = skill.pool ?? skill.value;
+  const breakdown =
+    skill.skill_rating !== undefined && skill.stat_rating !== undefined
+      ? `${skill.stat_rating} + ${skill.skill_rating}`
+      : undefined;
+
+  return (
+    <Box
+      className={classes(['CharacterStats__skillRow', skill.class])}
+      onClick={() => setModal(skill)}
+    >
+      <Stack align="center">
+        <Stack.Item className="CharacterStats__skillRow_pool">
+          {pool}
+        </Stack.Item>
+        <Stack.Item grow>
+          <Box className="CharacterStats__skillRow_name">{skill.name}</Box>
+          {breakdown && (
+            <Box className="CharacterStats__skillRow_breakdown" italic>
+              <i>{breakdown}</i>
+            </Box>
+          )}
+        </Stack.Item>
+      </Stack>
     </Box>
-  );
-}
-
-function StatRow(relevantStat: Stat, seeingModalOf, setModal) {
-  const { data } = useBackend<CharacterStatsData>();
-  const relevantSkills = data.skills.filter(
-    (skill) => skill.parent_stat_name === relevantStat.name,
-  );
-
-  const dummySkills = 3 - relevantSkills.length;
-  return (
-    <Flex
-      className={classes(['CharacterStats__statColumn', relevantStat.class])}
-      direction="column"
-      width="100%"
-      justify="flex-start"
-      align="center"
-      height="100%"
-    >
-      {StatEntry(relevantStat, seeingModalOf, setModal)}
-      {relevantSkills.map((skill) =>
-        SkillEntry(skill, seeingModalOf, setModal),
-      )}
-      {fillWithDummies(dummySkills, relevantStat.class)}
-    </Flex>
-  );
-}
-
-function fillWithDummies(amount: number, skillClass) {
-  const fragments: JSX.Element[] = [];
-  for (let i = 0; i < amount; i++) {
-    fragments.push(
-      <Flex.Item
-        key={i}
-        className={classes(['CharacterStats__skillBlock', 'dummy', skillClass])}
-      />,
-    );
-  }
-  return fragments;
-}
-
-function SkillEntry(skill: Skill, seeingModalOf, setModal, dummy?: boolean) {
-  const { data } = useBackend<CharacterStatsData>();
-  return (
-    <Flex.Item
-      className={classes(['CharacterStats__skillBlock', skill.class])}
-      onClick={() => {
-        setModal(skill);
-      }}
-    >
-      <Flex direction="column" height="100%" justify="space-between">
-        <Flex
-          direction="column"
-          align="center"
-          className="CharacterStats__skillBlock_statValue"
-          color={
-            skill.value === data.default_skill_value
-              ? ''
-              : skill.value >= data.default_skill_value
-                ? '#03fca1'
-                : '#fc4b32'
-          }
-        >
-          {skill.value}
-        </Flex>
-        <Flex.Item>
-          <Box
-            textAlign="center"
-            fontSize="1.5rem"
-            style={{ lineHeight: '1.2' }}
-          >
-            {skill.name}
-          </Box>
-        </Flex.Item>
-      </Flex>
-    </Flex.Item>
-  );
-}
-
-function StatEntry(stat: Stat, seeingModalOf, setModal) {
-  const { data } = useBackend<CharacterStatsData>();
-  return (
-    <Flex.Item
-      className={classes(['CharacterStats__statBlock', stat.class])}
-      onClick={() => {
-        setModal(stat);
-      }}
-    >
-      <Flex direction="column" height="100%" justify="space-between">
-        <Flex
-          direction="column"
-          align="center"
-          justify="center"
-          className="CharacterStats__statBlock_statValue"
-          color={
-            stat.value === data.default_skill_value
-              ? ''
-              : stat.value >= data.default_skill_value
-                ? '#03fca1'
-                : '#fc4b32'
-          }
-        >
-          {stat.value}
-        </Flex>
-        <Flex.Item>
-          <hr
-            className={stat.class}
-            style={{ width: '50%', borderWidth: '1px', borderStyle: 'solid' }}
-          />
-          <Box
-            textAlign="center"
-            fontSize="2.2rem"
-            fontFamily="Libre Baskerville"
-          >
-            {stat.name}
-          </Box>
-        </Flex.Item>
-      </Flex>
-    </Flex.Item>
   );
 }
 
@@ -381,7 +353,6 @@ function DetailedStatOrSkillModal(
   },
 ) {
   const { data } = useBackend<CharacterStatsData>();
-  console.log(seeingModalOf);
   return (
     !!seeingModalOf && (
       <Modal

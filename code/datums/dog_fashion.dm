@@ -123,7 +123,7 @@
 
 /datum/dog_fashion/head/red_wizard
 	name = "Pyromancer REAL_NAME"
-	speak = list("YAP", "Woof!", "Bark!", "AUUUUUU", "ONI SOMA!")
+	speak = list("YAP", "Woof!", "Bark!", "AUUUUUU", "ONI CORPUS!")
 
 /datum/dog_fashion/head/cardborg
 	name = "Borgi"

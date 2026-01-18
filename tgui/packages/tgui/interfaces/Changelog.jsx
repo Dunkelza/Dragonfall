@@ -183,7 +183,7 @@ export class Changelog extends Component {
 
     const header = (
       <Section>
-        <h1>Daedalus Dock</h1>
+        <h1>Renraku Arcology</h1>
         <p>
           <b>Brought to you by: </b>
           Kapu1178, Francinum, Spyroshark, Cenrus, FunnyLegJiggle, Zonespace,
@@ -228,7 +228,7 @@ export class Changelog extends Component {
           No
         </p>
         <p>
-          Daedalus Dock is thankful to the GoonStation 13 Development Team for
+          This codebase is thankful to the GoonStation 13 Development Team for
           its work on the game up to the
           {' r4407 release. The changelog for changes up to r4407 can be seen '}
           <a href="https://wiki.ss13.co/Pre-2016_Changelog#April_2010">here</a>.

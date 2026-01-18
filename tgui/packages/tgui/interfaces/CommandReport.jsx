@@ -30,7 +30,7 @@ export const CommandReport = (props) => {
       <Window.Content>
         <Stack vertical>
           <Stack.Item>
-            <Section title="Set Central Command name:" textAlign="center">
+            <Section title="Set Sector Control name:" textAlign="center">
               <Dropdown
                 width="100%"
                 selected={command_name}

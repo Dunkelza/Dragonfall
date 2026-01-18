@@ -366,16 +366,16 @@ SUBSYSTEM_DEF(shuttle)
 
 	if(!admiral_message)
 		admiral_message = pick(GLOB.admiral_messages)
-	var/intercepttext = "<font size = 3><b>Daedalus Industries Update</b>: Request For Shuttle.</font><hr>\
+	var/intercepttext = "<font size = 3><b>Renraku Transport Update</b>: Request for Transit.</font><hr>\
 						To whom it may concern:<br><br>\
-						We have taken note of the situation upon [station_name()] and have come to the \
-						conclusion that it does not warrant the abandonment of the station.<br>\
+						We have taken note of the situation within [station_name()] and have come to the \
+						conclusion that it does not warrant an evacuation order at this time.<br>\
 						If you do not agree with our opinion we suggest that you open a direct \
 						line with us and explain the nature of your crisis.<br><br>\
 						<i>This message has been automatically generated based upon readings from long \
 						range diagnostic tools. To assure the quality of your request every finalized report \
-						is reviewed by an on-call rear admiral.<br>\
-						<b>Rear Admiral's Notes:</b> \
+						is reviewed by an on-call corporate liaison.<br>\
+						<b>Corporate Liaison's Notes:</b> \
 						[admiral_message]"
 	print_command_report(intercepttext, announce = TRUE)
 

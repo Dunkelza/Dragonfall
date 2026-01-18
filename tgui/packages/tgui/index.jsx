@@ -25,7 +25,7 @@ import './styles/themes/retro-dark.scss';
 import './styles/themes/syndicate.scss';
 import './styles/themes/wizard.scss';
 import './styles/themes/admin.scss';
-import './styles/themes/daedalus.scss';
+import './styles/themes/dragonfall.scss';
 
 import { perf } from 'common/perf';
 import { setupHotReloading } from 'tgui-dev-server/link/client.cjs';

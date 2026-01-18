@@ -118,7 +118,7 @@ const FlavorSection = (props) => {
                 Overall Sentience Coherence Grade: FAILING.
                 <br />
               </span>
-              &gt;Report to Nanotrasen?
+              &gt;Report to Sector Control?
               <br />
               &gt;&gt;N
             </Stack.Item>

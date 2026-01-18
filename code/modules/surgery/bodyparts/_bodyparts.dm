@@ -39,6 +39,12 @@
 
 	///A bitfield of bodytypes for clothing, surgery, and misc information
 	var/bodytype = BODYTYPE_HUMANOID | BODYTYPE_ORGANIC
+
+	/// SR5: Essence loss contributed by this bodypart (e.g. cybernetic limbs).
+	/// If `essence_base_cost` is set, `essence_cost` is derived as base×multiplier in Initialize().
+	var/essence_cost = 0
+	var/essence_base_cost = 0
+	var/essence_grade_multiplier = 1.0
 	///Defines when a bodypart should not be changed. Example: BP_BLOCK_CHANGE_SPECIES prevents the limb from being overwritten on species gain
 	var/change_exempt_flags
 
@@ -227,6 +233,9 @@
 
 /obj/item/bodypart/Initialize(mapload)
 	. = ..()
+
+	if(essence_base_cost)
+		essence_cost = round(essence_base_cost * essence_grade_multiplier, 0.01)
 
 	if(can_be_disabled)
 		RegisterSignal(src, SIGNAL_ADDTRAIT(TRAIT_PARALYSIS), PROC_REF(on_paralysis_trait_gain))

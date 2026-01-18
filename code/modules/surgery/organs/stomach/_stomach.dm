@@ -228,13 +228,14 @@
 			modifier = 0
 
 	if(modifier)
-		human.stats.set_stat_modifier(modifier, /datum/rpg_stat/pneuma, "Hunger")
-		human.stats.set_stat_modifier(modifier, /datum/rpg_stat/psyche, "Hunger")
-		human.stats.set_stat_modifier(modifier, /datum/rpg_stat/soma, "Hunger")
+		// SR5 overhaul: hunger impacts physical resilience and mental focus.
+		human.stats.set_stat_modifier(modifier, /datum/rpg_stat/body, "Hunger")
+		human.stats.set_stat_modifier(modifier, /datum/rpg_stat/willpower, "Hunger")
+		human.stats.set_stat_modifier(modifier, /datum/rpg_stat/logic, "Hunger")
 	else
-		human.stats.remove_stat_modifier(/datum/rpg_stat/pneuma, "Hunger")
-		human.stats.remove_stat_modifier(/datum/rpg_stat/psyche, "Hunger")
-		human.stats.remove_stat_modifier(/datum/rpg_stat/soma, "Hunger")
+		human.stats.remove_stat_modifier(/datum/rpg_stat/body, "Hunger")
+		human.stats.remove_stat_modifier(/datum/rpg_stat/willpower, "Hunger")
+		human.stats.remove_stat_modifier(/datum/rpg_stat/logic, "Hunger")
 
 /obj/item/organ/stomach/proc/handle_disgust(mob/living/carbon/human/disgusted, delta_time, times_fired)
 	var/old_disgust = disgusted.old_disgust
@@ -304,9 +305,13 @@
 	icon_state = "stomach-c"
 	desc = "A basic device designed to mimic the functions of a minervan stomach"
 	organ_flags = ORGAN_SYNTHETIC
+	// SR5: organ replacement cost.
+	essence_base_cost = 0.20
 	var/emp_vulnerability = 80 //Chance of permanent effects if emp-ed.
 
 /obj/item/organ/stomach/cybernetic/tier2
+	// SR5: upgraded model (higher grade) costs less Essence than the basic.
+	essence_grade_multiplier = 0.8
 	name = "cybernetic stomach"
 	icon_state = "stomach-c-u"
 	desc = "An electronic device designed to mimic the functions of a minervan stomach. Handles disgusting food a bit better."
@@ -315,6 +320,8 @@
 	emp_vulnerability = 40
 
 /obj/item/organ/stomach/cybernetic/tier3
+	// SR5: further-upgraded model (higher grade again) costs even less Essence.
+	essence_grade_multiplier = 0.7
 	name = "upgraded cybernetic stomach"
 	icon_state = "stomach-c-u2"
 	desc = "An upgraded version of the cybernetic stomach, designed to improve further upon organic stomachs. Handles disgusting food very well."

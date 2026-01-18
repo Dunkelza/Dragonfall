@@ -389,7 +389,7 @@
 
 /datum/mod_theme/mining
 	name = "mining"
-	desc = "A Daedalus Industries mining suit for on-site operations, fit with accreting ash armor and a sphere form."
+	desc = "A Renraku mining suit for on-site operations, fit with accreting ash armor and a sphere form."
 	extended_desc = "A high-powered Ananke-designed suit, based off the work of Nakamura Engineering. \
 		While initial designs were built for the rigors of asteroid mining, given blast resistance through inbuilt ceramics, \
 		mining teams have since heavily tweaked the suit themselves with assistance from devices crafted by \
@@ -902,9 +902,9 @@
 
 /datum/mod_theme/magnate
 	name = "magnate"
-	desc = "A fancy, very protective suit for Daedalus' captains. Shock, fire and acid-proof while also having a large capacity and high speed."
+	desc = "A fancy, very protective suit for Renraku executives. Shock, fire and acid-proof while also having a large capacity and high speed."
 	extended_desc = "They say it costs four hundred thousand marks to run this MODsuit... for twelve seconds. \
-		The Magnate suit is designed for protection, comfort, and luxury for Daedalus Captains. \
+		The Magnate suit is designed for protection, comfort, and luxury for Renraku executives. \
 		The onboard air filters have been preprogrammed with an additional five hundred different fragrances that can \
 		be pumped into the helmet, all of highly-endangered flowers. A bespoke Tralex mechanical clock has been placed \
 		in the wrist, and the Magnate package comes with carbon-fibre cufflinks to wear underneath. \
@@ -1399,8 +1399,8 @@
 	name = "apocryphal"
 	desc = "A high-tech, only technically legal, armored suit created by a collaboration effort between Ananke and Apadyne Technologies."
 	extended_desc = "A bulky and only legal by technicality suit, this ominous black and red MODsuit is only worn by \
-		Nanotrasen Black Ops teams. If you can see this suit, you fucked up. A collaborative joint effort between \
-		Apadyne and Nanotrasen the construction and modules gives the user robust protection against \
+		Ares Macrotechnology black ops teams. If you can see this suit, you fucked up. A collaborative joint effort between \
+		Apadyne and Ares; the construction and modules give the user robust protection against \
 		anything that can be thrown at it, along with acute combat awareness tools for it's wearer. \
 		Whether the wearer uses it or not is up to them. \
 		There seems to be a little inscription on the wrist that reads; \'squiddie', d'aww."
@@ -1460,11 +1460,11 @@
 
 /datum/mod_theme/corporate
 	name = "corporate"
-	desc = "A fancy, high-tech suit for Nanotrasen's high ranking officers."
+	desc = "A fancy, high-tech suit for Renraku's high ranking executives."
 	extended_desc = "An even more costly version of the Magnate model, the corporate suit is a thermally insulated, \
-		anti-corrosion coated suit for high-ranking CentCom Officers, deploying pristine protective armor and \
+		anti-corrosion coated suit for high-ranking Sector Control Officers, deploying pristine protective armor and \
 		advanced actuators, feeling practically weightless when turned on. Scraping the paint of this suit is \
-		counted as a war-crime and reason for immediate execution in over fifty Nanotrasen space stations. \
+		counted as a war-crime and reason for immediate execution in over fifty Renraku arcologies. \
 		The resemblance to a Gorlex Marauder helmet is purely coincidental."
 	default_skin = "corporate"
 	armor = list(BLUNT = 50, PUNCTURE = 40, SLASH = 0, LASER = 50, ENERGY = 50, BOMB = 50, BIO = 100, FIRE = 100, ACID = 100)

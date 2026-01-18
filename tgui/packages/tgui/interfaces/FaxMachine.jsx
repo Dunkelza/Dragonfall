@@ -50,7 +50,7 @@ export const FaxMachine = (props) => {
     <Window width={550} height={630} theme={emagged ? 'syndicate' : 'ntos'}>
       <Window.Content>
         <Section
-          title="Nanotrasen Fax Device"
+          title="Renraku Fax Device"
           height={6.5}
           buttons={
             !!emagged && (
@@ -65,7 +65,7 @@ export const FaxMachine = (props) => {
           Hello, {display_name}!{' '}
           {emagged
             ? 'ERR- ERRoR. ERROR.'
-            : 'Welcome to the Nanotrasen Approved Faxing Device!'}
+            : 'Welcome to the Renraku Approved Faxing Device!'}
         </Section>
         <Section title="Faxed Papers">
           <Stack vertical height={15}>

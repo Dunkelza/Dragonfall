@@ -21,7 +21,7 @@ TYPEINFO_DEF(/obj/item/paint_sprayer)
 	var/stripe_color = COLOR_WHITE
 
 	var/preset_wall_colors= list(
-		"Daedalus Industries" = list("wall" = PAINT_WALL_DAEDALUS, "trim" = PAINT_STRIPE_DAEDALUS),
+		"Renraku" = list("wall" = PAINT_WALL_DAEDALUS, "trim" = PAINT_STRIPE_DAEDALUS),
 		"Priapus Recreational Solutions" = list("wall" = PAINT_WALL_PRIAPUS, "trim" = PAINT_STRIPE_PRIAPUS),
 		"Mars People's Coalition" = list("wall" = PAINT_WALL_MARS, "trim" = PAINT_STRIPE_MARS),
 		"Command" = list("wall" = PAINT_WALL_COMMAND, "trim" = PAINT_STRIPE_COMMAND),

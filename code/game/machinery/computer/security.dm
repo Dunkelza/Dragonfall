@@ -633,7 +633,7 @@ Age: [active1.fields[DATACORE_AGE]]<BR>"}
 				if(!( printing ))
 					var/missing_name = tgui_input_text(usr, "Enter an alias for the missing person", "Print Missing Persons Poster", active1.fields[DATACORE_NAME])
 					if(missing_name)
-						var/default_description = "A poster declaring [missing_name] to be a missing individual, missed by Nanotrasen. Report any sightings to security immediately."
+						var/default_description = "A poster declaring [missing_name] to be a missing individual, missed by Sector Control. Report any sightings to security immediately."
 
 						var/headerText = tgui_input_text(usr, "Enter a poster heading", "Print Missing Persons Poster", "MISSING", 7)
 

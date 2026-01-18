@@ -6,7 +6,7 @@ TYPEINFO_DEF(/obj/item/weldingtool)
 
 /obj/item/weldingtool
 	name = "welding tool"
-	desc = "A standard edition welder provided by Nanotrasen."
+	desc = "A standard edition welder issued by Shiawase Industrial."
 	icon = 'icons/obj/tools.dmi'
 	icon_state = "welder"
 	inhand_icon_state = "welder"

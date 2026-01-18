@@ -1,6 +1,6 @@
 // Macros for all the paint helpers
 
-//Daedalus Industries
+//Renraku Computer Systems
 #define PAINT_WALL_DAEDALUS "#706149"
 #define PAINT_STRIPE_DAEDALUS "#4b443d"
 

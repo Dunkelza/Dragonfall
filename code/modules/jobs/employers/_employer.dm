@@ -4,31 +4,31 @@
 	var/creator_info = ""
 
 /datum/employer/government
-	name = "The Federation"
-	short_name = "Federation"
-	creator_info = "The pool's local government superpower, evolving from the Minervan Trade Union. The Federation showed up on the colony's proverbial doorstep and taken hold over it's inhabitants."
+	name = "UCAS"
+	short_name = "UCAS"
+	creator_info = "The United Canadian and American States. The default civil authority in much of North America, and a constant political backdrop to corporate life in the Seattle Metroplex."
 
 /datum/employer/daedalus
-	name = "Daedalus Industries"
-	short_name = "Daedalus"
-	creator_info = "The most famous space station engineers in the Great Pool. Creators of the Resonance Drive and Resonance Gate."
+	name = "Renraku Computer Systems"
+	short_name = "Renraku"
+	creator_info = "A Japanese megacorporation and one of the AAA giants. Operators of major arcology-scale developments, with corporate culture that prizes loyalty, discretion, and results."
 
 /datum/employer/mars_exec
-	name = "Mars People's Coalition"
-	short_name = "MPC"
-	creator_info = "A hastily put together band of peacekeepers formed by the Red Sand Republic during it's formation shortly before the Mars Revolution. After the conclusion of the war, the MPC acts as the police force on the planet, as well as a cheap peacekeeping corps for hire. All proceeds go to various charities on Mars."
+	name = "Lone Star Security Services"
+	short_name = "Lone Star"
+	creator_info = "A corporate law enforcement and security contractor. Depending on the district and contract, Lone Star may act as police, private security, or a rapid-response force with broad discretion."
 
 /datum/employer/aether
-	name = "The Aether Association"
-	short_name = "Aether"
-	creator_info = "A mysterious society of doctors, pharmacists, and surgeons, intent on providing healthcare to every being in the Great Pool."
+	name = "DocWagon"
+	short_name = "DocWagon"
+	creator_info = "A premier medical response corporation. DocWagon coverage tiers can mean the difference between a morgue tag and a second chance."
 
 /datum/employer/hermes
-	name = "Hermes Galactic Freight"
-	short_name = "Hermes"
-	creator_info = "A ragtag fleet of merchants and freighters who will ship anything anywhere for the right price. They loosely follow the group's leader, a Vox named Grease Kitriki, who was previously a fierce pirate."
+	name = "Shiawase Logistics"
+	short_name = "Shiawase"
+	creator_info = "A logistics and infrastructure arm tied to Shiawase. Reliable shipping, tight security, and plenty of paperwork — the kind of backbone an arcology runs on."
 
 /datum/employer/none
 	name = "None"
 	short_name = "None"
-	creator_info = "The lone wolf. Solumn wonderer. Average joe."
+	creator_info = "Independent contractor. Freelancer. Someone with no corporate badge and a talent for finding trouble."

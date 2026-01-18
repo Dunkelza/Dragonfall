@@ -144,7 +144,7 @@
 	data["channelAuthor"] = current_channel?.author
 
 	if(!current_channel)
-		data["channelAuthor"] = "Daedalus Industries"
+		data["channelAuthor"] = "Renraku Corporate Communications"
 		data["channelDesc"] = "Welcome to Newscaster Net. Interface & News networks Operational."
 		data["channelLocked"] = TRUE
 	else

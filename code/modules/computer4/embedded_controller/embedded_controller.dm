@@ -233,7 +233,7 @@ DEFINE_INTERACTABLE(/obj/machinery/c4_embedded_controller)
 
 /obj/item/key/embedded_controller
 	name = "bell-crested key"
-	desc = " There's a small Daedalus logo on the bow."
+	desc = " There's a small Renraku logo on the bow."
 	icon_state = "ec_key"
 
 /obj/item/key/embedded_controller/examine(mob/user)

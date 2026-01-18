@@ -281,6 +281,8 @@
 	base_icon_state = "heart-c"
 	icon_state = "heart-c-on"
 	organ_flags = ORGAN_SYNTHETIC
+	// SR5: major organ replacement has a meaningful Essence impact.
+	essence_base_cost = 0.50
 
 	var/dose_available = FALSE
 	var/rid = /datum/reagent/medicine/epinephrine
@@ -288,6 +290,8 @@
 	var/emp_vulnerability = 80 //Chance of permanent effects if emp-ed.
 
 /obj/item/organ/heart/cybernetic/tier2
+	// SR5: upgraded model (higher grade) costs less Essence than the basic.
+	essence_grade_multiplier = 0.8
 	name = "cybernetic heart"
 	desc = "An electronic device designed to mimic the functions of an organic minervan heart. Also holds an emergency dose of epinephrine, used automatically after facing severe trauma."
 	icon_state = "heart-c-u-on"
@@ -297,6 +301,8 @@
 	emp_vulnerability = 40
 
 /obj/item/organ/heart/cybernetic/tier3
+	// SR5: further-upgraded model (higher grade again) costs even less Essence.
+	essence_grade_multiplier = 0.7
 	name = "upgraded cybernetic heart"
 	desc = "An electronic device designed to mimic the functions of an organic minervan heart. Also holds an emergency dose of epinephrine, used automatically after facing severe trauma. This upgraded model can regenerate its dose after use."
 	icon_state = "heart-c-u2-on"

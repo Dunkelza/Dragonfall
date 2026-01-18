@@ -1,14 +1,14 @@
 @use '../colors.scss';
 
 $department_map: (
-  'TheFederation': colors.$yellow,
-  'MarsPrivateSecurity': colors.$red,
-  'DaedalusIndustries': colors.$orange,
-  'AetherPharmaceuticals': colors.$teal,
+  'RenrakuCorporate': colors.$yellow,
+  'LoneStar': colors.$red,
+  'RenrakuFacilities': colors.$orange,
+  'DocWagon': colors.$teal,
   'Misc': colors.$white,
   'Science': colors.$purple,
-  'HermesGalacticFreight': colors.$brown,
-  'Independant': colors.$green,
+  'ShiawaseLogistics': colors.$brown,
+  'Independent': colors.$green,
   'Silicon': colors.$pink,
 );
 

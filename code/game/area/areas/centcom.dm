@@ -73,7 +73,7 @@ The areas used here are STRICTLY on the CC Z level.
 	icon_state = "centcom_cells"
 
 /area/centcom/central_command_areas/courtroom
-	name = "Nanotrasen Grand Courtroom"
+	name = "UCAS Grand Courtroom"
 	icon_state = "centcom_court"
 
 /area/centcom/central_command_areas/holding

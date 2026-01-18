@@ -1,0 +1,5 @@
+@use './dragonfall.scss';
+
+.theme-arcology {
+  @extend .theme-dragonfall;
+}

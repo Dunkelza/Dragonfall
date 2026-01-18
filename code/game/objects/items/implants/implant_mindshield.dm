@@ -6,7 +6,7 @@
 
 /obj/item/implant/mindshield/get_data()
 	var/dat = {"<b>Implant Specifications:</b><BR>
-				<b>Name:</b> Daedalus Industries Employee Management Implant<BR>
+				<b>Name:</b> Renraku Employee Compliance Implant<BR>
 				<b>Life:</b> Ten years.<BR>
 				<b>Important Notes:</b> Personnel injected with this device are much more resistant to brainwashing.<BR>
 				<HR>

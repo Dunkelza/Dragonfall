@@ -8,7 +8,7 @@ const ClownOperative: Antagonist = {
     `
       Honk! You have been chosen, for better or worse to join the Syndicate
       Clown Operative strike team. Your mission, whether or not you choose
-      to tickle it, is to honk Nanotrasen's most advanced research facility!
+  		to tickle it, is to honk Renraku's most advanced research facility!
       That's right, you're going to Clown Station 13.
     `,
 

@@ -22,7 +22,7 @@
 
 /datum/supply_pack/misc/bicycle
 	name = "Bicycle"
-	desc = "Daedalus Industries reminds all employees to never toy with powers outside their control."
+	desc = "Renraku reminds all employees to never toy with powers outside their control."
 	cost = 1000000 //Special case, we don't want to make this in terms of crates because having bikes be a million credits is the whole meme.
 	contains = list(/obj/vehicle/ridden/bicycle)
 	crate_name = "bicycle crate"

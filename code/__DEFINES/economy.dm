@@ -13,14 +13,14 @@
 #define VENDING_DISCOUNT 0
 
 #define ACCOUNT_ENG "ENG"
-#define ACCOUNT_ENG_NAME "Daedalus Industries Funds"
+#define ACCOUNT_ENG_NAME "Renraku Facilities Funds"
 #define ACCOUNT_MED "MED"
 #define ACCOUNT_MED_NAME "Aether Association Funds"
 #define ACCOUNT_SRV "SRV"
 #define ACCOUNT_CAR "CAR"
 #define ACCOUNT_CAR_NAME "Hermes Galactic Freight Funds"
 #define ACCOUNT_SEC "SEC"
-#define ACCOUNT_SEC_NAME "Mars People's Coalition Budget"
+#define ACCOUNT_SEC_NAME "Lone Star Budget"
 
 #define ACCOUNT_STATION_MASTER "STA"
 #define ACCOUNT_STATION_MASTER_NAME "Station Budget"

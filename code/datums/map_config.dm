@@ -17,7 +17,7 @@
 	var/map_name = "Theseus"
 	var/map_path = "map_files/Theseus"
 	var/map_file = "Theseus.dmm"
-	var/webmap_id = "DaedalusMeta"
+	var/webmap_id = "RenrakuArcology"
 
 	var/traits = null
 	var/space_ruin_levels = 7

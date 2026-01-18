@@ -134,7 +134,7 @@ TYPEINFO_DEF(/obj/item/crowbar/power)
 	return COMPONENT_NO_DEFAULT_MESSAGE
 
 /obj/item/crowbar/power/syndicate
-	desc = "A re-engineered copy of Daedalus' standard jaws of life. Can be used to force open airlocks in its crowbar configuration."
+	desc = "A re-engineered copy of Renraku's standard hydraulic spreader. Can be used to force open doors in its crowbar configuration."
 	icon_state = "jaws_syndie"
 	toolspeed = 0.5
 	force_opens = TRUE

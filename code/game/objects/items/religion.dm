@@ -1,6 +1,6 @@
 /obj/item/banner
 	name = "banner"
-	desc = "A banner with Nanotrasen's logo on it."
+	desc = "A banner with Renraku's logo on it."
 	icon = 'icons/obj/banner.dmi'
 	icon_state = "banner"
 	inhand_icon_state = "banner"
@@ -215,7 +215,7 @@
 	name = "command banner"
 	desc = "The banner of Command, a staunch and ancient line of bueraucratic kings and queens."
 	//No icon state here since the default one is the NT banner
-	warcry = "Hail Nanotrasen!"
+	warcry = "Hail Renraku!"
 
 /obj/item/banner/command/Initialize(mapload)
 	. = ..()
@@ -248,8 +248,8 @@
 	desc = "A banner with the logo of the blue deity."
 
 /obj/item/storage/backpack/bannerpack
-	name = "\improper Nanotrasen banner backpack"
-	desc = "It's a backpack with lots of extra room.  A banner with Nanotrasen's logo is attached, that can't be removed."
+	name = "\improper Renraku banner backpack"
+	desc = "It's a backpack with lots of extra room. A banner with Renraku's logo is attached, and can't be removed."
 	icon_state = "bannerpack"
 	supports_variations_flags = NONE
 

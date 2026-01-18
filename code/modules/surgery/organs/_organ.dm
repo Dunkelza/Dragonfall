@@ -54,6 +54,18 @@
 	var/visual = FALSE
 	///If the organ is cosmetic only, it loses all organ functionality.
 	var/cosmetic_only = FALSE
+	/// SR5: Essence costing for cyberware/augments.
+	/// For tiered/graded cyberware, set `essence_base_cost` and `essence_grade_multiplier` and let `essence_cost` be computed.
+	/// This is only used by the Shadowrun/SR5 stats overhaul (see /datum/rpg_stat/essence).
+	var/essence_cost = 0
+	/// SR5: Base Essence cost before grade multipliers.
+	var/essence_base_cost = 0
+	/// SR5: Grade multiplier applied to `essence_base_cost`.
+	/// Mapping we use in this codebase (since organs use tier subtypes, not a separate grade system):
+	/// - tier1/basic: 1.0 (standard)
+	/// - tier2: 0.8 (alpha-ish)
+	/// - tier3: 0.7 (beta-ish)
+	var/essence_grade_multiplier = 1.0
 	/// Traits that are given to the holder of the organ. If you want an effect that changes this, don't add directly to this. Use the add_organ_trait() proc
 	var/list/organ_traits = list()
 
@@ -65,6 +77,9 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 
 /obj/item/organ/Initialize(mapload, mob_sprite)
 	. = ..()
+	// SR5: compute derived Essence cost (if this organ uses base+grade costing).
+	if(essence_base_cost)
+		essence_cost = round(essence_base_cost * essence_grade_multiplier, 0.01)
 	if(organ_flags & ORGAN_EDIBLE)
 		AddComponent(/datum/component/edible,\
 			initial_reagents = food_reagents,\

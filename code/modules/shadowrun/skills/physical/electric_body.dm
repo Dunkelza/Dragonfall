@@ -7,7 +7,7 @@
 	name = "The Body Electric"
 	desc = "The flesh is a vessel for electric connections."
 
-	parent_stat_type = /datum/rpg_stat/soma
+	parent_stat_type = /datum/rpg_stat/body
 
 /datum/rpg_skill/electric_body/get(mob/living/user, list/out_sources)
 	. = ..()

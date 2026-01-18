@@ -6,10 +6,10 @@
 @use 'sass:color';
 @use 'sass:meta';
 
-@use './daedalus.scss';
+@use './dragonfall.scss';
 
 .theme-admin {
-  @extend .theme-daedalus;
+  @extend .theme-dragonfall;
 
   .Layout__content {
     background-image: url('../../assets/bg-admin.svg');

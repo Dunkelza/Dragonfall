@@ -39,7 +39,7 @@
 /turf/closed/wall/r_wall/prepainted
 	name = "PRe-Painted Reinforced Wall"
 
-//Daedalus/"Standard" walls
+//Renraku/"Standard" walls
 
 /turf/closed/wall/prepainted/daedalus
 	color = PAINT_WALL_DAEDALUS

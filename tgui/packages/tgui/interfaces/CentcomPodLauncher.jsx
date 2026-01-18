@@ -216,7 +216,7 @@ const SOUNDS = [
 const STYLES = [
   { title: 'Standard' },
   { title: 'Advanced' },
-  { title: 'Nanotrasen' },
+  { title: 'Renraku' },
   { title: 'Syndicate' },
   { title: 'Deathsquad' },
   { title: 'Cultist' },
@@ -1059,7 +1059,7 @@ const Bays = (props) => {
             color="transparent"
             tooltip={`
               Each option corresponds
-              to an area on centcom.
+              to an area on Sector Control.
               Launched pods will
               be filled with items
               in these areas according

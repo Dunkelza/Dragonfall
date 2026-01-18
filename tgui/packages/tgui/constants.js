@@ -87,7 +87,7 @@ export const RADIO_CHANNELS = [
     color: '#fdfd34',
   },
   {
-    name: 'CentCom',
+    name: 'Sector Control',
     freq: 1337,
     color: '#2681a5',
   },

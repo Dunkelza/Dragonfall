@@ -5,7 +5,7 @@
  */
 /obj/item/inspector
 	name = "\improper N-spect scanner"
-	desc = "Central Command-issued inspection device. Performs inspections according to Nanotrasen protocols when activated, then \
+	desc = "Sector Control-issued inspection device. Performs inspections according to arcology compliance protocols when activated, then \
 			prints an encrypted report regarding the maintenance of the station. Hard to replace."
 	icon = 'icons/obj/device.dmi'
 	icon_state = "inspector"

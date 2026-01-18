@@ -674,4 +674,4 @@
 
 /// Unique slug for the webmap
 /datum/config_entry/string/webmap_community
-	default = "DaedalusDock"
+	default = "renraku_arcology"

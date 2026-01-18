@@ -16,13 +16,13 @@ $include pariah/pariah_config.txt
 # There are various options which are hard-locked for security reasons.
 
 ## Server name: This appears at the top of the screen in-game and in the BYOND hub. Uncomment and replace 'tgstation' with the name of your choice.
-SERVERNAME Daedalus Dock
+SERVERNAME Renraku Arcology
 
 ## Server SQL name: This is the name used to identify the server to the SQL DB, distinct from SERVERNAME as it must be at most 32 characters.
-SERVERSQLNAME daedalusdock
+SERVERSQLNAME dragonfall
 
 ## Station name: The name of the station as it is referred to in-game. If commented out, the game will generate a random name instead.
-STATIONNAME Daedalus Outpost
+STATIONNAME Renraku Arcology
 
 ## Community slug for AffectedArc's Web Map
 #WEBMAP_COMMUNITY DaedalusDock

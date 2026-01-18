@@ -22,7 +22,7 @@ TYPEINFO_DEF(/obj/item/gun/energy/laser)
 /obj/item/gun/energy/laser/retro
 	name ="retro laser gun"
 	icon_state = "retro"
-	desc = "An older model of the basic lasergun, no longer used by Daedalus' private security or military forces. Nevertheless, it is still quite deadly and easy to maintain, making it a favorite amongst pirates and other outlaws."
+	desc = "An older model of the basic lasergun, no longer used by Renraku corporate security. Nevertheless, it is still quite deadly and easy to maintain, making it a favorite amongst criminals and other outlaws."
 	ammo_x_offset = 3
 
 /obj/item/gun/energy/laser/retro/old

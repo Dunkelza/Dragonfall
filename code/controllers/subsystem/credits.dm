@@ -8,7 +8,7 @@ SUBSYSTEM_DEF(credits)
 	var/control = "mapwindow.credits" //if updating this, update in credits.html as well
 	var/file = 'code/modules/credits_roll/credits.html'
 
-	var/director = "Daedalus Productions"
+	var/director = "Renraku Trideo"
 	var/list/producers = list()
 	var/star = ""
 	var/ss = ""

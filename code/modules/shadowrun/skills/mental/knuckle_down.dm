@@ -7,4 +7,4 @@
 	name = "Knuckle Down"
 	desc = "Stubborness be your shield."
 
-	parent_stat_type = /datum/rpg_stat/psyche
+	parent_stat_type = /datum/rpg_stat/willpower

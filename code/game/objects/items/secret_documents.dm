@@ -21,9 +21,9 @@
 	//pressure_resistance = 2
 	resistance_flags = INDESTRUCTIBLE | LAVA_PROOF | FIRE_PROOF | ACID_PROOF
 
-///Daedalus documents
+///Renraku documents
 /obj/item/documents/nanotrasen
-	desc = "\"Top Secret\" Daedalus Industries documents, filled with complex diagrams and lists of names, dates and coordinates."
+	desc = "\"Top Secret\" Renraku Computer Systems documents, filled with complex diagrams and lists of names, dates and coordinates."
 	icon_state = "docs_verified"
 
 ///Syndicate documents

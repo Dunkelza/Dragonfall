@@ -1,11 +1,11 @@
 /datum/stats
 	var/mob/living/owner
 
-	// Higher is better with stats. 11 is the baseline.
+	// SR5 overhaul: stats are attributes (ratings), higher is better.
 	/// A lazylist
 	VAR_PRIVATE/list/stats = list()
 
-	// Higher is better with skills. 0 is the baseline.
+	// SR5 overhaul: skills are ratings, used with an attribute to form a dice pool.
 	VAR_PRIVATE/list/skills = list()
 
 	VAR_PRIVATE/list/stat_cooldowns = list()
@@ -30,7 +30,7 @@
 	for(var/datum/path as anything in typesof(/datum/rpg_skill))
 		if(isabstract(path))
 			continue
-		skills[path] += new path
+		skills[path] = new path
 
 	byondui_screen = new
 	byondui_screen.generate_view("byondui_characterstats_[ref(src)]")
@@ -71,6 +71,7 @@
 /datum/stats/ui_data(mob/user)
 	var/list/data = list(
 		"byondui_map" = byondui_screen.assigned_map,
+		// UI baseline for displayed dice-pool values.
 		"default_skill_value" = STATS_BASELINE_VALUE,
 	)
 
@@ -98,10 +99,15 @@
 
 		var/skill_value = get_skill_modifier(skill_type, skill_modifiers)
 		var/stat_value = get_stat_modifier(stat.type, stat_modifiers)
+		var/pool_value = STATS_BASELINE_VALUE + skill_value + stat_value
 		skill_data[++skill_data.len] = list(
 			"name" = skill.name,
 			"desc" = skill.desc,
-			"value" = STATS_BASELINE_VALUE + skill_value + stat_value,
+			// SR5: displayed as the dice pool (attribute + skill + modifiers).
+			"value" = pool_value,
+			"pool" = pool_value,
+			"skill_rating" = skill_value,
+			"stat_rating" = stat_value,
 			"modifiers" = skill_modifier_data,
 			"parent_stat_name" = stat.name,
 			"class" = stat.ui_class,
@@ -113,6 +119,7 @@
 				"name" = stat.name,
 				"desc" = stat.desc,
 				"value" = STATS_BASELINE_VALUE + stat_value,
+				"rating" = stat_value,
 				"modifiers" = stat_modifier_data,
 				"class" = stat.ui_class,
 				"sort_order" = stat.ui_sort_order,
@@ -354,22 +361,19 @@
 		. = 0
 		CRASH("Bad max scalar: [max_scalar]")
 
-	var/skill_value = clamp(get_skill_modifier(skill) + STATS_BASELINE_VALUE, STATS_MINIMUM_VALUE, STATS_MAXIMUM_VALUE)
-	if(skill_value == STATS_BASELINE_VALUE)
+	// SR dice pool scalar helper.
+	// We interpret the "skill" argument as contributing to a pool, and scale smoothly between
+	// min_scalar and max_scalar over [0, STATS_MAXIMUM_VALUE].
+	var/pool = clamp(get_skill_modifier(skill), STATS_MINIMUM_VALUE, STATS_MAXIMUM_VALUE)
+	if(pool <= 0)
 		return 1
 
 	var/min_scalar = round(1 / max_scalar, 0.01)
+	var/t = pool / STATS_MAXIMUM_VALUE
 	if(!inverse)
-		if(skill_value > STATS_BASELINE_VALUE)
-			return 1 + (skill_value - STATS_BASELINE_VALUE) * (max_scalar - 1) / (STATS_MAXIMUM_VALUE - STATS_BASELINE_VALUE)
-
-		else
-			return min_scalar + (skill_value - STATS_MINIMUM_VALUE) * (1 - min_scalar) / (STATS_BASELINE_VALUE - 3)
+		return min_scalar + t * (max_scalar - min_scalar)
 	else
-		if(skill_value > STATS_BASELINE_VALUE)
-			return 1 - (skill_value - STATS_BASELINE_VALUE) * (1 - min_scalar) / (STATS_MAXIMUM_VALUE - STATS_BASELINE_VALUE)
-		else
-			return max_scalar - (skill_value - STATS_MINIMUM_VALUE) * (max_scalar - 1) / (STATS_BASELINE_VALUE - 3)
+		return max_scalar - t * (max_scalar - min_scalar)
 
 /// Returns a cached result datum pr null
 /datum/stats/proc/get_stashed_result(id)

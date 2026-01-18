@@ -101,7 +101,7 @@ TYPEINFO_DEF(/obj/item/clothing/mask/gas/atmos)
 
 /obj/item/clothing/mask/gas/atmos/captain
 	name = "captain's gas mask"
-	desc = "Daedalus cut corners and repainted a spare atmospheric gas mask, but don't tell anyone."
+	desc = "Renraku cut corners and repainted a spare atmospheric gas mask, but don't tell anyone."
 	icon_state = "gas_cap"
 	inhand_icon_state = "gas_cap"
 	resistance_flags = FIRE_PROOF | ACID_PROOF

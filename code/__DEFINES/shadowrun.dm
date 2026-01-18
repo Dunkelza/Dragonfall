@@ -26,9 +26,10 @@
 /// Alchohol withdrawl
 #define SKILL_SOURCE_ALCHOHOL_WITHDRAWL "Alchohol withdrawl"
 
-/// The baseline value for a stat.
-#define STATS_BASELINE_VALUE 11
-/// Maximum "real" value of a stat, including modifiers.
-#define STATS_MAXIMUM_VALUE 18
-/// Minimum "real" value of a stat, including modifiers.
-#define STATS_MINIMUM_VALUE 3
+// Shadowrun 5e-style dice pools.
+// Dice pools and attribute/skill ratings use 0 as the neutral baseline.
+#define STATS_BASELINE_VALUE 0
+/// Soft cap used for scaling helpers. Dice pools can exceed this, but UI/scalars clamp.
+#define STATS_MAXIMUM_VALUE 20
+/// Minimum rating/pool.
+#define STATS_MINIMUM_VALUE 0

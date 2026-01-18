@@ -2,7 +2,7 @@ import { capitalize } from 'common/string';
 import { Fragment } from 'react';
 
 import { resolveAsset } from '../assets';
-import nt_logo from '../assets/bg-nanotrasen.svg';
+import neutral_logo from '../assets/bg-neutral.svg';
 import { useBackend, useLocalState } from '../backend';
 import {
   BlockQuote,
@@ -191,7 +191,7 @@ const SignalLostModal = (props) => {
       p={0}
       style={{ borderRadius: '5%' }}
     >
-      <img src={nt_logo} width={64} height={64} />
+      <img src={neutral_logo} width={64} height={64} />
       <Box
         backgroundColor="black"
         textColor="red"
@@ -202,7 +202,8 @@ const SignalLostModal = (props) => {
       </Box>
       <Box p={2} italic>
         Connection to exploration drone interrupted. Please contact nearest
-        Nanotrasen Exploration Division representative for further instructions.
+        Shiawase Aerospace Exploration Division representative for further
+        instructions.
       </Box>
       <Icon name="exclamation-triangle" textColor="black" size={5} />
       <Box>

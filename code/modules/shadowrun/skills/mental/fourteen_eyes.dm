@@ -7,5 +7,5 @@
 	name = "Eyes Fourteen"
 	desc = "Recall information from other perspectives."
 
-	parent_stat_type = /datum/rpg_stat/pneuma
+	parent_stat_type = /datum/rpg_stat/intuition
 

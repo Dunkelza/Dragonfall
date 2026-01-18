@@ -199,7 +199,7 @@ TYPEINFO_DEF(/obj/item/storage/backpack/holding)
 
 /obj/item/storage/backpack/captain
 	name = "captain's backpack"
-	desc = "It's a special backpack made exclusively for Daedalus Industries officers."
+	desc = "It's a special backpack made exclusively for Renraku corporate officers."
 	icon_state = "captainpack"
 	inhand_icon_state = "captainpack"
 
@@ -364,7 +364,7 @@ TYPEINFO_DEF(/obj/item/storage/backpack/holding)
 
 /obj/item/storage/backpack/satchel/cap
 	name = "captain's satchel"
-	desc = "An exclusive satchel for Daedalus Industries officers."
+	desc = "An exclusive satchel for Renraku corporate officers."
 	icon_state = "satchel-cap"
 	inhand_icon_state = "satchel-cap"
 
@@ -578,7 +578,7 @@ TYPEINFO_DEF(/obj/item/storage/backpack/holding)
 	atom_storage.silent = TRUE
 
 /obj/item/storage/backpack/duffelbag/syndie/hitman
-	desc = "A large duffel bag for holding extra things. There is a Nanotrasen logo on the back."
+	desc = "A large duffel bag for holding extra things. There is a Renraku logo on the back."
 	icon_state = "duffel-syndieammo"
 	inhand_icon_state = "duffel-syndieammo"
 

@@ -196,7 +196,7 @@ const SystemWallpaper = (_) => {
   const { data } = useBackend<PaiInterfaceData>();
   const { emagged } = data;
 
-  const owner = !emagged ? 'NANOTRASEN' : ' SYNDICATE';
+  const owner = !emagged ? 'RENRAKU' : ' SYNDICATE';
   const eyebrows = !emagged ? "/\\ ' /\\" : ' \\\\ // ';
 
   const paiAscii = [

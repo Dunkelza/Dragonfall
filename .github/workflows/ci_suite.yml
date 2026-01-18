@@ -56,7 +56,7 @@ jobs:
         run: tools/bootstrap/python -m dmi.test
       - name: Check File Directories
         if: steps.linter-setup.conclusion == 'success' && !cancelled()
-        run: bash tools/ci/check_filedirs.sh daedalus.dme
+        run: bash tools/ci/check_filedirs.sh dragonfall.dme
       - name: Check Changelogs
         if: steps.linter-setup.conclusion == 'success' && !cancelled()
         run: bash tools/ci/check_changelogs.sh
@@ -89,7 +89,7 @@ jobs:
       - name: Run OpenDream
         run: |
           source dependencies.sh
-          ./DMCompiler_linux-x64/DMCompiler daedalus.dme --suppress-unimplemented --define=CIBUILDING --version=$BYOND_MAJOR.$BYOND_MINOR
+          ./DMCompiler_linux-x64/DMCompiler dragonfall.dme --suppress-unimplemented --define=CIBUILDING --version=$BYOND_MAJOR.$BYOND_MINOR
 
   compile_all_maps:
     if: ( !contains(github.event.head_commit.message, '[ci skip]') )
@@ -146,13 +146,13 @@ jobs:
       map: ${{ matrix.map }}
 
   run_alternate_tests:
-    if: ( !contains(github.event.head_commit.message, '[ci skip]') && needs.find_all_maps.outputs.alternate_tests != '[]' )
-    name: Alternate Tests
     needs: [find_all_maps]
+    if: ${{ !contains(github.event.head_commit.message, '[ci skip]') }}
+    name: Alternate Tests
     strategy:
       fail-fast: false
       matrix:
-        setup: ${{ fromJSON(needs.find_all_maps.outputs.alternate_tests) }}
+        setup: ${{ needs.find_all_maps.outputs.alternate_tests != '[]' && fromJSON(needs.find_all_maps.outputs.alternate_tests) || fromJSON('[{"major":"","minor":"","map":"__skip__"}]') }}
     concurrency:
       group: run_all_tests-${{ github.head_ref || github.run_id }}-${{ matrix.setup.major }}.${{ matrix.setup.minor }}-${{ matrix.setup.map }}
       cancel-in-progress: true
@@ -163,9 +163,9 @@ jobs:
       minor: ${{ matrix.setup.minor }}
 
   check_alternate_tests:
-    if: ( !contains(github.event.head_commit.message, '[ci skip]') && needs.find_all_maps.outputs.alternate_tests != '[]' )
-    name: Check Alternate Tests
     needs: [run_alternate_tests]
+    if: ${{ !contains(github.event.head_commit.message, '[ci skip]') }}
+    name: Check Alternate Tests
     runs-on: ubuntu-latest
     steps:
       - run: echo Alternate tests passed.

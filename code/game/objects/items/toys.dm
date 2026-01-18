@@ -843,8 +843,8 @@ TYPEINFO_DEF(/obj/item/toy/ammo/gun)
 	w_class = WEIGHT_CLASS_BULKY //Stops people from hiding it in their bags/pockets
 
 /obj/item/toy/beach_ball/branded
-	name = "\improper Nanotrasen-brand beach ball"
-	desc = "The simple beach ball is one of Nanotrasen's most popular products. 'Why do we make beach balls? Because we can! (TM)' - Nanotrasen"
+	name = "\improper Horizon-brand beach ball"
+	desc = "The simple beach ball is one of Horizon's most popular products. 'Why do we make beach balls? Because we can! (TM)' - Horizon"
 
 /*
  * Clockwork Watch
