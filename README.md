@@ -1,4 +1,4 @@
-## The Sixth World in 2088
+## The Sixth World in 21XX
 
 <img width="601" height="744" alt="Cd0cf73f83cac22a703e9678bbd35cb4" src="https://github.com/user-attachments/assets/ff8a48ce-6659-40d2-92c6-5a236fcfada5" />
 
