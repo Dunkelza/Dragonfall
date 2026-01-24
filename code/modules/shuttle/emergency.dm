@@ -643,7 +643,11 @@
 		return
 
 	var/list/turfs = get_area_turfs(target_area)
-	var/original_len = turfs?.len
+	var/original_len = turfs?.len || 0
+	if(!original_len)
+		// Some maps/configurations don't include the target area at all.
+		// This is not actionable for admins and would otherwise spam warnings.
+		return INITIALIZE_HINT_QDEL
 	while(turfs?.len)
 		var/turf/T = pick(turfs)
 		if(T.x<edge_distance || T.y<edge_distance || (world.maxx+1-T.x)<edge_distance || (world.maxy+1-T.y)<edge_distance)

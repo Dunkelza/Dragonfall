@@ -41,12 +41,18 @@
 
 // Increases perceptual color lightness.
 @function lighten($color, $amount) {
-  @return color.adjust($color, $lightness: $amount * 1%, $space: hsl);
+  @if math.is-unitless($amount) {
+    $amount: $amount * 1%;
+  }
+  @return color.adjust($color, $lightness: $amount, $space: hsl);
 }
 
 // Decreases perceptual color lightness.
 @function darken($color, $amount) {
-  @return color.adjust($color, $lightness: -$amount * 1%, $space: hsl);
+  @if math.is-unitless($amount) {
+    $amount: $amount * 1%;
+  }
+  @return color.adjust($color, $lightness: -$amount, $space: hsl);
 }
 
 // Returns the NTSC luminance of `$color` as a float (between 0 and 1).

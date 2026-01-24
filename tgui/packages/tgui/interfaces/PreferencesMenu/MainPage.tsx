@@ -64,7 +64,7 @@ const CharacterControls = (props: {
           onClick={props.handleOpenSpecies}
           fontSize="22px"
           icon="paw"
-          tooltip="Species"
+          tooltip="Metatype"
           tooltipPosition="top"
         />
       </Stack.Item>
@@ -419,7 +419,8 @@ const PreferenceList = (props: {
                   <Box
                     as="span"
                     style={{
-                      borderBottom: '2px dotted rgba(255, 255, 255, 0.8)',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.25)',
+                      cursor: 'help',
                     }}
                   >
                     {name}:
@@ -462,7 +463,10 @@ const PreferenceList = (props: {
   );
 };
 
-export const MainPage = (props: { openSpecies: () => void }) => {
+export const MainPage = (props: {
+  embedded?: boolean;
+  openSpecies?: () => void;
+}) => {
   const { act, data } = useBackend<PreferencesMenuData>();
   const [currentClothingMenu, setCurrentClothingMenu] = useLocalState<
     string | null
@@ -476,44 +480,46 @@ export const MainPage = (props: { openSpecies: () => void }) => {
   return (
     <ServerPreferencesFetcher
       render={(serverData) => {
-        const currentSpeciesData =
-          serverData &&
-          serverData.species[data.character_preferences.misc.species];
+        const selectedSpecies =
+          data.character_preferences?.misc?.species || 'human';
+        const currentSpeciesData = serverData?.species?.[selectedSpecies];
 
-        const contextualPreferences =
-          data.character_preferences.secondary_features || [];
+        const clothingPrefs = data.character_preferences?.clothing || {};
+        const featurePrefs = data.character_preferences?.features || {};
+        const secondaryFeatures =
+          data.character_preferences?.secondary_features || {};
+
+        const nonContextual = data.character_preferences?.non_contextual || {};
+        const randomization = data.character_preferences?.randomization || {};
 
         const mainFeatures = [
-          ...Object.entries(data.character_preferences.clothing),
-          ...Object.entries(data.character_preferences.features).filter(
-            ([featureName]) => {
-              if (!currentSpeciesData) {
-                return false;
-              }
+          ...Object.entries(clothingPrefs),
+          ...Object.entries(featurePrefs).filter(([featureName]) => {
+            if (!currentSpeciesData) {
+              return false;
+            }
 
-              return (
-                currentSpeciesData.enabled_features.indexOf(featureName) !== -1
-              );
-            },
-          ),
+            return (
+              currentSpeciesData.enabled_features.indexOf(featureName) !== -1
+            );
+          }),
         ];
 
-        const randomBodyEnabled =
-          data.character_preferences.non_contextual.random_body !==
-            RandomSetting.Disabled || randomToggleEnabled;
+        // Randomize-body control is intentionally hidden; only the explicit
+        // random toggle should enable appearance randomization.
+        const randomBodyEnabled = randomToggleEnabled;
 
         const getRandomization = (
           preferences: Record<string, unknown>,
         ): Record<string, RandomSetting> => {
-          if (!serverData) {
+          const randomizable = serverData?.random?.randomizable;
+          if (!Array.isArray(randomizable)) {
             return {};
           }
 
           return Object.fromEntries(
             filterMap(Object.keys(preferences), (preferenceKey) => {
-              if (
-                serverData.random.randomizable.indexOf(preferenceKey) === -1
-              ) {
+              if (randomizable.indexOf(preferenceKey) === -1) {
                 return undefined;
               }
 
@@ -523,8 +529,7 @@ export const MainPage = (props: { openSpecies: () => void }) => {
 
               return [
                 preferenceKey,
-                data.character_preferences.randomization[preferenceKey] ||
-                  RandomSetting.Disabled,
+                randomization[preferenceKey] || RandomSetting.Disabled,
               ];
             }),
           );
@@ -534,17 +539,68 @@ export const MainPage = (props: { openSpecies: () => void }) => {
           Object.fromEntries(mainFeatures),
         );
 
-        const nonContextualPreferences = {
-          ...data.character_preferences.non_contextual,
-        };
+        // Hide the Randomize Body setting from the menu.
+        const nonContextualPreferences = Object.fromEntries(
+          Object.entries(nonContextual).filter(
+            ([key]) => key !== 'random_body',
+          ),
+        );
 
         if (randomBodyEnabled) {
-          nonContextualPreferences['random_species'] =
-            data.character_preferences.randomization['species'];
+          nonContextualPreferences['random_species'] = randomization['species'];
         } else {
           // We can't use random_name/is_accessible because the
           // server doesn't know whether the random toggle is on.
           delete nonContextualPreferences['random_name'];
+        }
+
+        if (props.embedded) {
+          // Embedded mode is used by the Shadowrun sheet.
+          // Keep it focused on appearance-only preferences and avoid
+          // rendering secondary_features (which includes shadowrun_chargen).
+          const embeddedNonContextualKeys = ['random_species'];
+          const embeddedNonContextualPreferences = Object.fromEntries(
+            Object.entries(nonContextualPreferences).filter(([key]) =>
+              embeddedNonContextualKeys.includes(key),
+            ),
+          );
+
+          const embeddedFeaturePrefs = Object.fromEntries(
+            Object.entries(featurePrefs).filter(([featureName]) => {
+              if (!currentSpeciesData) {
+                return false;
+              }
+
+              return (
+                currentSpeciesData.enabled_features.indexOf(featureName) !== -1
+              );
+            }),
+          );
+
+          const embeddedAppearancePreferences = {
+            ...clothingPrefs,
+            ...embeddedFeaturePrefs,
+          };
+
+          return (
+            <Stack>
+              <PreferenceList
+                act={act}
+                randomizations={getRandomization(embeddedAppearancePreferences)}
+                preferences={embeddedAppearancePreferences}
+              />
+
+              {Object.keys(embeddedNonContextualPreferences).length > 0 ? (
+                <PreferenceList
+                  act={act}
+                  randomizations={getRandomization(
+                    embeddedNonContextualPreferences,
+                  )}
+                  preferences={embeddedNonContextualPreferences}
+                />
+              ) : null}
+            </Stack>
+          );
         }
 
         return (
@@ -572,8 +628,8 @@ export const MainPage = (props: { openSpecies: () => void }) => {
                 <Stack vertical fill>
                   <Stack.Item>
                     <CharacterControls
-                      gender={data.character_preferences.misc.gender}
-                      handleOpenSpecies={props.openSpecies}
+                      gender={data.character_preferences?.misc?.gender}
+                      handleOpenSpecies={props.openSpecies || (() => {})}
                       handleRotate={() => {
                         act('rotate');
                       }}
@@ -611,10 +667,14 @@ export const MainPage = (props: { openSpecies: () => void }) => {
                   />
                   <Stack.Item position="relative">
                     <NameInput
-                      name={data.character_preferences.names[data.name_to_use]}
+                      name={
+                        data.character_preferences.names[
+                          data.name_to_use || 'real_name'
+                        ]
+                      }
                       handleUpdateName={createSetPreference(
                         act,
-                        data.name_to_use,
+                        data.name_to_use || 'real_name',
                       )}
                       openMultiNameInput={() => {
                         setMultiNameInputOpen(true);
@@ -666,8 +726,8 @@ export const MainPage = (props: { openSpecies: () => void }) => {
                 <Stack vertical fill>
                   <PreferenceList
                     act={act}
-                    randomizations={getRandomization(contextualPreferences)}
-                    preferences={contextualPreferences}
+                    randomizations={getRandomization(secondaryFeatures)}
+                    preferences={secondaryFeatures}
                   />
 
                   <PreferenceList

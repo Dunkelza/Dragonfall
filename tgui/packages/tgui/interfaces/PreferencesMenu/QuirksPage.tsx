@@ -150,11 +150,22 @@ export const QuirksPage = (props) => {
           return <Box>Loading quirks...</Box>;
         }
 
+        if (!data.quirks) {
+          return (
+            <Box color="red">
+              Missing `quirks` server data (preferences.json). Check server
+              preference middleware.
+            </Box>
+          );
+        }
+
         const {
           max_positive_quirks: maxPositiveQuirks,
           quirk_blacklist: quirkBlacklist,
           quirk_info: quirkInfo,
         } = data.quirks;
+
+        const enforceBalance = Boolean((data.quirks as any).enforce_balance);
 
         const quirks = Object.entries(quirkInfo);
         quirks.sort(([_, quirkA], [__, quirkB]) => {
@@ -184,7 +195,11 @@ export const QuirksPage = (props) => {
         const getReasonToNotAdd = (quirkName: string) => {
           const quirk = quirkInfo[quirkName];
 
-          if (quirk.value > 0) {
+          if (!quirk) {
+            return 'Unknown quirk (server data mismatch).';
+          }
+
+          if (enforceBalance && quirk.value > 0) {
             if (positiveQuirks >= maxPositiveQuirks) {
               return "You can't have any more positive quirks!";
             } else if (balance + quirk.value > 0) {
@@ -192,9 +207,9 @@ export const QuirksPage = (props) => {
             }
           }
 
-          const selectedQuirkNames = selectedQuirks.map((quirkKey) => {
-            return quirkInfo[quirkKey].name;
-          });
+          const selectedQuirkNames = selectedQuirks
+            .map((quirkKey) => quirkInfo[quirkKey]?.name)
+            .filter(Boolean);
 
           for (const blacklist of quirkBlacklist) {
             if (blacklist.indexOf(quirk.name) === -1) {
@@ -217,7 +232,11 @@ export const QuirksPage = (props) => {
         const getReasonToNotRemove = (quirkName: string) => {
           const quirk = quirkInfo[quirkName];
 
-          if (balance - quirk.value > 0) {
+          if (!quirk) {
+            return undefined;
+          }
+
+          if (enforceBalance && balance - quirk.value > 0) {
             return 'You need to remove a positive quirk first!';
           }
 
@@ -229,7 +248,7 @@ export const QuirksPage = (props) => {
             <Stack.Item basis="50%">
               <Stack vertical fill align="center">
                 <Stack.Item>
-                  <Box fontSize="1.3em">Positive Quirks</Box>
+                  <Box fontSize="1.3em">Edge Qualities</Box>
                 </Stack.Item>
 
                 <Stack.Item>
@@ -240,7 +259,7 @@ export const QuirksPage = (props) => {
 
                 <Stack.Item>
                   <Box as="b" fontSize="1.6em">
-                    Available Quirks
+                    Available Qualities
                   </Box>
                 </Stack.Item>
 
@@ -280,7 +299,7 @@ export const QuirksPage = (props) => {
             <Stack.Item basis="50%">
               <Stack vertical fill align="center">
                 <Stack.Item>
-                  <Box fontSize="1.3em">Quirk Balance</Box>
+                  <Box fontSize="1.3em">Karma Balance</Box>
                 </Stack.Item>
 
                 <Stack.Item>
@@ -289,7 +308,7 @@ export const QuirksPage = (props) => {
 
                 <Stack.Item>
                   <Box as="b" fontSize="1.6em">
-                    Current Quirks
+                    Active Qualities
                   </Box>
                 </Stack.Item>
 

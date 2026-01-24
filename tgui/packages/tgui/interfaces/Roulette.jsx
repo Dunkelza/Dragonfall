@@ -203,12 +203,12 @@ export const RouletteBetTable = (props) => {
           ])}
         >
           <Box bold mt={1} mb={1} fontSize="20px" textAlign="center">
-            {data.BetAmount} cr on {BetType}
+            ¥{data.BetAmount} on {BetType}
           </Box>
           <Box ml={1} mr={1}>
             <Button
               fluid
-              content="Bet 10 cr"
+              content="Bet ¥10"
               onClick={() =>
                 act('ChangeBetAmount', {
                   amount: 10,
@@ -217,7 +217,7 @@ export const RouletteBetTable = (props) => {
             />
             <Button
               fluid
-              content="Bet 50 cr"
+              content="Bet ¥50"
               onClick={() =>
                 act('ChangeBetAmount', {
                   amount: 50,
@@ -226,7 +226,7 @@ export const RouletteBetTable = (props) => {
             />
             <Button
               fluid
-              content="Bet 100 cr"
+              content="Bet ¥100"
               onClick={() =>
                 act('ChangeBetAmount', {
                   amount: 100,
@@ -235,7 +235,7 @@ export const RouletteBetTable = (props) => {
             />
             <Button
               fluid
-              content="Bet 500 cr"
+              content="Bet ¥500"
               onClick={() =>
                 act('ChangeBetAmount', {
                   amount: 500,
@@ -282,7 +282,7 @@ export const RouletteBetTable = (props) => {
             House Balance:
           </Box>
           <Box inline>
-            {data.HouseBalance ? data.HouseBalance + ' cr' : 'None'}
+            {data.HouseBalance ? '¥' + data.HouseBalance : 'None'}
           </Box>
         </Table.Cell>
         <Table.Cell className="Roulette__lowertable--cell">

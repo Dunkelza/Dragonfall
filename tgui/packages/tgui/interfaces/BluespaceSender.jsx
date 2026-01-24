@@ -83,9 +83,7 @@ export const BluespaceSender = (props) => {
             </>
           }
         >
-          <Box>
-            {'The vendors have made ' + data.credits + ' credits so far.'}
-          </Box>
+          <Box>{'The vendors have made ¥' + data.credits + ' so far.'}</Box>
           <Divider />
           <LabeledList>
             {bluespace_network_gases.map((gas) => (

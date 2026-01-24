@@ -87,11 +87,11 @@
 
 	switch(action)
 		if("siphon")
-			say("Siphon of station credits has begun!")
+			say("Siphon of station nuyen has begun!")
 			siphoning = TRUE
 			. = TRUE
 		if("halt")
-			say("Station credit withdrawal halted.")
+			say("Station nuyen withdrawal halted.")
 			end_syphon()
 			. = TRUE
 

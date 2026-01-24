@@ -119,7 +119,7 @@ export const CheckboxInputInverse = (
 export const createDropdownInput = <T extends string | number = string>(
   // Map of value to display texts
   choices: Record<T, ReactNode>,
-  dropdownProps?: Record<T, unknown>,
+  dropdownProps?: Record<string, unknown>,
 ): FeatureValue<T> => {
   return (props: FeatureValueProps<T>) => {
     return (
@@ -189,18 +189,24 @@ export const FeatureDropdownInput = (
     return null;
   }
 
+  const choices = Array.isArray(serverData.choices) ? serverData.choices : [];
+  if (choices.length === 0) {
+    return (
+      <Box color="bad">
+        Preference metadata is missing (preferences.json is incomplete).
+      </Box>
+    );
+  }
+
   const displayNames =
     serverData.display_names ||
     Object.fromEntries(
-      serverData.choices.map((choice) => [
-        choice,
-        capitalizeFirstLetter(choice),
-      ]),
+      choices.map((choice) => [choice, capitalizeFirstLetter(choice)]),
     );
 
   return (
     <StandardizedDropdown
-      choices={sortStrings(serverData.choices)}
+      choices={sortStrings(choices)}
       disabled={props.disabled}
       displayNames={displayNames}
       onSetValue={props.handleSetValue}
@@ -229,15 +235,21 @@ export const FeatureIconnedDropdownInput = (
     return null;
   }
 
+  const choices = Array.isArray(serverData.choices) ? serverData.choices : [];
+  if (choices.length === 0) {
+    return (
+      <Box color="bad">
+        Preference metadata is missing (preferences.json is incomplete).
+      </Box>
+    );
+  }
+
   const icons = serverData.icons;
 
   const textNames =
     serverData.display_names ||
     Object.fromEntries(
-      serverData.choices.map((choice) => [
-        choice,
-        capitalizeFirstLetter(choice),
-      ]),
+      choices.map((choice) => [choice, capitalizeFirstLetter(choice)]),
     );
 
   const displayNames = Object.fromEntries(
@@ -268,7 +280,7 @@ export const FeatureIconnedDropdownInput = (
 
   return (
     <StandardizedDropdown
-      choices={sortStrings(serverData.choices)}
+      choices={sortStrings(choices)}
       displayNames={displayNames}
       onSetValue={props.handleSetValue}
       value={props.value.value}

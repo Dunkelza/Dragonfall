@@ -62,6 +62,64 @@ export const backendReducer = (state = initialState, action) => {
       ...payload.static_data,
       ...payload.data,
     };
+
+    // PreferencesMenu can sometimes deliver partial character_preferences blobs
+    // during initialization or feature-gated flows. Ensure required nested
+    // objects exist so UI components don't crash on deep reads.
+    if (data && typeof data === 'object' && data.character_preferences) {
+      const characterPreferences = data.character_preferences;
+      if (typeof characterPreferences === 'object') {
+        characterPreferences.clothing =
+          characterPreferences.clothing &&
+          typeof characterPreferences.clothing === 'object'
+            ? characterPreferences.clothing
+            : {};
+        characterPreferences.features =
+          characterPreferences.features &&
+          typeof characterPreferences.features === 'object'
+            ? characterPreferences.features
+            : {};
+        characterPreferences.secondary_features =
+          characterPreferences.secondary_features &&
+          typeof characterPreferences.secondary_features === 'object'
+            ? characterPreferences.secondary_features
+            : {};
+        characterPreferences.supplemental_features =
+          characterPreferences.supplemental_features &&
+          typeof characterPreferences.supplemental_features === 'object'
+            ? characterPreferences.supplemental_features
+            : {};
+        characterPreferences.randomization =
+          characterPreferences.randomization &&
+          typeof characterPreferences.randomization === 'object'
+            ? characterPreferences.randomization
+            : {};
+        characterPreferences.non_contextual =
+          characterPreferences.non_contextual &&
+          typeof characterPreferences.non_contextual === 'object'
+            ? characterPreferences.non_contextual
+            : {};
+
+        characterPreferences.misc =
+          characterPreferences.misc &&
+          typeof characterPreferences.misc === 'object'
+            ? characterPreferences.misc
+            : {};
+
+        // Minimal safe defaults.
+        characterPreferences.misc.species =
+          characterPreferences.misc.species || 'human';
+        characterPreferences.misc.gender =
+          characterPreferences.misc.gender || 'male';
+        characterPreferences.misc.joblessrole =
+          characterPreferences.misc.joblessrole || 1;
+
+        // RandomSetting.Disabled is 2; keep it stable even if enum changes elsewhere.
+        if (characterPreferences.non_contextual.random_body === undefined) {
+          characterPreferences.non_contextual.random_body = 2;
+        }
+      }
+    }
     // Merge shared states
     const shared = { ...state.shared };
     if (payload.shared) {

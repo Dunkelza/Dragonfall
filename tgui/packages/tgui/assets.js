@@ -7,7 +7,39 @@
 const EXCLUDED_PATTERNS = [/v4shim/i];
 const loadedMappings = {};
 
-export const resolveAsset = (name) => loadedMappings[name] || name;
+// Cache busting for BYOND's embedded browser.
+// The embedded browser can aggressively cache resources between reconnects,
+// which makes it easy to end up running a stale tgui bundle after rebuilds.
+// We apply a per-session cache-buster to JS/CSS/JSON assets.
+const CACHE_BUST = Date.now().toString(36);
+
+const appendCacheBust = (url) => {
+  if (!url || typeof url !== 'string') {
+    return url;
+  }
+  if (url.startsWith('data:') || url.startsWith('blob:')) {
+    return url;
+  }
+  // Avoid double-appending if upstream already included a cache-buster.
+  if (url.includes('v=')) {
+    return url;
+  }
+  const joiner = url.includes('?') ? '&' : '?';
+  return `${url}${joiner}v=${CACHE_BUST}`;
+};
+
+export const resolveAsset = (name) => {
+  const url = loadedMappings[name] || name;
+  const lowerName = String(name || '').toLowerCase();
+  if (
+    lowerName.endsWith('.js') ||
+    lowerName.endsWith('.css') ||
+    lowerName.endsWith('.json')
+  ) {
+    return appendCacheBust(url);
+  }
+  return url;
+};
 
 export const assetMiddleware = (store) => (next) => (action) => {
   const { type, payload } = action;
@@ -25,10 +57,10 @@ export const assetMiddleware = (store) => (next) => (action) => {
       const ext = name.split('.').pop();
       loadedMappings[name] = url;
       if (ext === 'css') {
-        Byond.loadCss(url);
+        Byond.loadCss(resolveAsset(name));
       }
       if (ext === 'js') {
-        Byond.loadJs(url);
+        Byond.loadJs(resolveAsset(name));
       }
     }
     return;

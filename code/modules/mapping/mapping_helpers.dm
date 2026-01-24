@@ -915,7 +915,8 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	var/has_become_cable = FALSE
 
 /obj/structure/cable/smart_cable/Initialize(mapload)
-	spawn_cable()
+	if (!spawn_cable())
+		return INITIALIZE_HINT_QDEL
 	return ..()
 
 /obj/structure/cable/smart_cable/proc/spawn_cable()
@@ -948,8 +949,7 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 			dir_count++
 			passed_directions |= cardinal
 	if(dir_count == 0)
-		WARNING("Smart cable mapping helper failed to spawn, connected to 0 directions, at [loc.x],[loc.y],[loc.z]")
-		return
+		return FALSE
 	switch(dir_count)
 		if(1)
 			//We spawn one cable with an open knot
@@ -966,6 +966,7 @@ INITIALIZE_IMMEDIATE(/obj/effect/mapping_helpers/no_lava)
 	// if we want a knot, and we connect with more than 1 direction, spawn an extra open knotted cable connecting with any of the directions
 	if(dir_count > 1 && knot_desirable())
 		spawn_knotty_connecting_to_directions(passed_directions)
+	return TRUE
 
 /obj/structure/cable/smart_cable/proc/knot_desirable()
 	var/turf/my_turf = loc

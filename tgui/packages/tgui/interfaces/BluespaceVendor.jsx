@@ -112,7 +112,7 @@ export const BluespaceVendor = (props) => {
                         {getGasLabel(gas.name) +
                           ' is ' +
                           gas.price +
-                          ' credits per mole'}
+                          ' ¥ per mole'}
                       </Stack.Item>
                       <Stack.Item grow mt={1}>
                         <ProgressBar

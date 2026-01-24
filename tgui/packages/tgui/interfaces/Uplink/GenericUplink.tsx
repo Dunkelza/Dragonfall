@@ -21,7 +21,7 @@ type GenericUplinkProps = {
 
 export const GenericUplink = (props: GenericUplinkProps) => {
   const {
-    currency = 'cr',
+    currency = '\u00a5',
     categories,
 
     handleBuy,

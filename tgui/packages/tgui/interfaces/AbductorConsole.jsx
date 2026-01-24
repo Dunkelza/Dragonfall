@@ -57,7 +57,7 @@ const Abductsoft = (props) => {
         id: item.name,
         name: item.name,
         category: category.name,
-        cost: `${item.cost} Credits`,
+        cost: `¥${item.cost}`,
         desc: item.desc,
         disabled: credits < item.cost,
       });
@@ -74,7 +74,7 @@ const Abductsoft = (props) => {
         </LabeledList>
       </Section>
       <GenericUplink
-        currency={`${credits} Credits`}
+        currency={`¥${credits}`}
         categories={categoriesList}
         items={items}
         handleBuy={(item) => act('buy', { name: item.name })}

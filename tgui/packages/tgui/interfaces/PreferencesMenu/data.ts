@@ -169,6 +169,7 @@ export type PreferencesMenuData = {
   >;
   // PARIAH EDIT ADDITION
   keybindings: Record<string, string[]>;
+  name_locked?: BooleanLike;
   name_to_use: string;
 
   overflow_role: string;

@@ -125,7 +125,7 @@
 						else
 							var/diff = p.fine - p.paid
 							current.pay_citation(text2num(href_list["cdataid"]), pay)
-							to_chat(M, span_notice("You have paid [pay] credit\s towards your fine."))
+							to_chat(M, span_notice("You have paid \u00a5[pay] towards your fine."))
 							if (pay == diff || pay > diff || pay >= diff)
 								investigate_log("Citation Paid off: <strong>[p.crimeName]</strong> Fine: [p.fine] | Paid off by [key_name(usr)]", INVESTIGATE_RECORDS)
 								to_chat(M, span_notice("The fine has been paid in full."))

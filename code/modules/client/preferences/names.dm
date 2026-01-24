@@ -19,6 +19,14 @@
 	return
 
 /datum/preference/name/deserialize(input, datum/preferences/preferences)
+	// Lock name edits during active rounds (players in lobby can still edit).
+	// Admins and game effects bypass this by modifying the mob directly.
+	if (!isnull(preferences) && !isnull(SSticker) && SSticker.IsRoundInProgress())
+		// If the user is a new_player (lobby), allow edits for latejoin setup.
+		var/mob/dead/new_player/np = preferences.parent?.mob
+		if (!istype(np))
+			// Already spawned in-round; reject preference edit, keep current value.
+			return preferences.read_preference(type)
 	return reject_bad_name("[input]", allow_numbers)
 
 /datum/preference/name/serialize(input)

@@ -216,8 +216,8 @@
 /datum/map_template/shuttle/emergency/luxury
 	suffix = "luxury"
 	name = "Luxury Shuttle"
-	description = "A luxurious golden shuttle complete with an indoor swimming pool. Each crewmember wishing to board must bring 500 credits, payable in cash and mineral coin."
-	extra_desc = "This shuttle costs 500 credits to board."
+	description = "A luxurious golden shuttle complete with an indoor swimming pool. Each crewmember wishing to board must bring \u00a5500, payable in cash and mineral coin."
+	extra_desc = "This shuttle costs \u00a5500 to board."
 	admin_notes = "Due to the limited space for non paying crew, this shuttle may cause a riot."
 	credit_cost = CARGO_CRATE_VALUE * 20
 

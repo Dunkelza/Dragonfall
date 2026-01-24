@@ -296,10 +296,38 @@
 	var/datum/rpg_stat/S = stats[stat]
 	return S.get(owner, out_sources)
 
+/// Return the compile-time base rating for a stat (before modifiers).
+/datum/stats/proc/get_base_stat_value(datum/rpg_stat/stat_path)
+	var/datum/rpg_stat/S = stats[stat_path]
+	if(!S)
+		return STATS_MINIMUM_VALUE
+	return initial(S.value)
+
 /// Return a given skill value modifier.
 /datum/stats/proc/get_skill_modifier(skill, list/out_sources)
 	var/datum/rpg_skill/S = skills[skill]
 	return S.get(owner, out_sources)
+
+/// Return the compile-time base rating for a skill (before modifiers).
+/datum/stats/proc/get_base_skill_value(datum/rpg_skill/skill_path)
+	var/datum/rpg_skill/S = skills[skill_path]
+	if(!S)
+		return STATS_MINIMUM_VALUE
+	return initial(S.value)
+
+/// Return a list of all instantiated skill typepaths.
+/datum/stats/proc/get_all_skill_types()
+	var/list/output = list()
+	for (var/skill_path in skills)
+		output += skill_path
+	return output
+
+/// Return a list of all instantiated stat typepaths.
+/datum/stats/proc/get_all_stat_types()
+	var/list/output = list()
+	for (var/stat_path in stats)
+		output += stat_path
+	return output
 
 /// Add a stat modifier from a given source
 /datum/stats/proc/set_stat_modifier(amount, datum/rpg_stat/stat_path, source)

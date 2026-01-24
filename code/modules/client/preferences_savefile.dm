@@ -297,6 +297,10 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	//Write prefs
 	save_data["alt_job_titles"] = alt_job_titles
 
+	// NOTE: Character preferences live in a sub-tree ("character[n]").
+	// Mutating that list does not trigger json_savefile.auto_save, so ensure we flush.
+	savefile.save()
+
 	return TRUE
 
 /proc/sanitize_keybindings(value)

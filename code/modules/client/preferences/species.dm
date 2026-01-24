@@ -1,4 +1,5 @@
 /// Species preference
+
 /datum/preference/choiced/species
 	explanation = "Species"
 	savefile_identifier = PREFERENCE_CHARACTER
@@ -6,6 +7,8 @@
 	priority = PREFERENCE_PRIORITY_SPECIES
 
 /datum/preference/choiced/species/deserialize(input, datum/preferences/preferences)
+	if (shadowrun_should_lock_nonappearance_prefs(preferences))
+		return ispath(preferences?.value_cache?[type], /datum/species) ? preferences.value_cache[type] : /datum/species/human
 	return GLOB.species_list[sanitize_inlist(input, get_choices_serialized(), SPECIES_HUMAN)]
 
 /datum/preference/choiced/species/serialize(input)
@@ -16,15 +19,19 @@
 	return /datum/species/human
 
 /datum/preference/choiced/species/create_random_value(datum/preferences/preferences)
-	return pick(get_choices())
+	// For now, allow testing with Human and Elf.
+	return pick(/datum/species/human, /datum/species/elf)
 
 /datum/preference/choiced/species/init_possible_values()
 	var/list/values = list()
-
-	for (var/species_id in get_selectable_species())
-		values += GLOB.species_list[species_id]
-
+	values += /datum/species/human
+	values += /datum/species/elf
 	return values
+
+/datum/preference/choiced/species/compile_constant_data()
+	// The TGUI PreferencesMenu expects a rich `species` dictionary from middleware.
+	// Avoid overwriting it with the generic choiced preference constant data.
+	return null
 
 /datum/preference/choiced/species/get_button(datum/preferences/prefs)
 	. = ..()

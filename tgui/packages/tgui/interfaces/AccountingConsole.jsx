@@ -57,8 +57,8 @@ export const AccountingConsole = (props) => {
           <Section>
             {AuditLog.map((purchase) => (
               <BlockQuote key={purchase.index} p={1}>
-                <b>{purchase.account}</b> spent <b>{purchase.cost}</b> cr at{' '}
-                <i>{purchase.vendor}.</i>
+                <b>{purchase.account}</b> spent{' '}
+                <b>{`\u00a5${purchase.cost}`}</b> at <i>{purchase.vendor}.</i>
               </BlockQuote>
             ))}
           </Section>

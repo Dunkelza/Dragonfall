@@ -111,9 +111,9 @@
 #define DEPARTMENT_BITFLAG_ASSISTANT (1<<8)
 #define DEPARTMENT_ASSISTANT "Civilian"
 #define DEPARTMENT_BITFLAG_CAPTAIN (1<<9)
-#define DEPARTMENT_CAPTAIN "Captain"
+#define DEPARTMENT_CAPTAIN "Arcology Command"
 #define DEPARTMENT_BITFLAG_COMPANY_LEADER (1<<10)
-#define DEPARTMENT_COMPANY_LEADER "Company Leader"
+#define DEPARTMENT_COMPANY_LEADER "Executive Board"
 
 /* Job datum job_flags */
 /// Whether the mob is announced on arrival.

@@ -158,10 +158,15 @@
  * Clears the map of registered screen objects.
  */
 /client/proc/clear_map(map_name)
-	if(!map_name || !screen_maps?[map_name])
+	if(!map_name)
+		return FALSE
+	if(!islist(screen_maps))
+		return FALSE
+	var/list/screen_map = screen_maps[map_name]
+	if(!islist(screen_map) || !length(screen_map))
 		return FALSE
 
-	for(var/atom/movable/screen/screen_obj in screen_maps[map_name])
+	for(var/atom/movable/screen/screen_obj in screen_map)
 		screen_maps[map_name] -= screen_obj
 		screen -= screen_obj
 		if(screen_obj.del_on_map_removal)

@@ -227,7 +227,8 @@ const SpeciesPerks = (props: { perks: Species['perks'] }) => {
 };
 
 const SpeciesPageInner = (props: {
-  handleClose: () => void;
+  embedded?: boolean;
+  handleClose?: () => void;
   species: ServerData['species'];
 }) => {
   const { act, data } = useBackend<PreferencesMenuData>();
@@ -239,38 +240,64 @@ const SpeciesPageInner = (props: {
     },
   );
 
+  if (species.length === 0) {
+    return (
+      <Stack vertical fill>
+        {!!props.handleClose && !props.embedded && (
+          <Stack.Item>
+            <Button
+              icon="arrow-left"
+              onClick={props.handleClose}
+              content="Go Back"
+            />
+          </Stack.Item>
+        )}
+        <Stack.Item>
+          <Box color="grey">No selectable metatypes available.</Box>
+        </Stack.Item>
+      </Stack>
+    );
+  }
+
   // Humans are always the top of the list
   const humanIndex = species.findIndex(([species]) => species === 'human');
-  const swapWith = species[0];
-  species[0] = species[humanIndex];
-  species[humanIndex] = swapWith;
+  if (humanIndex > 0) {
+    const swapWith = species[0];
+    species[0] = species[humanIndex];
+    species[humanIndex] = swapWith;
+  }
 
-  const currentSpecies = species.filter(([speciesKey]) => {
-    return speciesKey === data.character_preferences.misc.species;
-  })[0][1];
+  const selectedSpeciesKey = data.character_preferences?.misc?.species;
+  const currentSpecies =
+    species.find(([speciesKey]) => speciesKey === selectedSpeciesKey)?.[1] ||
+    species[0][1];
 
   return (
     <Stack vertical fill>
-      <Stack.Item>
-        <Button
-          icon="arrow-left"
-          onClick={props.handleClose}
-          content="Go Back"
-        />
-      </Stack.Item>
+      {!!props.handleClose && !props.embedded && (
+        <Stack.Item>
+          <Button
+            icon="arrow-left"
+            onClick={props.handleClose}
+            content="Go Back"
+          />
+        </Stack.Item>
+      )}
 
       <Stack.Item grow>
         <Stack fill>
           <Stack.Item>
-            <Box height="calc(100vh - 170px)" overflowY="auto" pr={3}>
+            <Box
+              height={props.embedded ? '420px' : 'calc(100vh - 170px)'}
+              overflowY="auto"
+              pr={3}
+            >
               {species.map(([speciesKey, species]) => {
                 return (
                   <Button
                     key={speciesKey}
                     onClick={() => setSpecies(speciesKey)}
-                    selected={
-                      data.character_preferences.misc.species === speciesKey
-                    }
+                    selected={selectedSpeciesKey === speciesKey}
                     tooltip={species.name}
                     style={{
                       display: 'block',
@@ -292,7 +319,7 @@ const SpeciesPageInner = (props: {
             <Box>
               <Box>
                 <Stack fill>
-                  <Stack.Item width="70%">
+                  <Stack.Item width={props.embedded ? '100%' : '70%'}>
                     <Section
                       title={currentSpecies.name}
                       buttons={
@@ -313,12 +340,14 @@ const SpeciesPageInner = (props: {
                     </Section>
                   </Stack.Item>
 
-                  <Stack.Item width="30%">
-                    <CharacterPreview
-                      id={data.character_preview_view}
-                      height="100%"
-                    />
-                  </Stack.Item>
+                  {!props.embedded && (
+                    <Stack.Item width="30%">
+                      <CharacterPreview
+                        id={data.character_preview_view}
+                        height="100%"
+                      />
+                    </Stack.Item>
+                  )}
                 </Stack>
               </Box>
 
@@ -359,7 +388,26 @@ export const SpeciesPage = (props: { closeSpecies: () => void }) => {
             />
           );
         } else {
-          return <Box>Loading species...</Box>;
+          return <Box>Loading metatypes...</Box>;
+        }
+      }}
+    />
+  );
+};
+
+export const EmbeddedSpeciesPage = (props: { embedded?: boolean }) => {
+  return (
+    <ServerPreferencesFetcher
+      render={(serverData) => {
+        if (serverData) {
+          return (
+            <SpeciesPageInner
+              embedded={props.embedded ?? true}
+              species={serverData.species}
+            />
+          );
+        } else {
+          return <Box>Loading metatypes...</Box>;
         }
       }}
     />

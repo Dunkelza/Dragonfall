@@ -60,7 +60,7 @@ export const BountyBoardContent = (props) => {
                     {request.owner}
                   </Stack.Item>
                   <Stack.Item width="100px">
-                    {formatMoney(request.value) + ' cr'}
+                    {'\u00a5' + formatMoney(request.value)}
                   </Stack.Item>
                   <Stack.Item>
                     <Button
@@ -147,7 +147,7 @@ export const BountyBoardContent = (props) => {
               <Box>
                 <NumberInput
                   animated
-                  unit="cr"
+                  unit="\u00a5"
                   minValue={1}
                   maxValue={1000}
                   value={bountyValue}

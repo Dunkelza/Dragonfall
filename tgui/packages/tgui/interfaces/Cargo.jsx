@@ -107,7 +107,7 @@ const CargoStatus = (props) => {
             value={points}
             format={(value) => formatMoney(value)}
           />
-          {' credits'}
+          {' ¥'}
         </Box>
       }
     >
@@ -171,7 +171,7 @@ export const CargoCatalog = (props) => {
   const { express } = props;
   const { act, data } = useBackend();
 
-  const { self_paid, app_cost, uiCurrency = ' cr' } = data;
+  const { self_paid, app_cost, uiCurrency = ' \u00a5' } = data;
 
   const supplies = Object.values(data.supplies);
 
@@ -346,7 +346,7 @@ const CargoRequests = (props) => {
                 <i>{request.reason}</i>
               </Table.Cell>
               <Table.Cell collapsing textAlign="right">
-                {formatMoney(request.cost)} cr
+                {'¥' + formatMoney(request.cost)}
               </Table.Cell>
               {(!requestonly || can_send) && can_approve_requests && (
                 <Table.Cell collapsing>
@@ -392,7 +392,7 @@ const CargoCartButtons = (props) => {
         {cart.length === 0 && 'Cart is empty'}
         {cart.length === 1 && '1 item'}
         {cart.length >= 2 && cart.length + ' items'}{' '}
-        {total > 0 && `(${formatMoney(total)} cr)`}
+        {total > 0 && `(¥${formatMoney(total)})`}
       </Box>
       <Button
         icon="times"
@@ -424,12 +424,12 @@ const CargoCart = (props) => {
               </Table.Cell>
               {(entry.dep_order && (
                 <Table.Cell collapsing textAlign="right">
-                  {formatMoney(entry.cost)} cr earned on delivery
+                  ¥{formatMoney(entry.cost)} earned on delivery
                 </Table.Cell>
               )) || (
                 <>
                   <Table.Cell collapsing textAlign="right">
-                    {formatMoney(entry.cost)} cr
+                    {'¥' + formatMoney(entry.cost)}
                   </Table.Cell>
                   <Table.Cell collapsing>
                     {can_send && (

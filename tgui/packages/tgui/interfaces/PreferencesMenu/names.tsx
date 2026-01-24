@@ -208,7 +208,7 @@ export const NameInput = (props: {
 
           <Box
             style={{
-              borderBottom: '2px dotted rgba(255, 255, 255, 0.8)',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.25)',
               right: '50%',
               transform: 'translateX(50%)',
               position: 'absolute',

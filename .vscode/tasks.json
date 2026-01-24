@@ -34,7 +34,10 @@
 		},
 		{
 			"type": "shell",
-			"command": "bin/tgui-build",
+			"command": "tools/build/build tgui",
+			"linux": {
+				"command": "tools/build/build tgui"
+			},
 			"windows": {
 				"command": ".\\bin\\tgui-build.cmd"
 			},
@@ -44,7 +47,10 @@
 		},
 		{
 			"type": "shell",
-			"command": "bin/tgui-dev",
+			"command": "tools/build/build tgui-dev",
+			"linux": {
+				"command": "tools/build/build tgui-dev"
+			},
 			"windows": {
 				"command": ".\\bin\\tgui-dev.cmd"
 			},
@@ -54,7 +60,10 @@
 		},
 		{
 			"type": "shell",
-			"command": "bin/tgui-bench",
+			"command": "cd tgui && yarn tgui:bench",
+			"linux": {
+				"command": "cd tgui && yarn tgui:bench"
+			},
 			"windows": {
 				"command": ".\\bin\\tgui-bench.cmd"
 			},
@@ -64,13 +73,24 @@
 		},
 		{
 			"type": "shell",
-			"command": "bin/tgui-sonar",
+			"command": "tools/build/build tgui-sonar",
+			"linux": {
+				"command": "tools/build/build tgui-sonar"
+			},
 			"windows": {
 				"command": ".\\bin\\tgui-sonar.cmd"
 			},
 			"problemMatcher": ["$tsc", "$eslint-stylish"],
 			"group": "build",
 			"label": "tgui: sonar"
+		},
+		{
+			"label": "Build All (Juke wrapper)",
+			"type": "shell",
+			"command": "tools/build/build build",
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
 		}
 	]
 }

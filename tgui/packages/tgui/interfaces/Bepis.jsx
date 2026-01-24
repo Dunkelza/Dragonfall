@@ -1,12 +1,5 @@
 import { useBackend } from '../backend';
-import {
-  Box,
-  Button,
-  Grid,
-  LabeledList,
-  NumberInput,
-  Section,
-} from '../components';
+import { Box, Button, Grid, LabeledList, Section } from '../components';
 import { Window } from '../layouts';
 
 export const Bepis = (props) => {
@@ -50,8 +43,8 @@ export const Bepis = (props) => {
             <Grid.Column size={1.5}>
               <Section title="Stored Data and Statistics">
                 <LabeledList>
-                  <LabeledList.Item label="Available Credits">
-                    {data.stored_cash}
+                  <LabeledList.Item label="Available Nuyen">
+                    ¥{data.stored_cash}
                   </LabeledList.Item>
                   <LabeledList.Item label="Investment Variability">
                     {data.accuracy_percentage}%
@@ -65,7 +58,7 @@ export const Bepis = (props) => {
                   <LabeledList.Item label="Deposit Amount">
                     <NumberInput
                       value={amount}
-                      unit="Credits"
+                      unit="¥"
                       minValue={100}
                       maxValue={30000}
                       step={100}
@@ -82,7 +75,7 @@ export const Bepis = (props) => {
               <Box>
                 <Button
                   icon="donate"
-                  content="Deposit Credits and Start"
+                  content="Deposit ¥ and Start"
                   disabled={data.manual_power === 1 || data.silicon_check === 1}
                   onClick={() => act('begin_experiment')}
                 />

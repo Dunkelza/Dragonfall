@@ -128,6 +128,7 @@
 #define SPECIES_ETHEREAL "ethereal"
 #define SPECIES_FELINE "felinid"
 #define SPECIES_FLYPERSON "fly"
+#define SPECIES_ELF "elf"
 #define SPECIES_HUMAN "human"
 #define SPECIES_IPC "ipc"
 #define SPECIES_JELLYPERSON "jelly"

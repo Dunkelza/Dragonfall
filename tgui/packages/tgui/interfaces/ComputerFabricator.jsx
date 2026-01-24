@@ -83,11 +83,7 @@ const CfStep2 = (props) => {
     <Section
       title="Step 2: Customize your device"
       minHeight="282px"
-      buttons={
-        <Box bold color="good">
-          {data.totalprice} cr
-        </Box>
-      }
+      buttons={<Box bold color="good">{`\u00a5${data.totalprice}`}</Box>}
     >
       <Table>
         <Table.Row>
@@ -369,7 +365,7 @@ const CfStep3 = (props) => {
       <Box bold mt={2} textAlign="center" fontSize="16px">
         <Box inline>Please insert the required</Box>{' '}
         <Box inline color="good">
-          {data.totalprice} cr
+          ¥{data.totalprice}
         </Box>
       </Box>
       <Box bold mt={1} textAlign="center" fontSize="18px">
@@ -382,7 +378,7 @@ const CfStep3 = (props) => {
         fontSize="18px"
         color={data.credits >= data.totalprice ? 'good' : 'bad'}
       >
-        {data.credits} cr
+        ¥{data.credits}
       </Box>
       <Button
         fluid

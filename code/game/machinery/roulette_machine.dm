@@ -239,7 +239,7 @@ TYPEINFO_DEF(/obj/machinery/roulette)
 	var/account_balance = my_card?.registered_account?.account_balance
 	potential_payout = (account_balance >= potential_payout) ? potential_payout : account_balance
 
-	say("You have won [potential_payout] credits! Congratulations!")
+	say("You have won \u00a5[potential_payout]! Congratulations!")
 	playsound(src, 'sound/machines/synth_yes.ogg', 50)
 
 	dispense_prize(potential_payout)

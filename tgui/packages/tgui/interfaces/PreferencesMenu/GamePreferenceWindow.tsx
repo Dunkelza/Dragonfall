@@ -32,8 +32,13 @@ export const GamePreferenceWindow = (props: {
   }
 
   return (
-    <Window title="Game Preferences" width={920} height={770}>
-      <Window.Content>
+    <Window
+      title="System Settings"
+      theme="ntos_darkmode"
+      width={920}
+      height={770}
+    >
+      <Window.Content className="PreferencesMenu__ShadowrunSheet">
         <Stack vertical fill>
           <Stack.Item>
             <Stack fill>

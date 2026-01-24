@@ -175,8 +175,9 @@ GLOBAL_REAL_VAR(default_apc_armor) = list(BLUNT = 20, PUNCTURE = 20, SLASH = 0, 
 		name = "\improper [get_area_name(area, TRUE)] APC"
 
 	if(area)
-		if(area.apc)
+		if(area.apc && area.apc != src)
 			log_mapping("Duplicate APC created at [AREACOORD(src)] (Original APC at[COORD(area.apc)])")
+			return INITIALIZE_HINT_QDEL
 		area.apc = src
 
 	update_appearance()

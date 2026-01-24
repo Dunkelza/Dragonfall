@@ -129,6 +129,14 @@
 	return JOB_AVAILABLE
 
 /mob/dead/new_player/proc/AttemptLateSpawn(rank)
+	var/datum/preferences/preferences = client?.prefs
+	if(!shadowrun_chargen_is_saved(preferences))
+		var/mob/message_target = usr
+		if(!message_target)
+			message_target = src
+		to_chat(message_target, span_warning("You must Save your Shadowrun character sheet before joining. Open Character Setup → Core → Save Sheet."))
+		return FALSE
+
 	var/error = IsJobUnavailable(rank)
 	if(error != JOB_AVAILABLE)
 		tgui_alert(usr, get_job_unavailable_error_message(error, rank))

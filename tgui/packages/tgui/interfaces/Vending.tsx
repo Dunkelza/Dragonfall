@@ -163,7 +163,7 @@ const ProductDisplay = (_) => {
         !!onstation &&
         user && (
           <Box fontSize="16px" color="green">
-            {(user && user.cash) || 0} cr <Icon name="coins" color="gold" />
+            ¥{(user && user.cash) || 0} <Icon name="coins" color="gold" />
           </Box>
         )
       }
@@ -292,12 +292,12 @@ const ProductButton = (props) => {
   const { act, data } = useBackend<VendingData>();
   const { access } = data;
   const { custom, discount, disabled, free, product, redPrice } = props;
-  const customPrice = access ? 'FREE' : product.price + ' cr';
-  let standardPrice = product.price + ' cr';
+  const customPrice = access ? 'FREE' : `¥${product.price}`;
+  let standardPrice = `¥${product.price}`;
   if (free) {
     standardPrice = 'FREE';
   } else if (discount) {
-    standardPrice = redPrice + ' cr';
+    standardPrice = `¥${redPrice}`;
   }
   return custom ? (
     <Button

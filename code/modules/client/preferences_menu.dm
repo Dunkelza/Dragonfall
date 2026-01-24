@@ -7,7 +7,10 @@
 	if (!preferences)
 		return
 
-	preferences.html_show(usr)
+	// Open the TGUI character preferences window (Window.Character = 0).
+	preferences.current_window = 0
+	preferences.update_static_data(usr)
+	preferences.ui_interact(usr)
 
 /datum/verbs/menu/Preferences/verb/open_game_preferences()
 	set category = "OOC"

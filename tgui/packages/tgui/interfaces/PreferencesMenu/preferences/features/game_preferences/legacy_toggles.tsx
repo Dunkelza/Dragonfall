@@ -63,7 +63,8 @@ export const deadmin_position_silicon: FeatureToggle = {
 export const disable_arrivalrattle: FeatureToggle = {
   name: 'Notify for new arrivals',
   category: 'GHOST',
-  description: 'When enabled, you will be notified as a ghost for new crew.',
+  description:
+    'When enabled, you will be notified as a ghost for new arrivals.',
   component: CheckboxInputInverse,
 };
 

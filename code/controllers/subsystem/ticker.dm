@@ -369,6 +369,11 @@ SUBSYSTEM_DEF(ticker)
 				player.make_me_an_observer(TRUE)
 
 			if(PLAYER_READY_TO_PLAY)
+				if(!shadowrun_chargen_is_saved(player.client?.prefs))
+					to_chat(player, span_warning("You must Save your Shadowrun character sheet before joining. Open Character Setup → Core → Save Sheet."))
+					player.ready = PLAYER_NOT_READY
+					player.npp?.update()
+					continue
 				GLOB.joined_player_list += player.ckey
 				var/atom/spawn_loc = player.mind.assigned_role.get_roundstart_spawn_point()
 				player.create_character(spawn_loc)

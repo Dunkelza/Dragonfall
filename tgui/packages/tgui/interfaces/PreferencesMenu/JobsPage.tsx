@@ -193,9 +193,16 @@ const JobRow = (props: { className?: string; job: Job; name: string }) => {
   const daysLeft = data.job_days_left ? data.job_days_left[name] : 0;
 
   // PARIAH EDIT
-  const alt_title_selected = data.job_alt_titles[name]
-    ? data.job_alt_titles[name]
-    : name;
+  const altTitles = Array.isArray(job.alt_titles)
+    ? job.alt_titles.filter((t) => typeof t === 'string' && t.length)
+    : null;
+
+  const alt_title_selected =
+    altTitles && altTitles.length
+      ? altTitles.includes(data.job_alt_titles[name])
+        ? data.job_alt_titles[name]
+        : altTitles[0]
+      : name;
   // PARIAH EDIT END
 
   let rightSide: ReactNode;
@@ -259,12 +266,12 @@ const JobRow = (props: { className?: string; job: Job; name: string }) => {
             {' '}
             {
               // PARIAH EDIT
-              !job.alt_titles ? (
+              !altTitles || altTitles.length === 0 ? (
                 name
               ) : (
                 <Dropdown
                   width="100%"
-                  options={job.alt_titles}
+                  options={altTitles}
                   displayText={alt_title_selected}
                   onSelected={(value) =>
                     act('set_job_title', { job: name, new_title: value })
@@ -295,6 +302,10 @@ const Department: FC<{ children?: ReactNode; department: string }> = (
     <ServerPreferencesFetcher
       render={(data) => {
         if (!data) {
+          return null;
+        }
+
+        if (!data.jobs) {
           return null;
         }
 
@@ -353,35 +364,34 @@ const Gap = (props: { amount: number }) => {
 
 const JoblessRoleDropdown = (props) => {
   const { act, data } = useBackend<PreferencesMenuData>();
-  const selected = data.character_preferences.misc.joblessrole;
+  const selected = data.character_preferences?.misc?.joblessrole;
 
   const options = [
     {
-      displayText: `Join as ${data.overflow_role} if unavailable`,
+      displayText: `Deploy as ${data.overflow_role} if unavailable`,
       value: JoblessRole.BeOverflow,
     },
     {
-      displayText: `Join as a random job if unavailable`,
+      displayText: `Deploy as random assignment if unavailable`,
       value: JoblessRole.BeRandomJob,
     },
     {
-      displayText: `Return to lobby if unavailable`,
+      displayText: `Return to decker terminal if unavailable`,
       value: JoblessRole.ReturnToLobby,
     },
   ];
+
+  const selectedOption =
+    options.find((option) => option.value === selected) || options[0];
 
   return (
     <Box position="absolute" right={0} width="30%">
       <Dropdown
         width="100%"
-        selected={selected}
+        selected={selectedOption.value}
         onSelected={createSetPreference(act, 'joblessrole')}
         options={options}
-        displayText={
-          <Box pr={1}>
-            {options.find((option) => option.value === selected)!.displayText}
-          </Box>
-        }
+        displayText={<Box pr={1}>{selectedOption.displayText}</Box>}
       />
     </Box>
   );
@@ -402,7 +412,7 @@ export const JobsPage = () => {
 
               <PriorityHeaders />
 
-              <Department department="Engineering">
+              <Department department="Renraku Facilities">
                 <Gap amount={6} />
               </Department>
 
@@ -414,21 +424,21 @@ export const JobsPage = () => {
                 <Gap amount={12} />
               </Department>
 
-              <Department department="Assistant" />
+              <Department department="Civilian" />
             </Stack.Item>
 
             <Stack.Item mr={1}>
               <PriorityHeaders />
 
-              <Department department="Captain">
+              <Department department="Arcology Command">
                 <Gap amount={6} />
               </Department>
 
-              <Department department="Service">
+              <Department department="Independent">
                 <Gap amount={6} />
               </Department>
 
-              <Department department="Cargo" />
+              <Department department="Shiawase Logistics" />
             </Stack.Item>
 
             <Stack.Item>
@@ -436,11 +446,11 @@ export const JobsPage = () => {
 
               <PriorityHeaders />
 
-              <Department department="Security">
+              <Department department="Lone Star">
                 <Gap amount={6} />
               </Department>
 
-              <Department department="Medical" />
+              <Department department="DocWagon" />
             </Stack.Item>
           </Stack>
         </Stack.Item>

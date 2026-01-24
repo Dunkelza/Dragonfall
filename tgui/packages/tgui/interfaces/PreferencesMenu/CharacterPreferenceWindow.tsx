@@ -5,26 +5,29 @@ import { Dropdown, Flex, Stack } from '../../components';
 import { Window } from '../../layouts';
 import { AntagsPage } from './AntagsPage';
 import { PreferencesMenuData } from './data';
-import { JobsPage } from './JobsPage';
-import { MainPage } from './MainPage';
 import { PageButton } from './PageButton';
-import { QuirksPage } from './QuirksPage';
-import { SpeciesPage } from './SpeciesPage';
+import { ShadowrunPage } from './ShadowrunPage';
 
 enum Page {
   Antags,
-  Main,
-  Jobs,
-  Species,
-  Quirks,
+  Shadowrun,
 }
 
 const CharacterProfiles = (props: {
   activeSlot: number;
   onClick: (index: number) => void;
-  profiles: (string | null)[];
+  profiles?: (string | null)[];
 }) => {
-  const { profiles, activeSlot, onClick } = props;
+  const profiles = props.profiles || [];
+  const activeSlot = Math.max(
+    0,
+    Math.min(props.activeSlot, profiles.length - 1),
+  );
+  const { onClick } = props;
+
+  if (profiles.length === 0) {
+    return null;
+  }
 
   return (
     <Flex justify="center">
@@ -48,7 +51,10 @@ const CharacterProfiles = (props: {
 export const CharacterPreferenceWindow = (props) => {
   const { act, data } = useBackend<PreferencesMenuData>();
 
-  const [currentPage, setCurrentPage] = useLocalState('currentPage', Page.Main);
+  const [currentPage, setCurrentPage] = useLocalState(
+    'currentPage',
+    Page.Shadowrun,
+  );
 
   let pageContents;
 
@@ -56,23 +62,8 @@ export const CharacterPreferenceWindow = (props) => {
     case Page.Antags:
       pageContents = <AntagsPage />;
       break;
-    case Page.Jobs:
-      pageContents = <JobsPage />;
-      break;
-    case Page.Main:
-      pageContents = (
-        <MainPage openSpecies={() => setCurrentPage(Page.Species)} />
-      );
-
-      break;
-    case Page.Species:
-      pageContents = (
-        <SpeciesPage closeSpecies={() => setCurrentPage(Page.Main)} />
-      );
-
-      break;
-    case Page.Quirks:
-      pageContents = <QuirksPage />;
+    case Page.Shadowrun:
+      pageContents = <ShadowrunPage />;
       break;
     default:
       exhaustiveCheck(currentPage);
@@ -80,12 +71,12 @@ export const CharacterPreferenceWindow = (props) => {
 
   return (
     <Window
-      title="Character Preferences"
-      theme="rounded_base"
+      title="Runner Dossier"
+      theme="ntos_darkmode"
       width={920}
       height={770}
     >
-      <Window.Content scrollable>
+      <Window.Content scrollable className="PreferencesMenu__ShadowrunSheet">
         <Stack vertical fill>
           <Stack.Item>
             <CharacterProfiles
@@ -95,13 +86,13 @@ export const CharacterPreferenceWindow = (props) => {
                   slot: slot + 1,
                 });
               }}
-              profiles={data.character_profiles}
+              profiles={data.character_profiles || []}
             />
           </Stack.Item>
 
           {!data.content_unlocked && (
             <Stack.Item align="center">
-              Buy BYOND premium for more slots!
+              BYOND membership unlocks additional runner dossiers.
             </Stack.Item>
           )}
 
@@ -112,25 +103,10 @@ export const CharacterPreferenceWindow = (props) => {
               <Stack.Item grow>
                 <PageButton
                   currentPage={currentPage}
-                  page={Page.Main}
-                  setPage={setCurrentPage}
-                  otherActivePages={[Page.Species]}
-                >
-                  Character
-                </PageButton>
-              </Stack.Item>
-
-              <Stack.Item grow>
-                <PageButton
-                  currentPage={currentPage}
-                  page={Page.Jobs}
+                  page={Page.Shadowrun}
                   setPage={setCurrentPage}
                 >
-                  {/*
-                    Fun fact: This isn't "Jobs" so that it intentionally
-                    catches your eyes, because it's really important!
-                  */}
-                  Occupations
+                  Character Sheet
                 </PageButton>
               </Stack.Item>
 
@@ -140,17 +116,7 @@ export const CharacterPreferenceWindow = (props) => {
                   page={Page.Antags}
                   setPage={setCurrentPage}
                 >
-                  Antagonists
-                </PageButton>
-              </Stack.Item>
-
-              <Stack.Item grow>
-                <PageButton
-                  currentPage={currentPage}
-                  page={Page.Quirks}
-                  setPage={setCurrentPage}
-                >
-                  Quirks
+                  Threat Profile
                 </PageButton>
               </Stack.Item>
             </Stack>

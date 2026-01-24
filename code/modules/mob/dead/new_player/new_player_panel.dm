@@ -1,9 +1,6 @@
-#define LINKIFY_CONSOLE_OPTION(str, cmd) "<a class='rawLink' href='byond://?src=\ref[src];[cmd]' onmouseover='fillInput(\"[str]\");' onmouseout='fillInput(\"&#8203;\");'>[str]</a>"
-#define CONSOLE_BACK "<a class='rawLink' href='byond://?src=\ref[src];main_menu=1' onmouseover='fillInput(\"cd..\");' onmouseout='fillInput(\"&#8203;\");'>Back</a>"
-#define LINKIFY_READY(string, value) "<a class='cursorPointer' href='byond://?src=\ref[src];ready=[value]'>[string]</a>"
+#define SR_LINK(str, cmd) "<a class='srTerminalLink' href='byond://?src=\ref[src];[cmd]'>[str]</a>"
 
 #define NPP_TAB_MAIN "main"
-#define NPP_TAB_GAME "game"
 
 /datum/new_player_panel
 	var/mob/dead/new_player/parent
@@ -51,7 +48,10 @@
 
 	if(href_list["character_setup"])
 		var/datum/preferences/preferences = parent.client.prefs
-		preferences.html_show(usr)
+		// Open the TGUI character preferences window (Window.Character = 0).
+		preferences.current_window = 0
+		preferences.update_static_data(usr)
+		preferences.ui_interact(usr)
 		return TRUE
 
 	if(href_list["ready"])
@@ -60,6 +60,13 @@
 		//This is likely not an actual issue but I don't have time to prove that this
 		//no longer is required
 		if(SSticker.current_state <= GAME_STATE_PREGAME)
+			if (tready == PLAYER_READY_TO_PLAY)
+				var/datum/preferences/preferences = parent.client?.prefs
+				if (!shadowrun_chargen_is_saved(preferences))
+					to_chat(usr, span_warning("You must Save your Shadowrun character sheet before you can Ready. Open Character Setup → Core → Save Sheet."))
+					parent.ready = PLAYER_NOT_READY
+					update()
+					return
 			parent.ready = tready
 
 		//if it's post initialisation and they're trying to observe we do the needful
@@ -69,10 +76,6 @@
 			return
 
 		update()
-		return
-
-	if(href_list["npp_game"])
-		change_tab(NPP_TAB_GAME)
 		return
 
 	if(href_list["main_menu"])
@@ -97,6 +100,11 @@
 	if(href_list["SelectedJob"])
 		if(!SSticker?.IsRoundInProgress())
 			to_chat(usr, span_danger("The round is either not ready, or has already finished..."))
+			return
+
+		var/datum/preferences/preferences = parent.client?.prefs
+		if (!shadowrun_chargen_is_saved(preferences))
+			to_chat(usr, span_warning("You must Save your Shadowrun character sheet before joining. Open Character Setup → Core → Save Sheet."))
 			return
 
 		if(SSlag_switch.measures[DISABLE_NON_OBSJOBS])
@@ -148,10 +156,10 @@
 	var/list/output = list()
 	output += npp_header()
 	output += "<div id='content'>"
-	output += npp_main("dir")
+	output += npp_main()
 	output += "</div>"
 
-	var/datum/browser/popup = new(parent, "playersetup", "", 480, 360)
+	var/datum/browser/popup = new(parent, "playersetup", "", 400, 320)
 	popup.set_window_options("can_close=0;focus=false;can_resize=0")
 	popup.set_content(output.Join())
 	popup.open(FALSE)
@@ -164,13 +172,8 @@
 
 	switch(new_tab)
 		if(NPP_TAB_MAIN)
-			content = npp_main("cd..")
+			content = npp_main()
 			active_tab = NPP_TAB_MAIN
-
-		if(NPP_TAB_GAME)
-			content = npp_game("space_station_13.exe")
-			active_tab = NPP_TAB_GAME
-
 		else
 			return
 
@@ -178,108 +181,184 @@
 
 /datum/new_player_panel/proc/npp_header()
 	return {"
+		<style>
+			@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600&family=Libre+Baskerville:wght@400;700&display=swap');
+
+			body {
+				font-family: 'Jost', sans-serif;
+				background: linear-gradient(135deg, #0a0a0c 0%, #151520 50%, #0d0d12 100%);
+				margin: 0;
+				padding: 8px;
+			}
+
+			.srTerminalPane {
+				background: linear-gradient(180deg, rgba(0,0,0,0.85), rgba(10,10,15,0.95));
+				border: 2px solid rgba(202, 165, 61, 0.4);
+				border-left: 4px solid #caa53d;
+				box-shadow: 0 0 20px rgba(0,0,0,0.5), inset 0 0 30px rgba(0,0,0,0.3);
+				padding: 1rem;
+				margin-bottom: 0.5rem;
+			}
+
+			.srTerminalHeader {
+				font-family: 'Libre Baskerville', serif;
+				color: #caa53d;
+				font-size: 18px;
+				letter-spacing: 0.05em;
+				text-transform: uppercase;
+				margin-bottom: 1rem;
+				padding-bottom: 0.5rem;
+				border-bottom: 1px solid rgba(202, 165, 61, 0.3);
+				text-shadow: 0 0 10px rgba(202, 165, 61, 0.3);
+			}
+
+			.srTerminalContent {
+				color: rgba(255,255,255,0.85);
+				font-size: 14px;
+				line-height: 1.8;
+			}
+
+			.srTerminalLink {
+				color: rgba(255,255,255,0.7);
+				text-decoration: none;
+				background: linear-gradient(135deg, rgba(40,40,45,0.8), rgba(25,25,30,0.9));
+				border: 1px solid rgba(255,255,255,0.15);
+				padding: 0.4em 0.8em;
+				margin: 0.25em 0;
+				display: inline-block;
+				border-radius: 2px;
+				transition: all 0.15s ease;
+				font-family: 'Jost', sans-serif;
+			}
+
+			.srTerminalLink:hover {
+				color: #fff;
+				border-color: rgba(202, 165, 61, 0.5);
+				background: linear-gradient(135deg, rgba(50,50,55,0.9), rgba(35,35,40,0.95));
+				box-shadow: 0 0 8px rgba(202, 165, 61, 0.2);
+				text-shadow: 0 0 5px rgba(202, 165, 61, 0.3);
+			}
+
+			.srTerminalBtn {
+				color: rgba(255,255,255,0.85);
+				text-decoration: none;
+				background: linear-gradient(135deg, rgba(40,40,45,0.9), rgba(25,25,30,0.95));
+				border: 1px solid rgba(255,255,255,0.2);
+				padding: 0.5em 1.2em;
+				margin: 0 0.25em;
+				border-radius: 2px;
+				font-family: 'Jost', sans-serif;
+				text-transform: uppercase;
+				letter-spacing: 0.05em;
+				font-size: 13px;
+				transition: all 0.15s ease;
+			}
+
+			.srTerminalBtn:hover {
+				color: #fff;
+				border-color: rgba(202, 165, 61, 0.6);
+				box-shadow: 0 0 10px rgba(202, 165, 61, 0.25);
+			}
+
+			.srTerminalBtn.active {
+				background: linear-gradient(135deg, rgba(202, 165, 61, 0.3), rgba(150, 120, 40, 0.2));
+				border-color: rgba(202, 165, 61, 0.7);
+				color: #caa53d;
+				text-shadow: 0 0 5px rgba(202, 165, 61, 0.4);
+			}
+
+			.srCharacterName {
+				color: #caa53d;
+				font-family: 'Libre Baskerville', serif;
+				font-size: 16px;
+			}
+
+			.srStatusLabel {
+				color: rgba(255,255,255,0.5);
+				font-size: 12px;
+				text-transform: uppercase;
+				letter-spacing: 0.1em;
+			}
+
+			.srStatusValue {
+				color: rgba(255,255,255,0.8);
+			}
+
+			.srDivider {
+				border: none;
+				border-top: 1px solid rgba(255,255,255,0.08);
+				margin: 0.75rem 0;
+			}
+
+			.srReadyBar {
+				display: flex;
+				justify-content: center;
+				gap: 0.5rem;
+				padding: 0.75rem;
+				background: rgba(0,0,0,0.3);
+				border-radius: 2px;
+			}
+		</style>
 		<script type='text/javascript'>
 			function fillInput(text){
-			const elem = document.getElementById("input");
-			elem.innerHTML = text;
-		}
+				const elem = document.getElementById('input');
+				if(elem) elem.innerHTML = text;
+			}
 
-		function update_content(data){
-			document.getElementById('content').innerHTML = data;
-		}
+			function update_content(data){
+				document.getElementById('content').innerHTML = data;
+			}
 
-		function byondCall(cmd){
-			window.location = 'byond://?src=[ref(src)];' + cmd;
-		}
-
+			function byondCall(cmd){
+				window.location = 'byond://?src=[ref(src)];' + cmd;
+			}
 		</script>
 	"}
 
-/datum/new_player_panel/proc/npp_main(last_cmd)
-	var/list/output = list()
-
-	var/poll = playerpolls()
-	if(!is_guest_key(parent.client.key) && poll)
-		poll = "<div>>[LINKIFY_CONSOLE_OPTION(poll, "showpoll=1")]</div>"
-
-	output += {"
-		<fieldset class='computerPane' style='height:260px'>
-			<legend class='computerLegend' style='margin: 0 auto'>
-				<b>ThinkDOS Terminal</b>
-			</legend>
-			<div class='computerLegend flexColumn' style='font-size: 14px; height: 80%; text-align:left'>
-				<div style='font-size: 16px'>
-					C:\\Users\\[parent.ckey]\\ss13&gt;[last_cmd]
-				</div>
-				<div>
-					>[LINKIFY_CONSOLE_OPTION("space_station_13.exe", "npp_game=1")]
-				</div>
-				<div>
-					>[LINKIFY_CONSOLE_OPTION("options.cfg", "npp_options=1")]
-				</div>
-				<div>
-					>[LINKIFY_CONSOLE_OPTION("where_am_i.txt", "view_primer=1")]
-				</div>
-				<div>
-					>[LINKIFY_CONSOLE_OPTION("discord_link.lnk", "verify=1")]
-				</div>
-				[poll]
-				<br>
-				<div>
-					<span>C:\\Users\\[parent.ckey]\\ss13&gt</span>
-					<span id='input' class='consoleInput'>&#8203;</span>
-				</div>
-			</div>
-		</fieldset>
-	"}
-
-	output += join_or_ready()
-
-	return jointext(output, "")
-
-/datum/new_player_panel/proc/npp_game(last_cmd)
+/datum/new_player_panel/proc/npp_main()
 	var/list/output = list()
 	var/name = parent.client?.prefs.read_preference(/datum/preference/name/real_name)
 
-	var/status
+	var/poll = playerpolls()
+	if(!is_guest_key(parent.client.key) && poll)
+		poll = "<div style='margin-top: 0.5rem'>[SR_LINK(poll, "showpoll=1")]</div>"
+
+	var/status_text = "Idle"
+	var/status_class = ""
 	if(SSticker.current_state <= GAME_STATE_PREGAME)
 		switch(parent.ready)
 			if(PLAYER_NOT_READY)
-				status = "<div>>Status: Not Ready</div>"
+				status_text = "Not Ready"
 			if(PLAYER_READY_TO_PLAY)
-				status = "<div>>Status: Ready</div>"
+				status_text = "Ready"
+				status_class = "color: #03fca1;"
 			if(PLAYER_READY_TO_OBSERVE)
-				status = "<div>>Status: Ready (Observe)</div>"
-			else
-				status = "<div>>Status: Not Ready</div>"
+				status_text = "Observing"
+				status_class = "color: #615b7d;"
 
 	output += {"
-		<fieldset class='computerPane' style='height:260px'>
-			<legend class='computerLegend' style='margin: 0 auto'>
-				<b>ThinkDOS Terminal</b>
-			</legend>
-			<div class='computerLegend flexColumn' style='font-size: 14px; height: 80%; text-align:left'>
-				<div style='font-size: 16px'>
-					C:\\Users\\[parent.ckey]\\ss13&gt;[last_cmd]
-				</div>
-				<div>
-					>Loaded Character: <b>[name]</b>
-				</div>
-				[status]
-				<br>
-				<div>
-					>[LINKIFY_CONSOLE_OPTION("Modify [name].txt", "character_setup=1")]
-				</div>
-				<div>
-					>[CONSOLE_BACK]
-				</div>
-				<br>
-				<div>
-					<span>C:\\Users\\[parent.ckey]\\ss13&gt</span>
-					<span id='input' class='consoleInput'>&#8203;</span>
-				</div>
+		<div class='srTerminalPane'>
+			<div class='srTerminalHeader'>
+				Runner Terminal
 			</div>
-		</fieldset>
+			<div class='srTerminalContent'>
+				<div style='margin-bottom: 0.75rem'>
+					<span class='srStatusLabel'>Identity:</span>
+					<span class='srCharacterName'>[name]</span>
+				</div>
+				<div style='margin-bottom: 0.75rem'>
+					<span class='srStatusLabel'>Status:</span>
+					<span class='srStatusValue' style='[status_class]'>[status_text]</span>
+				</div>
+				<hr class='srDivider'>
+				<div style='display: flex; flex-direction: column; gap: 0.25rem'>
+					[SR_LINK("&#9654; Character Dossier", "character_setup=1")]
+					[SR_LINK("&#9881; Game Options", "npp_options=1")]
+					[SR_LINK("&#9432; Location Briefing", "view_primer=1")]
+				</div>
+				[poll]
+			</div>
+		</div>
 	"}
 
 	output += join_or_ready()
@@ -288,45 +367,52 @@
 
 /datum/new_player_panel/proc/join_or_ready()
 	var/list/output = list()
-	output += {"
-		<div class='flexColumn' style='justify-content: center;align-items: center;width:100%;font-size: 16px;'>
-	"}
 
 	if(SSticker.current_state > GAME_STATE_PREGAME)
 		output += {"
-			<div class='flexRow' style='justify-content: center;align-items: center;width:100%;margin-top: 4px;'>
-				<div class='flexItem'>[button_element(src, "Join Game", "late_join=1")]</div>
-				<div class='flexItem'>[LINKIFY_READY("Observe", PLAYER_READY_TO_OBSERVE)]</div>
+			<div class='srReadyBar'>
+				[SR_LINK("Join Game", "late_join=1")]
+				[SR_LINK("Observe", "ready=[PLAYER_READY_TO_OBSERVE]")]
+				[SR_LINK("View Manifests", "manifest=1")]
 			</div>
 		"}
-		output += "<div class='flexItem' style='margin-top: 8px'>[button_element(src, "View Station Manifests", "manifest=1")]</div>"
 	else
+		output += "<div class='srReadyBar'>"
 		switch(parent.ready)
 			if(PLAYER_NOT_READY)
-				output += "<div>\[ [LINKIFY_READY("Ready", PLAYER_READY_TO_PLAY)] | <span class='linkOn'>Not Ready</span> | [LINKIFY_READY("Observe", PLAYER_READY_TO_OBSERVE)] \]</div>"
+				output += "<a class='srTerminalBtn' href='byond://?src=\ref[src];ready=[PLAYER_READY_TO_PLAY]'>Ready</a>"
+				output += "<a class='srTerminalBtn active' href='byond://?src=\ref[src];ready=[PLAYER_NOT_READY]'>Not Ready</a>"
+				output += "<a class='srTerminalBtn' href='byond://?src=\ref[src];ready=[PLAYER_READY_TO_OBSERVE]'>Observe</a>"
 			if(PLAYER_READY_TO_PLAY)
-				output += "<div>\[ <span class='linkOn'>Ready</span> | [LINKIFY_READY("Not Ready", PLAYER_NOT_READY)] | [LINKIFY_READY("Observe", PLAYER_READY_TO_OBSERVE)] \]</div>"
+				output += "<a class='srTerminalBtn active' href='byond://?src=\ref[src];ready=[PLAYER_READY_TO_PLAY]'>Ready</a>"
+				output += "<a class='srTerminalBtn' href='byond://?src=\ref[src];ready=[PLAYER_NOT_READY]'>Not Ready</a>"
+				output += "<a class='srTerminalBtn' href='byond://?src=\ref[src];ready=[PLAYER_READY_TO_OBSERVE]'>Observe</a>"
 			if(PLAYER_READY_TO_OBSERVE)
-				output += "<div>\[ [LINKIFY_READY("Ready", PLAYER_READY_TO_PLAY)] | [LINKIFY_READY("Not Ready", PLAYER_NOT_READY)] | <span class='linkOn'>Observe</span> \]</div>"
+				output += "<a class='srTerminalBtn' href='byond://?src=\ref[src];ready=[PLAYER_READY_TO_PLAY]'>Ready</a>"
+				output += "<a class='srTerminalBtn' href='byond://?src=\ref[src];ready=[PLAYER_NOT_READY]'>Not Ready</a>"
+				output += "<a class='srTerminalBtn active' href='byond://?src=\ref[src];ready=[PLAYER_READY_TO_OBSERVE]'>Observe</a>"
 		output += "</div>"
 
-	output += "</div>"
 	return jointext(output, "")
 
 /datum/new_player_panel/proc/restricted_client_panel()
 	var/content = {"
-		<div style='width:100%;height: 100%'>
-			<fieldset class='computerPane'>
-				<div class='computerLegend' style='margin: auto;height: 70%'>
-				Welcome to the Renraku Arcology Test Server<br><br>
-				We require discord verification in order to play, as a measure to protect us against griefing.
+		[npp_header()]
+		<div class='srTerminalPane'>
+			<div class='srTerminalHeader'>
+				Access Restricted
+			</div>
+			<div class='srTerminalContent' style='text-align: center'>
+				<p>Welcome to the Renraku Arcology Test Server</p>
+				<p style='color: rgba(255,255,255,0.6)'>Discord verification is required to access this host.</p>
+				<div style='margin-top: 1rem'>
+					[SR_LINK("Verify Identity", "verify=1")]
 				</div>
-			</fieldset>
-			<div style = 'text-align: center'>[button_element(src, "Verify", "verify=1")]</div>
+			</div>
 		</div>
 	"}
 
-	var/datum/browser/popup = new(parent, "playersetup", "<center><div>Welcome, New Player!</div></center>", 660, 270)
+	var/datum/browser/popup = new(parent, "playersetup", "", 480, 280)
 	popup.set_window_options("can_close=0;focus=false;can_resize=0")
 	popup.set_content(content)
 	popup.open(FALSE)

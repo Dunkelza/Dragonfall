@@ -4,15 +4,15 @@
 @use '../colors.scss';
 
 $department_map: (
-  'Assistant': colors.$grey,
-  'Captain': colors.fg(colors.$blue),
-  'Cargo': colors.$brown,
-  'Command': colors.$yellow,
-  'Security': colors.$red,
-  'Engineering': #f1a839,
-  'Medical': colors.$teal,
+  'Civilian': colors.$grey,
+  'Arcology Command': colors.fg(colors.$blue),
+  'Shiawase Logistics': colors.$brown,
+  'Renraku Corporate': colors.$yellow,
+  'Lone Star': colors.$red,
+  'Renraku Facilities': #f1a839,
+  'DocWagon': colors.$teal,
   'Science': colors.fg(colors.$purple),
-  'Service': colors.$green,
+  'Independent': colors.$green,
   'Silicon': colors.$pink,
 );
 
@@ -177,7 +177,7 @@ $department_map: (
           }
         }
 
-        &--Captain {
+        &--Arcology\\ Command {
           border: 3px solid rgba(200, 200, 0, 1);
 
           &:first-child {
@@ -254,6 +254,1027 @@ $department_map: (
           }
         }
       }
+    }
+  }
+}
+
+.PreferencesMenu__ShadowrunChargen__statTabs {
+  // NOTE: BYOND embedded browsers can lack flex-gap support.
+  // Use margins on tabs as the primary spacing mechanism.
+  gap: 0.25em;
+  flex-wrap: wrap;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+// Shadowrun character-sheet styling (scoped to the Shadowrun sheet page).
+$sr-special-color: #03fca1;
+$sr-physical-color: #caa53d;
+$sr-mental-color: #615b7d;
+
+.PreferencesMenu__ShadowrunChargen__statTabs .Tabs__Tab {
+  flex: 0 0 auto;
+  margin-right: 0.25em;
+  margin-bottom: 0.25em;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.PreferencesMenu__ShadowrunChargen__statTabs .Tabs__Tab--selected {
+  border-color: rgba($sr-physical-color, 0.75);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.PreferencesMenu__ShadowrunChargen__skillRow {
+  padding: 0.6rem 0.8rem;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.2);
+  margin-bottom: 0.35rem;
+}
+
+.PreferencesMenu__ShadowrunChargen__groupRow {
+  padding: 0.6rem 0.8rem;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.2);
+  margin-bottom: 0.35rem;
+}
+
+.PreferencesMenu__ShadowrunSheet {
+  font-family: 'Jost', sans-serif;
+
+  .Section {
+    background: rgba(0, 0, 0, 0.18);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  }
+
+  .Section__title {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.35),
+      rgba(0, 0, 0, 0.15)
+    );
+    border-bottom-color: rgba($sr-physical-color, 0.65);
+  }
+
+  .Section__titleText {
+    font-family: 'Libre Baskerville';
+    letter-spacing: 0.02em;
+  }
+
+  // Dropdown styling
+  .Dropdown {
+    font-family: 'Jost', sans-serif;
+  }
+
+  .Dropdown__control {
+    background: linear-gradient(
+      135deg,
+      rgba(40, 40, 45, 0.9),
+      rgba(25, 25, 30, 0.95)
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 2px !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.15s ease;
+
+    &:hover {
+      border-color: rgba($sr-physical-color, 0.5) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 2px 6px rgba(0, 0, 0, 0.4),
+        0 0 8px rgba($sr-physical-color, 0.2);
+    }
+  }
+
+  .Dropdown__arrow-button {
+    background: rgba($sr-physical-color, 0.2) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+
+    &:hover {
+      background: rgba($sr-physical-color, 0.35) !important;
+    }
+  }
+
+  .Dropdown__menu {
+    background: rgba(20, 20, 25, 0.98) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 2px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .Dropdown__menu-scroll {
+    background: transparent !important;
+  }
+
+  .Dropdown__menuentry {
+    padding: 0.4em 0.6em !important;
+    transition: all 0.1s ease;
+
+    &:hover {
+      background: rgba($sr-physical-color, 0.25) !important;
+    }
+  }
+
+  .Dropdown__menuentry--selected {
+    background: rgba($sr-physical-color, 0.35) !important;
+    border-left: 2px solid $sr-physical-color;
+  }
+
+  // Input styling
+  .Input {
+    background: linear-gradient(
+      135deg,
+      rgba(25, 25, 30, 0.95),
+      rgba(15, 15, 20, 0.98)
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 2px !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+    transition: all 0.15s ease;
+
+    &:focus,
+    &:focus-within {
+      border-color: rgba($sr-physical-color, 0.5) !important;
+      box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.3),
+        0 0 8px rgba($sr-physical-color, 0.2);
+    }
+  }
+}
+
+.PreferencesMenu__ShadowrunSheet__tabs {
+  gap: 0.25em;
+  flex-wrap: wrap;
+  overflow: visible;
+
+  .Tabs__Tab {
+    flex: 0 0 auto;
+    margin-right: 0.25em;
+    margin-bottom: 0.25em;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.18);
+    font-family: 'Libre Baskerville';
+    letter-spacing: 0.01em;
+  }
+
+  .Tabs__Tab--selected {
+    border-color: rgba($sr-physical-color, 0.85);
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+
+.PreferencesMenu__ShadowrunChargen {
+  font-family: 'Jost', sans-serif;
+}
+
+.PreferencesMenu__ShadowrunChargen__mainTabs {
+  gap: 0.25em;
+  flex-wrap: wrap;
+  overflow: visible;
+
+  .Tabs__Tab {
+    flex: 0 0 auto;
+    margin-right: 0.25em;
+    margin-bottom: 0.25em;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.15);
+    font-family: 'Libre Baskerville';
+    letter-spacing: 0.01em;
+  }
+
+  .Tabs__Tab--selected {
+    border-color: rgba($sr-physical-color, 0.85);
+    background: rgba(0, 0, 0, 0.28);
+  }
+}
+
+.PreferencesMenu__ShadowrunChargen__attributeRow {
+  padding: 0.6rem 0.8rem;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.2);
+  margin-bottom: 0.35rem;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.PreferencesMenu__ShadowrunChargen__attributeRow_value {
+  width: 3.5rem;
+  text-align: center;
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.PreferencesMenu__ShadowrunChargen__attributeRow_name {
+  font-size: 1.45rem;
+  font-weight: 650;
+}
+
+.PreferencesMenu__ShadowrunChargen__attributeRow_breakdown {
+  font-size: 1.05rem;
+  opacity: 0.9;
+}
+
+// Accent mapping by SR attribute id (physical/mental/special).
+.PreferencesMenu__ShadowrunChargen__attributeRow.body,
+.PreferencesMenu__ShadowrunChargen__attributeRow.agility,
+.PreferencesMenu__ShadowrunChargen__attributeRow.reaction,
+.PreferencesMenu__ShadowrunChargen__attributeRow.strength {
+  border-color: rgba($sr-physical-color, 0.9);
+}
+
+.PreferencesMenu__ShadowrunChargen__attributeRow.willpower,
+.PreferencesMenu__ShadowrunChargen__attributeRow.logic,
+.PreferencesMenu__ShadowrunChargen__attributeRow.intuition,
+.PreferencesMenu__ShadowrunChargen__attributeRow.charisma {
+  border-color: rgba($sr-mental-color, 0.9);
+}
+
+.PreferencesMenu__ShadowrunChargen__attributeRow.edge,
+.PreferencesMenu__ShadowrunChargen__attributeRow.essence,
+.PreferencesMenu__ShadowrunChargen__attributeRow.magic {
+  border-color: rgba($sr-special-color, 0.9);
+}
+
+.PreferencesMenu__ShadowrunChargen__skillRow_pool {
+  width: 3.5rem;
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.PreferencesMenu__ShadowrunChargen__skillRow_name {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.PreferencesMenu__ShadowrunChargen__skillRow_breakdown {
+  font-size: 1.05rem;
+  opacity: 0.9;
+}
+
+.PreferencesMenu__ShadowrunChargen__skillRow--locked {
+  opacity: 0.75;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+// Shadowrun-themed LabeledList styling
+.PreferencesMenu__ShadowrunSheet__labeledList {
+  .LabeledList {
+    font-family: 'Jost', sans-serif;
+  }
+
+  .LabeledList__row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .LabeledList__cell {
+    padding: 0.4em 0.5em;
+    vertical-align: middle;
+    border-bottom: none !important;
+  }
+
+  .LabeledList__label {
+    width: 7.5em;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.95em;
+    letter-spacing: 0.02em;
+    border-bottom: none !important;
+  }
+
+  // Button styling for buttons within labeled lists
+  .Button {
+    background: linear-gradient(
+      135deg,
+      rgba(40, 40, 45, 0.9),
+      rgba(25, 25, 30, 0.95)
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    clip-path: none !important;
+    border-radius: 2px !important;
+    font-family: 'Jost', sans-serif !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85em;
+
+    &:hover:not(.Button--disabled) {
+      background: linear-gradient(
+        135deg,
+        rgba(55, 55, 60, 0.95),
+        rgba(35, 35, 40, 0.95)
+      ) !important;
+      border-color: rgba($sr-physical-color, 0.5) !important;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 2px 6px rgba(0, 0, 0, 0.4),
+        0 0 8px rgba($sr-physical-color, 0.2) !important;
+    }
+  }
+
+  .Button--selected {
+    background: linear-gradient(
+      135deg,
+      rgba($sr-physical-color, 0.3),
+      rgba($sr-physical-color, 0.15)
+    ) !important;
+    border-color: rgba($sr-physical-color, 0.6) !important;
+    color: $sr-physical-color !important;
+  }
+
+  // Ensure dropdowns and inputs match the theme
+  .Dropdown__control {
+    background: linear-gradient(
+      135deg,
+      rgba(40, 40, 45, 0.9),
+      rgba(25, 25, 30, 0.95)
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 2px !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.25);
+
+    &:hover {
+      border-color: rgba($sr-physical-color, 0.4) !important;
+    }
+  }
+
+  .Dropdown__arrow-button {
+    background: rgba($sr-physical-color, 0.15) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+
+  .Input {
+    background: linear-gradient(
+      135deg,
+      rgba(30, 30, 35, 0.95),
+      rgba(20, 20, 25, 0.98)
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 2px !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
+
+    &:focus,
+    &:focus-within {
+      border-color: rgba($sr-physical-color, 0.5) !important;
+      box-shadow:
+        inset 0 1px 3px rgba(0, 0, 0, 0.25),
+        0 0 6px rgba($sr-physical-color, 0.15);
+    }
+  }
+
+  // NumberInput styling
+  .NumberInput {
+    background: linear-gradient(
+      135deg,
+      rgba(30, 30, 35, 0.95),
+      rgba(20, 20, 25, 0.98)
+    ) !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    border-radius: 2px !important;
+  }
+}
+
+// ============================================================================
+// ENHANCED SHADOWRUN CHARACTER SHEET STYLES
+// ============================================================================
+
+// Animation keyframes
+@keyframes sr-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sr-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+// Character sheet header banner
+.PreferencesMenu__ShadowrunSheet__header {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.6),
+    rgba(15, 15, 15, 0.8)
+  );
+  border-left: 4px solid $sr-physical-color;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba($sr-physical-color, 0.08)
+    );
+    pointer-events: none;
+  }
+
+  &__title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 1.5rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: $sr-physical-color;
+    text-shadow: 0 0 10px rgba($sr-physical-color, 0.3);
+    margin-bottom: 0.25rem;
+  }
+
+  &__subtitle {
+    font-family: 'Jost', sans-serif;
+    font-size: 1.15rem;
+    opacity: 0.85;
+    letter-spacing: 0.02em;
+  }
+
+  &__hint {
+    font-size: 0.85rem;
+    opacity: 0.6;
+    margin-top: 0.35rem;
+  }
+}
+
+// Dashboard tiles for point budgets
+.PreferencesMenu__ShadowrunSheet__dashboard {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.PreferencesMenu__ShadowrunSheet__dashboardTile {
+  flex: 1 1 auto;
+  min-width: 100px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  padding: 0.6rem 0.8rem;
+  text-align: center;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  &--physical {
+    border-color: rgba($sr-physical-color, 0.6);
+    .PreferencesMenu__ShadowrunSheet__dashboardTile__icon {
+      color: $sr-physical-color;
+    }
+  }
+
+  &--mental {
+    border-color: rgba($sr-mental-color, 0.6);
+    .PreferencesMenu__ShadowrunSheet__dashboardTile__icon {
+      color: $sr-mental-color;
+    }
+  }
+
+  &--special {
+    border-color: rgba($sr-special-color, 0.6);
+    .PreferencesMenu__ShadowrunSheet__dashboardTile__icon {
+      color: $sr-special-color;
+    }
+  }
+
+  &--resources {
+    border-color: rgba(#e8c547, 0.6);
+    .PreferencesMenu__ShadowrunSheet__dashboardTile__icon {
+      color: #e8c547;
+    }
+  }
+
+  &--bad {
+    border-color: rgba(colors.$red, 0.8);
+    animation: sr-pulse 1s infinite;
+  }
+
+  &--good {
+    border-color: rgba(colors.$green, 0.6);
+  }
+
+  &__icon {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  &__value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  &__label {
+    font-size: 0.75rem;
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 0.15rem;
+  }
+
+  &__subtext {
+    font-size: 0.7rem;
+    opacity: 0.55;
+    margin-top: 0.1rem;
+  }
+}
+
+// Validation badge for tabs
+.PreferencesMenu__ShadowrunSheet__validationBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  margin-left: 0.35rem;
+
+  &--good {
+    background: rgba(colors.$green, 0.25);
+    color: colors.$green;
+  }
+
+  &--bad {
+    background: rgba(colors.$red, 0.25);
+    color: colors.$red;
+    animation: sr-pulse 1.2s infinite;
+  }
+
+  &--warn {
+    background: rgba(#e8c547, 0.25);
+    color: #e8c547;
+  }
+}
+
+// Progress indicator bar
+.PreferencesMenu__ShadowrunSheet__progressBar {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 3px;
+  overflow: hidden;
+  margin: 0.5rem 0;
+
+  &__fill {
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: 3px;
+
+    &--good {
+      background: linear-gradient(
+        90deg,
+        colors.$green,
+        color.scale(colors.$green, $lightness: -15%)
+      );
+    }
+
+    &--average {
+      background: linear-gradient(
+        90deg,
+        #e8c547,
+        color.scale(#e8c547, $lightness: -15%)
+      );
+    }
+
+    &--bad {
+      background: linear-gradient(
+        90deg,
+        colors.$red,
+        color.scale(colors.$red, $lightness: -15%)
+      );
+    }
+  }
+}
+
+// Tab content animation
+.PreferencesMenu__ShadowrunSheet__tabContent {
+  animation: sr-fadeIn 0.2s ease-out;
+}
+
+// Collapsible section styling
+.PreferencesMenu__ShadowrunSheet__collapsible {
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.15);
+  margin-bottom: 0.5rem;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    transition: background 0.15s;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.35);
+    }
+
+    &__icon {
+      margin-right: 0.5rem;
+      transition: transform 0.2s;
+
+      &--open {
+        transform: rotate(90deg);
+      }
+    }
+
+    &__title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.05rem;
+      letter-spacing: 0.02em;
+      flex: 1;
+    }
+
+    &__badge {
+      margin-left: auto;
+    }
+  }
+
+  &__content {
+    padding: 0.8rem;
+    animation: sr-fadeIn 0.15s ease-out;
+
+    &--closed {
+      display: none;
+    }
+  }
+}
+
+// Derived stats panel
+.PreferencesMenu__ShadowrunSheet__derivedStats {
+  background: rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba($sr-mental-color, 0.4);
+  padding: 0.8rem;
+  margin-top: 0.5rem;
+
+  &__title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.5rem;
+    color: $sr-mental-color;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.5rem;
+  }
+
+  &__stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.35rem 0.5rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-left: 2px solid rgba($sr-mental-color, 0.5);
+
+    &__name {
+      opacity: 0.85;
+    }
+
+    &__value {
+      font-weight: 700;
+    }
+  }
+}
+
+// Metatype selector (moved to biometrics)
+.PreferencesMenu__ShadowrunSheet__metatypeSelector {
+  background: rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba($sr-special-color, 0.4);
+  padding: 0.8rem;
+  margin-bottom: 0.5rem;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    &__icon {
+      color: $sr-special-color;
+      margin-right: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    &__title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    &__priority {
+      margin-left: auto;
+      font-size: 0.85rem;
+      opacity: 0.75;
+      padding: 0.15rem 0.5rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba($sr-special-color, 0.4);
+    }
+  }
+
+  &__locked {
+    opacity: 0.6;
+    font-size: 0.9rem;
+    color: #888;
+  }
+}
+
+// Two-column biometrics layout
+.PreferencesMenu__ShadowrunSheet__biometricsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.PreferencesMenu__ShadowrunSheet__biometricsColumn {
+  &__title {
+    font-family: 'Libre Baskerville', serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  }
+}
+
+// Shadowrun-themed button styles
+.PreferencesMenu__ShadowrunSheet {
+  // Base button styling for all buttons in the SR sheet
+  .Button {
+    background: linear-gradient(
+      135deg,
+      rgba(40, 40, 45, 0.9),
+      rgba(25, 25, 30, 0.95)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.3);
+    clip-path: none;
+    border-radius: 2px;
+    font-family: 'Jost', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85em;
+    transition: all 0.15s ease;
+
+    &:hover:not(.Button--disabled) {
+      background: linear-gradient(
+        135deg,
+        rgba(55, 55, 60, 0.95),
+        rgba(35, 35, 40, 0.95)
+      );
+      border-color: rgba($sr-physical-color, 0.5);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 2px 6px rgba(0, 0, 0, 0.4),
+        0 0 8px rgba($sr-physical-color, 0.2);
+    }
+
+    &:active:not(.Button--disabled) {
+      background: linear-gradient(
+        135deg,
+        rgba(30, 30, 35, 0.95),
+        rgba(20, 20, 25, 0.95)
+      );
+      box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.4),
+        0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  // Disabled state
+  .Button--disabled {
+    background: rgba(40, 40, 45, 0.5) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.35) !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+  }
+
+  // Selected/active state
+  .Button--selected {
+    background: linear-gradient(
+      135deg,
+      rgba($sr-physical-color, 0.3),
+      rgba($sr-physical-color, 0.15)
+    ) !important;
+    border-color: rgba($sr-physical-color, 0.6) !important;
+    color: $sr-physical-color !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 10px rgba($sr-physical-color, 0.3) !important;
+  }
+
+  // Color variants
+  .Button--color--good {
+    background: linear-gradient(
+      135deg,
+      rgba(46, 125, 50, 0.8),
+      rgba(27, 94, 32, 0.9)
+    ) !important;
+    border-color: rgba(76, 175, 80, 0.5) !important;
+
+    &:hover:not(.Button--disabled) {
+      background: linear-gradient(
+        135deg,
+        rgba(56, 142, 60, 0.9),
+        rgba(46, 125, 50, 0.9)
+      ) !important;
+      border-color: rgba(129, 199, 132, 0.6) !important;
+      box-shadow: 0 0 12px rgba(76, 175, 80, 0.4) !important;
+    }
+  }
+
+  .Button--color--bad {
+    background: linear-gradient(
+      135deg,
+      rgba(183, 28, 28, 0.8),
+      rgba(127, 16, 16, 0.9)
+    ) !important;
+    border-color: rgba(244, 67, 54, 0.5) !important;
+
+    &:hover:not(.Button--disabled) {
+      background: linear-gradient(
+        135deg,
+        rgba(211, 47, 47, 0.9),
+        rgba(183, 28, 28, 0.9)
+      ) !important;
+      border-color: rgba(229, 115, 115, 0.6) !important;
+      box-shadow: 0 0 12px rgba(244, 67, 54, 0.4) !important;
+    }
+  }
+
+  .Button--color--caution {
+    background: linear-gradient(
+      135deg,
+      rgba($sr-physical-color, 0.7),
+      rgba(darken($sr-physical-color, 15%), 0.8)
+    ) !important;
+    border-color: rgba($sr-physical-color, 0.5) !important;
+    color: #fff !important;
+
+    &:hover:not(.Button--disabled) {
+      background: linear-gradient(
+        135deg,
+        rgba(lighten($sr-physical-color, 10%), 0.8),
+        rgba($sr-physical-color, 0.8)
+      ) !important;
+      border-color: rgba(lighten($sr-physical-color, 20%), 0.6) !important;
+      box-shadow: 0 0 12px rgba($sr-physical-color, 0.4) !important;
+    }
+  }
+
+  // +/- increment buttons (compact style)
+  .Button--increment {
+    min-width: 1.8em;
+    padding: 0 0.3em;
+    font-weight: bold;
+    font-size: 1em;
+    line-height: 1.4em;
+  }
+}
+
+// Chargen-specific button styles
+.PreferencesMenu__ShadowrunChargen {
+  .Button {
+    background: linear-gradient(
+      135deg,
+      rgba(40, 40, 45, 0.9),
+      rgba(25, 25, 30, 0.95)
+    );
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.3);
+    clip-path: none;
+    border-radius: 2px;
+    font-family: 'Jost', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.85em;
+    transition: all 0.15s ease;
+
+    &:hover:not(.Button--disabled) {
+      background: linear-gradient(
+        135deg,
+        rgba(55, 55, 60, 0.95),
+        rgba(35, 35, 40, 0.95)
+      );
+      border-color: rgba($sr-physical-color, 0.5);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 2px 6px rgba(0, 0, 0, 0.4),
+        0 0 8px rgba($sr-physical-color, 0.2);
+    }
+
+    &:active:not(.Button--disabled) {
+      background: linear-gradient(
+        135deg,
+        rgba(30, 30, 35, 0.95),
+        rgba(20, 20, 25, 0.95)
+      );
+      box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.4),
+        0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  .Button--disabled {
+    background: rgba(40, 40, 45, 0.5) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.35) !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+  }
+
+  .Button--selected {
+    background: linear-gradient(
+      135deg,
+      rgba($sr-physical-color, 0.3),
+      rgba($sr-physical-color, 0.15)
+    ) !important;
+    border-color: rgba($sr-physical-color, 0.6) !important;
+    color: $sr-physical-color !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 10px rgba($sr-physical-color, 0.3) !important;
+  }
+
+  .Button--color--good {
+    background: linear-gradient(
+      135deg,
+      rgba(46, 125, 50, 0.8),
+      rgba(27, 94, 32, 0.9)
+    ) !important;
+    border-color: rgba(76, 175, 80, 0.5) !important;
+
+    &:hover:not(.Button--disabled) {
+      background: linear-gradient(
+        135deg,
+        rgba(56, 142, 60, 0.9),
+        rgba(46, 125, 50, 0.9)
+      ) !important;
+      border-color: rgba(129, 199, 132, 0.6) !important;
+      box-shadow: 0 0 12px rgba(76, 175, 80, 0.4) !important;
+    }
+  }
+
+  .Button--color--bad {
+    background: linear-gradient(
+      135deg,
+      rgba(183, 28, 28, 0.8),
+      rgba(127, 16, 16, 0.9)
+    ) !important;
+    border-color: rgba(244, 67, 54, 0.5) !important;
+
+    &:hover:not(.Button--disabled) {
+      background: linear-gradient(
+        135deg,
+        rgba(211, 47, 47, 0.9),
+        rgba(183, 28, 28, 0.9)
+      ) !important;
+      border-color: rgba(229, 115, 115, 0.6) !important;
+      box-shadow: 0 0 12px rgba(244, 67, 54, 0.4) !important;
     }
   }
 }

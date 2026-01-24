@@ -259,7 +259,7 @@ function StatsPage() {
     <Stack fill vertical className="CharacterStats__statsPage">
       {DetailedStatOrSkillModal(seeingModalOf, setModal)}
       <Stack.Item>
-        <Tabs fluid>
+        <Tabs className="CharacterStats__statTabs">
           {statsSorted.map((stat) => (
             <Tabs.Tab
               key={stat.name}

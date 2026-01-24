@@ -182,6 +182,19 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 	data["active_slot"] = default_slot
 
+	// The savefile_key of the primary name preference, used by tgui to identify
+	// which name field to update when the user edits their character name.
+	data["name_to_use"] = "real_name"
+
+	// Tell the UI whether name editing is currently allowed.
+	// Names are locked once the player has spawned into the round.
+	var/mob/dead/new_player/np = user
+	var/name_locked = FALSE
+	if (!isnull(SSticker) && SSticker.IsRoundInProgress())
+		if (!istype(np))
+			name_locked = TRUE
+	data["name_locked"] = name_locked
+
 	for (var/datum/preference_middleware/preference_middleware as anything in middleware)
 		data += preference_middleware.get_ui_data(user)
 
@@ -256,6 +269,17 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 			// SAFETY: `update_preference` performs validation checks
 			if (!update_preference(requested_preference, value))
 				return FALSE
+
+			// Persist certain character-critical edits immediately.
+			// This avoids user confusion when they close/reopen the menu before ui_close runs,
+			// and ensures Shadowrun "Save Sheet" and name edits survive reconnects.
+			if (requested_preference.savefile_identifier == PREFERENCE_CHARACTER)
+				if (istype(requested_preference, /datum/preference/name))
+					save_character()
+				else if (requested_preference.type == /datum/preference/blob/shadowrun_chargen)
+					var/list/sr_state = value_cache[requested_preference.type]
+					if (islist(sr_state) && !!sr_state["saved"])
+						save_character()
 
 			if (istype(requested_preference, /datum/preference/name))
 				tainted_character_profiles = TRUE
@@ -453,9 +477,14 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen/character_preview_view)
 		body.wipe_state()
 
 	rendered_appearance = preferences.render_new_preview_appearance(body)
+	if (isnull(rendered_appearance))
+		return
 
 	for(var/index in subscreens)
-		var/atom/movable/screen/subscreen = subscreens[index]
+		var/atom/movable/screen/screen_obj = subscreens[index]
+		if(!istype(screen_obj, /atom/movable/screen/subscreen))
+			continue
+		var/atom/movable/screen/subscreen/subscreen = screen_obj
 		var/cache_dir = subscreen.dir
 		subscreen.appearance = rendered_appearance.appearance
 		subscreen.dir = cache_dir
@@ -484,18 +513,34 @@ INITIALIZE_IMMEDIATE(/atom/movable/screen/character_preview_view)
 
 		plane_masters += plane_master
 
-	var/pos
+	var/atom/movable/screen/background/bg = subscreens["background"]
+	if(!bg)
+		bg = new
+		subscreens["background"] = bg
+		bg.assigned_map = assigned_map
+		client?.register_map_obj(bg)
+	bg.fill_rect(1, 1, 2, 2)
+
 	for(var/dir in GLOB.cardinals)
-		pos++
 		var/atom/movable/screen/subscreen/preview = subscreens["preview-[dir]"]
 		if(!preview)
 			preview = new
 			subscreens["preview-[dir]"] = preview
 			client?.register_map_obj(preview)
 
-		preview.appearance = rendered_appearance.appearance
+		if (isnull(rendered_appearance))
+			update_body()
+		preview.appearance = rendered_appearance?.appearance
 		preview.dir = dir
-		preview.set_position(0, pos)
+		switch(dir)
+			if(NORTH)
+				preview.set_position(1, 2)
+			if(EAST)
+				preview.set_position(2, 2)
+			if(SOUTH)
+				preview.set_position(1, 1)
+			if(WEST)
+				preview.set_position(2, 1)
 
 
 	client?.register_map_obj(src)

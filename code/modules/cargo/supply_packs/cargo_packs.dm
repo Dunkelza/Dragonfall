@@ -43,7 +43,7 @@
 
 /datum/supply_pack/service/empty
 	name = "Empty Supplypod"
-	desc = "Presenting the New Nanotrasen-Brand Bluespace Supplypod! Transport cargo with grace and ease! Call today and we'll shoot over a demo unit for just 300 credits!"
+	desc = "Presenting the New Nanotrasen-Brand Bluespace Supplypod! Transport cargo with grace and ease! Call today and we'll shoot over a demo unit for just \u00a5300!"
 	cost = CARGO_CRATE_VALUE
 	contains = list()
 	supply_flags = SUPPLY_PACK_DROPPOD_ONLY

@@ -387,6 +387,19 @@ GLOBAL_LIST_INIT(job_display_order, list(
 			card.registered_account = B
 			B.bank_cards += card
 
+			// Shadowrun chargen: apply Resources priority as a minimum starting balance.
+			// Done here (not in preference apply) to avoid preview side effects.
+			if(H.client?.prefs)
+				var/list/raw_state = H.client.prefs.read_preference(/datum/preference/blob/shadowrun_chargen)
+				if(islist(raw_state))
+					var/datum/preference/blob/shadowrun_chargen/pref = GLOB.preference_entries[/datum/preference/blob/shadowrun_chargen]
+					if(istype(pref))
+						var/list/state = pref.sanitize_state(raw_state)
+						var/letter = state?["priorities"]?["resources"]
+						var/desired_balance = pref.get_resources_amount(letter)
+						if(isnum(desired_balance) && desired_balance > 0 && B.account_balance < desired_balance)
+							B.adjust_money(desired_balance - B.account_balance)
+
 		H.sec_hud_set_ID()
 		if(!SSdatacore.finished_setup)
 			card.RegisterSignal(SSdcs, COMSIG_GLOB_DATACORE_READY, TYPE_PROC_REF(/obj/item/card/id, datacore_ready))

@@ -23,7 +23,7 @@ export const BankMachine = (props) => {
               buttons={
                 <Button
                   icon={siphoning ? 'times' : 'sync'}
-                  content={siphoning ? 'Stop Siphoning' : 'Siphon Credits'}
+                  content={siphoning ? 'Stop Siphoning' : 'Siphon Nuyen'}
                   selected={siphoning}
                   onClick={() => act(siphoning ? 'halt' : 'siphon')}
                 />
@@ -33,7 +33,7 @@ export const BankMachine = (props) => {
                 value={current_balance}
                 format={(value) => formatMoney(value)}
               />
-              {' cr'}
+              {' ¥'}
             </LabeledList.Item>
           </LabeledList>
         </Section>
