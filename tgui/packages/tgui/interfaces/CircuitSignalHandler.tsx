@@ -57,8 +57,8 @@ export class CircuitSignalHandler extends Component<
       .state as CircuitSignalHandlerState;
     const { global_port_types } = data;
     return (
-      <Window width={600} height={300}>
-        <Window.Content>
+      <Window theme="dragonfall" width={600} height={300}>
+        <Window.Content className="Shadowrun">
           <Stack vertical fill>
             <Stack.Item>
               <Stack fill>

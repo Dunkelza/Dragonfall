@@ -6,8 +6,8 @@ export const Bepis = (props) => {
   const { act, data } = useBackend();
   const { amount } = data;
   return (
-    <Window width={500} height={480}>
-      <Window.Content>
+    <Window width={500} height={480} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="Business Exploration Protocol Incubation Sink">
           <Section
             title="Information"

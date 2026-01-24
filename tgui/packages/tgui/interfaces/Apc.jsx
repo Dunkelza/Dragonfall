@@ -12,8 +12,8 @@ import { InterfaceLockNoticeBox } from './common/InterfaceLockNoticeBox';
 
 export const Apc = (props) => {
   return (
-    <Window width={450} height={432}>
-      <Window.Content>
+    <Window width={450} height={432} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <ApcContent />
       </Window.Content>
     </Window>

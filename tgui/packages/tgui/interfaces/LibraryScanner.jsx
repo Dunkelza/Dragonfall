@@ -4,8 +4,10 @@ import { Window } from '../layouts';
 
 export const LibraryScanner = (props) => {
   return (
-    <Window title="Library Scanner" width={350} height={150}>
-      <BookScanning />
+    <Window title="Library Scanner" width={350} height={150} theme="dragonfall">
+      <Window.Content className="Shadowrun">
+        <BookScanning />
+      </Window.Content>
     </Window>
   );
 };

@@ -36,8 +36,12 @@ export const CyborgBootDebug = (props) => {
   const { act, data } = useBackend();
   const { designation, master, lawsync, aisync, locomotion, panel } = data;
   return (
-    <Window width={master?.length > 26 ? 537 : 440} height={289}>
-      <Window.Content>
+    <Window
+      width={master?.length > 26 ? 537 : 440}
+      height={289}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Section title="Basic Settings">
           <LabeledList>
             <LabeledList.Item

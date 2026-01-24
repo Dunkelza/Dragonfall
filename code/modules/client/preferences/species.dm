@@ -7,7 +7,7 @@
 	priority = PREFERENCE_PRIORITY_SPECIES
 
 /datum/preference/choiced/species/deserialize(input, datum/preferences/preferences)
-	if (shadowrun_should_lock_nonappearance_prefs(preferences))
+	if (shadowrun_should_lock_chargen(preferences))
 		return ispath(preferences?.value_cache?[type], /datum/species) ? preferences.value_cache[type] : /datum/species/human
 	return GLOB.species_list[sanitize_inlist(input, get_choices_serialized(), SPECIES_HUMAN)]
 

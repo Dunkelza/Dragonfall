@@ -9,10 +9,24 @@
 	return
 
 /datum/preference/choiced/employer/create_default_value()
-	return /datum/employer/none
+	return /datum/employer/contractor
 
 /datum/preference/choiced/employer/init_possible_values()
 	return subtypesof(/datum/employer)
+
+/datum/preference/choiced/employer/compile_constant_data()
+	var/list/data = list()
+	var/list/choices = list()
+	var/list/display_names = list()
+
+	for (var/datum/employer/employer_type as anything in get_choices())
+		var/name = initial(employer_type.name)
+		choices += name
+		display_names[name] = name
+
+	data["choices"] = choices
+	data["display_names"] = display_names
+	return data
 
 /datum/preference/choiced/employer/value_changed(datum/preferences/prefs, new_value, old_value)
 	var/datum/preference/P = GLOB.preference_entries[/datum/preference/blob/job_priority]
@@ -29,7 +43,7 @@
 	return create_default_value()
 
 /datum/preference/choiced/employer/create_default_value()
-	return /datum/employer/none
+	return /datum/employer/contractor
 
 /datum/preference/choiced/employer/button_act(mob/user, datum/preferences/prefs, list/params)
 	if(params["info"])

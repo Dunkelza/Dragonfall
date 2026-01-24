@@ -25,12 +25,12 @@ export const LibraryConsole = (props) => {
   const { display_lore } = data;
   return (
     <Window
-      theme={display_lore ? 'spookyconsole' : ''}
+      theme={display_lore ? 'spookyconsole' : 'dragonfall'}
       title="Library Terminal"
       width={880}
       height={520}
     >
-      <Window.Content m="0">
+      <Window.Content m="0" className="Shadowrun">
         <Flex height="100%">
           <Flex.Item>
             <PopoutMenu />

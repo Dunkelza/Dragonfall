@@ -20,8 +20,8 @@ export const DisposalUnit = (props) => {
     stateText = 'Off';
   }
   return (
-    <Window width={300} height={180}>
-      <Window.Content>
+    <Window width={300} height={180} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="State" color={stateColor}>

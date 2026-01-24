@@ -14,8 +14,8 @@ export const AtmosFilter = (props) => {
   const { act, data } = useBackend();
   const filter_types = data.filter_types || [];
   return (
-    <Window width={420} height={249}>
-      <Window.Content>
+    <Window width={420} height={249} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Power">

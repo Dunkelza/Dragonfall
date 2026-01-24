@@ -13,8 +13,8 @@ export const BankMachine = (props) => {
   const { act, data } = useBackend();
   const { current_balance, siphoning, station_name } = data;
   return (
-    <Window width={350} height={155}>
-      <Window.Content>
+    <Window width={350} height={155} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <NoticeBox danger>Authorized personnel only</NoticeBox>
         <Section title={station_name + ' Vault'}>
           <LabeledList>

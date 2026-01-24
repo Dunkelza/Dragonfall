@@ -6,8 +6,13 @@ export const ColorBlindTester = (props) => {
   const { act, data } = useBackend();
   const { details } = data;
   return (
-    <Window title="Color Blindness Testing" width={600} height={515}>
-      <Window.Content>
+    <Window
+      title="Color Blindness Testing"
+      width={600}
+      height={515}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <NoticeBox warning>
           <Box>
             HEY FUCKOS, these filters are based off VERY OLD and VERY FLAWED

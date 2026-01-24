@@ -11,8 +11,13 @@ export const AutomatedAnnouncement = (props) => {
   const { act, data } = useBackend();
   const { arrivalToggle, arrival, newheadToggle, newhead } = data;
   return (
-    <Window title="Automated Announcement System" width={500} height={225}>
-      <Window.Content>
+    <Window
+      title="Automated Announcement System"
+      width={500}
+      height={225}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Section
           title="Arrival Announcement"
           buttons={

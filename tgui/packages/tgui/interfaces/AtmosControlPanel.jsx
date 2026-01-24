@@ -16,7 +16,12 @@ export const AtmosControlPanel = (props) => {
     sortBy((group) => group.id),
   ])(data.excited_groups);
   return (
-    <Window title="SSAir Control Panel" width={900} height={500}>
+    <Window
+      title="SSAir Control Panel"
+      width={900}
+      height={500}
+      theme="dragonfall"
+    >
       <Section m={1}>
         <Flex justify="space-between" align="baseline">
           <Flex.Item>
@@ -51,7 +56,7 @@ export const AtmosControlPanel = (props) => {
         </Flex>
       </Section>
       <Box fillPositionedParent top="45px">
-        <Window.Content scrollable>
+        <Window.Content className="Shadowrun" scrollable>
           <Section>
             <Table>
               <Table.Row header>

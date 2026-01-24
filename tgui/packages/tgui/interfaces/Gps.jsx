@@ -33,8 +33,13 @@ export const Gps = (props) => {
     ),
   ])(data.signals || []);
   return (
-    <Window title="Global Positioning System" width={470} height={700}>
-      <Window.Content scrollable>
+    <Window
+      title="Global Positioning System"
+      width={470}
+      height={700}
+      theme="dragonfall"
+    >
+      <Window.Content scrollable className="Shadowrun">
         <Section
           title="Control"
           buttons={

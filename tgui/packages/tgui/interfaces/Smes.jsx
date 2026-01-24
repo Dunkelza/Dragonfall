@@ -36,8 +36,8 @@ export const Smes = (props) => {
   const outputState =
     (outputting && 'good') || (charge > 0 && 'average') || 'bad';
   return (
-    <Window width={340} height={350}>
-      <Window.Content>
+    <Window width={340} height={350} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="Stored Energy">
           <ProgressBar
             value={capacityPercent * 0.01}

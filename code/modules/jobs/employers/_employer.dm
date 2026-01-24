@@ -3,11 +3,6 @@
 	var/short_name = ""
 	var/creator_info = ""
 
-/datum/employer/government
-	name = "UCAS"
-	short_name = "UCAS"
-	creator_info = "The United Canadian and American States. The default civil authority in much of North America, and a constant political backdrop to corporate life in the Seattle Metroplex."
-
 /datum/employer/daedalus
 	name = "Renraku Computer Systems"
 	short_name = "Renraku"
@@ -28,7 +23,7 @@
 	short_name = "Shiawase"
 	creator_info = "A logistics and infrastructure arm tied to Shiawase. Reliable shipping, tight security, and plenty of paperwork — the kind of backbone an arcology runs on."
 
-/datum/employer/none
-	name = "None"
-	short_name = "None"
-	creator_info = "Independent contractor. Freelancer. Someone with no corporate badge and a talent for finding trouble."
+/datum/employer/contractor
+	name = "Arcology Services"
+	short_name = "Services"
+	creator_info = "An umbrella designation for civilian service workers contracted to support arcology operations. Cooks, sanitation staff, entertainers, and other essential personnel who keep the arcology running day-to-day."

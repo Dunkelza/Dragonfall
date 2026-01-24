@@ -20,7 +20,7 @@ export class Thermometer extends Component {
   render() {
     const { act, data } = useBackend();
     return (
-      <Window width={70} height={430}>
+      <Window width={70} height={430} theme="dragonfall">
         <Stack
           fill
           align="center"

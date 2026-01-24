@@ -66,8 +66,8 @@ function nameSort(a: Area, b: Area) {
 
 export function PowerMonitor() {
   return (
-    <Window width={550} height={700}>
-      <Window.Content>
+    <Window theme="dragonfall" width={550} height={700}>
+      <Window.Content className="Shadowrun">
         <PowerMonitorContent />
       </Window.Content>
     </Window>

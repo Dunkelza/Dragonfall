@@ -1,7 +1,6 @@
 /datum/job/lawyer
 	title = JOB_LAWYER
-	description = "Advocate for prisoners, create law-binding contracts, \
-		ensure Security is following protocol and Space Law."
+	description = "Contracted legal representative. Navigate corporate law, advocate for detainees, and ensure protocols are followed. The fine print always matters."
 
 	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = FACTION_STATION
@@ -14,7 +13,7 @@
 	exp_granted_type = EXP_TYPE_CREW
 
 	employers = list(
-		/datum/employer/none
+		/datum/employer/contractor
 	)
 
 	outfits = list(

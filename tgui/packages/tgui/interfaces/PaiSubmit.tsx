@@ -33,8 +33,13 @@ export const PaiSubmit = (_) => {
   };
 
   return (
-    <Window width={400} height={460} title="pAI Candidacy Menu">
-      <Window.Content>
+    <Window
+      theme="dragonfall"
+      width={400}
+      height={460}
+      title="pAI Candidacy Menu"
+    >
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           <Stack.Item grow>
             <DetailsDisplay />

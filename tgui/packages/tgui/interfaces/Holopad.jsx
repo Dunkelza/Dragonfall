@@ -15,7 +15,7 @@ export const Holopad = (props) => {
   const { act, data } = useBackend();
   const { calling } = data;
   return (
-    <Window width={440} height={245}>
+    <Window width={440} height={245} theme="dragonfall">
       {!!calling && (
         <Modal fontSize="36px" fontFamily="monospace">
           <Flex align="center">
@@ -35,7 +35,7 @@ export const Holopad = (props) => {
           </Box>
         </Modal>
       )}
-      <Window.Content scrollable>
+      <Window.Content scrollable className="Shadowrun">
         <HolopadContent />
       </Window.Content>
     </Window>

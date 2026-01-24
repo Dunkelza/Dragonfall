@@ -23,8 +23,13 @@ export const ColorMatrixEditor = (props) => {
   ] = currentColor;
   const prefixes = ['r', 'g', 'b', 'a', 'c'];
   return (
-    <Window title="Color Matrix Editor" width={600} height={220}>
-      <Window.Content>
+    <Window
+      title="Color Matrix Editor"
+      width={600}
+      height={220}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Stack fill>
           <Stack.Item align="center">
             <Stack fill vertical>

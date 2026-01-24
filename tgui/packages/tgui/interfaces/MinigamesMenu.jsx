@@ -5,8 +5,8 @@ import { Window } from '../layouts';
 export const MinigamesMenu = (props) => {
   const { act } = useBackend();
   return (
-    <Window title="Minigames Menu" width={450} height={200}>
-      <Window.Content>
+    <Window title="Minigames Menu" width={450} height={200} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="Select Minigame" textAlign="center">
           <Stack>
             <Stack.Item grow>

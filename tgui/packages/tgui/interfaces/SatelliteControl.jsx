@@ -6,8 +6,8 @@ export const SatelliteControl = (props) => {
   const { act, data } = useBackend();
   const satellites = data.satellites || [];
   return (
-    <Window width={400} height={305}>
-      <Window.Content>
+    <Window width={400} height={305} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         {data.meteor_shield && (
           <Section>
             <LabeledList>

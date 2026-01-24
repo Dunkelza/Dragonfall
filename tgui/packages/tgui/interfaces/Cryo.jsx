@@ -30,8 +30,8 @@ const damageTypes = [
 
 export const Cryo = () => {
   return (
-    <Window width={400} height={550}>
-      <Window.Content scrollable>
+    <Window width={400} height={550} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <CryoContent />
       </Window.Content>
     </Window>

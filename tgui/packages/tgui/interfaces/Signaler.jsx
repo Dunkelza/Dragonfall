@@ -7,8 +7,8 @@ import { Window } from '../layouts';
 export const Signaler = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={280} height={132}>
-      <Window.Content>
+    <Window width={280} height={132} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <SignalerContent />
       </Window.Content>
     </Window>

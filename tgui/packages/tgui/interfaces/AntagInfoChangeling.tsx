@@ -208,8 +208,9 @@ const VictimPatternsSection = (props) => {
 export const AntagInfoChangeling = (props) => {
   const { data } = useBackend<Info>();
   return (
-    <Window width={620} height={580}>
+    <Window width={620} height={580} theme="dragonfall">
       <Window.Content
+        className="Shadowrun"
         style={{
           backgroundImage: 'none',
         }}

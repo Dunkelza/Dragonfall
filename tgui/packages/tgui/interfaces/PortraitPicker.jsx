@@ -14,8 +14,8 @@ export const PortraitPicker = (props) => {
   const current_portrait_asset_name =
     got_paintings && 'paintings' + '_' + paintings[listIndex]['md5'];
   return (
-    <Window theme="ntos" title="Portrait Picker" width={400} height={406}>
-      <Window.Content>
+    <Window theme="dragonfall" title="Portrait Picker" width={400} height={406}>
+      <Window.Content className="Shadowrun">
         <Flex height="100%" direction="column">
           <Flex.Item mb={1}>
             <Section title="Search">

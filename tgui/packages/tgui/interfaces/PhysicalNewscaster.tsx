@@ -3,8 +3,8 @@ import { Newscaster } from './Newscaster';
 
 export const PhysicalNewscaster = (props) => {
   return (
-    <Window width={575} height={560}>
-      <Window.Content scrollable>
+    <Window theme="dragonfall" width={575} height={560}>
+      <Window.Content className="Shadowrun" scrollable>
         <Newscaster />
       </Window.Content>
     </Window>

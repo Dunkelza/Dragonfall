@@ -48,8 +48,8 @@ export const SlimeBodySwapper = (props) => {
   const { act, data } = useBackend();
   const { bodies = [] } = data;
   return (
-    <Window width={400} height={400}>
-      <Window.Content scrollable>
+    <Window width={400} height={400} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section>
           {bodies.map((body) => (
             <BodyEntry

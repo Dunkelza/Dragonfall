@@ -6,8 +6,8 @@ export const StackingConsole = (props) => {
   const { act, data } = useBackend();
   const { machine } = data;
   return (
-    <Window width={320} height={340}>
-      <Window.Content scrollable>
+    <Window width={320} height={340} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         {!machine ? (
           <NoticeBox>No connected stacking machine</NoticeBox>
         ) : (

@@ -13,8 +13,8 @@ import { Window } from '../layouts';
 export const ThermoMachine = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={300} height={350}>
-      <Window.Content>
+    <Window width={300} height={350} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="Status">
           <LabeledList>
             <LabeledList.Item label="Temperature">

@@ -31,8 +31,8 @@ export const Tank = (props) => {
     connected,
   } = data;
   return (
-    <Window width={275} height={120}>
-      <Window.Content>
+    <Window width={275} height={120} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledControls>
             <LabeledControls.Item label="Pressure">

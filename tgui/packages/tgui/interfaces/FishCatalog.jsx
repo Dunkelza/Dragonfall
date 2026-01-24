@@ -15,8 +15,8 @@ export const FishCatalog = (props) => {
   );
   const [currentFish, setCurrentFish] = useLocalState('currentFish', null);
   return (
-    <Window width={500} height={300}>
-      <Window.Content>
+    <Window width={500} height={300} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Stack fill>
           <Stack.Item width="120px">
             <Section fill scrollable>

@@ -8,8 +8,8 @@ export const LaborClaimConsole = (props) => {
   const { act, data } = useBackend();
   const { can_go_home, id_points, ores, status_info, unclaimed_points } = data;
   return (
-    <Window width={315} height={440}>
-      <Window.Content>
+    <Window width={315} height={440} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Status">{status_info}</LabeledList.Item>

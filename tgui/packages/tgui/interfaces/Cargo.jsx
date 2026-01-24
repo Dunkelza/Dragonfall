@@ -21,8 +21,8 @@ import { Window } from '../layouts';
 
 export const Cargo = (props) => {
   return (
-    <Window width={780} height={750}>
-      <Window.Content scrollable>
+    <Window width={780} height={750} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <CargoContent />
       </Window.Content>
     </Window>
@@ -472,9 +472,9 @@ const CargoHelp = (props) => {
   return (
     <>
       <Section title="Department Orders">
-        Each department on the station will order crates from their own personal
-        consoles. These orders are ENTIRELY FREE! They do not come out of
-        cargo&apos;s budget, and rather put the consoles on cooldown. So
+        Each department in the arcology will order crates from their own
+        personal consoles. These orders are ENTIRELY FREE! They do not come out
+        of cargo&apos;s budget, and rather put the consoles on cooldown. So
         here&apos;s where you come in: The ordered crates will show up on your
         supply console, and you need to deliver the crates to the orderers.
         You&apos;ll actually be paid the full value of the department crate on

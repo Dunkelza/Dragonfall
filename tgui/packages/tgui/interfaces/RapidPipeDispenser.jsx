@@ -325,8 +325,8 @@ export const RapidPipeDispenser = (props) => {
   const { act, data } = useBackend();
   const { category: rootCategoryIndex } = data;
   return (
-    <Window width={450} height={575}>
-      <Window.Content>
+    <Window width={450} height={575} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           <Stack.Item>
             <SelectionSection />

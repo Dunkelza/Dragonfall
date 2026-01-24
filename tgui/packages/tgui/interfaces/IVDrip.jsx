@@ -15,8 +15,8 @@ export const IVDrip = (props) => {
     useInternalStorage,
   } = data;
   return (
-    <Window width={380} height={230}>
-      <Window.Content>
+    <Window width={380} height={230} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="IV Status">
           <LabeledList>
             <LabeledList.Item

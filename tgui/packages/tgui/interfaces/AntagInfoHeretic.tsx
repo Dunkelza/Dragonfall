@@ -305,8 +305,9 @@ export const AntagInfoHeretic = (props) => {
   const [currentTab, setTab] = useLocalState('currentTab', 0);
 
   return (
-    <Window width={675} height={600}>
+    <Window theme="dragonfall" width={675} height={600}>
       <Window.Content
+        className="Shadowrun"
         style={{
           backgroundImage: 'none',
           background: ascended

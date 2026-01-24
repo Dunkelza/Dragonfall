@@ -20,8 +20,8 @@ export const GasAnalyzerContent = (props) => {
 
 export const GasAnalyzer = (props) => {
   return (
-    <Window width={500} height={450}>
-      <Window.Content scrollable>
+    <Window theme="dragonfall" width={500} height={450}>
+      <Window.Content className="Shadowrun" scrollable>
         <GasAnalyzerContent />
       </Window.Content>
     </Window>

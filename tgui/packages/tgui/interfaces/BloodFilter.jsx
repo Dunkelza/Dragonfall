@@ -8,8 +8,8 @@ export const BloodFilter = (props) => {
   const { whitelist = [] } = data;
   const [chemName, setChemName] = useLocalState('chemName', '');
   return (
-    <Window width={500} height={300}>
-      <Window.Content scrollable>
+    <Window width={500} height={300} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Stack>
           <Stack.Item grow>
             <ChemFilterPane

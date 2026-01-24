@@ -15,8 +15,8 @@ export const ExosuitControlConsole = (props) => {
   const { act, data } = useBackend();
   const { mechs = [] } = data;
   return (
-    <Window width={500} height={500}>
-      <Window.Content scrollable>
+    <Window width={500} height={500} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         {mechs.length === 0 && <NoticeBox>No exosuits detected</NoticeBox>}
         {mechs.map((mech) => (
           <Section

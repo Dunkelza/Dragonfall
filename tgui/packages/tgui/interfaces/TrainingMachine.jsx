@@ -13,8 +13,8 @@ import { Window } from '../layouts';
 export const TrainingMachine = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={230} height={150} title="AURUMILL">
-      <Window.Content>
+    <Window width={230} height={150} title="AURUMILL" theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section fill title="Training Machine">
           <LabeledControls m={1}>
             <LabeledControls.Item label="Speed">

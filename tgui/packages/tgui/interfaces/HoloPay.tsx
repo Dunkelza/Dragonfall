@@ -28,8 +28,8 @@ type HoloPayData = {
 };
 
 const COPYRIGHT_SCROLLER = `Renraku Computer Systems (c) 2060-2079. All sales final.
-Use of departmental funds is prohibited. For more information, visit
-the Head of Personnel. All rights reserved. All trademarks are property
+Use of departmental funds is prohibited. For more information, contact
+Personnel Administration. All rights reserved. All trademarks are property
 of their respective owners.`;
 
 export const HoloPay = (_) => {
@@ -42,8 +42,8 @@ export const HoloPay = (_) => {
   };
 
   return (
-    <Window height="300" width="250" title="Holo Pay">
-      <Window.Content>
+    <Window height="300" width="250" title="Holo Pay" theme="dragonfall">
+      <Window.Content className="Shadowrun">
         {!owner ? (
           <NoticeBox>Error! Swipe an ID first.</NoticeBox>
         ) : (

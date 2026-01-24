@@ -19,8 +19,8 @@ export const Teg = (props) => {
     hot_pressure_out,
   } = data;
   return (
-    <Window width={400} height={470}>
-      <Window.Content>
+    <Window width={400} height={470} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="Status">
           <Button
             content="Refresh Parts"

@@ -59,8 +59,8 @@ export const PersonalCrafting = (props) => {
   const [tab, setTab] = useLocalState('tab', categories[0]?.name);
   const shownRecipes = recipes.filter((recipe) => recipe.category === tab);
   return (
-    <Window title="Crafting Menu" width={700} height={700}>
-      <Window.Content>
+    <Window title="Crafting Menu" width={700} height={700} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Stack fill>
           <Stack.Item grow={1}>
             <Section fill scrollable title="Category">

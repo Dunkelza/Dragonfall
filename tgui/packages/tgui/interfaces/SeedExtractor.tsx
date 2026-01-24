@@ -56,8 +56,8 @@ type SeedExtractorData = {
 export const SeedExtractor = (props) => {
   const { act, data } = useBackend<SeedExtractorData>();
   return (
-    <Window width={1100} height={400}>
-      <Window.Content>
+    <Window theme="dragonfall" width={1100} height={400}>
+      <Window.Content className="Shadowrun">
         <SeedList />
       </Window.Content>
     </Window>

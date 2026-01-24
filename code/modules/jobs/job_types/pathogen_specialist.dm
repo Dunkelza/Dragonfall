@@ -1,7 +1,6 @@
 /datum/job/virologist
 	title = JOB_VIROLOGIST
-	description = "Study the effects of various diseases and synthesize a \
-		vaccine for them. Engineer beneficial viruses."
+	description = "Analyze bioweapon threats, develop countermeasures against engineered pathogens, and synthesize vaccines for DocWagon's high-tier clients."
 	department_head = list(JOB_AUGUR)
 	faction = FACTION_STATION
 	total_positions = 1

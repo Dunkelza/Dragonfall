@@ -1,6 +1,6 @@
 /datum/job/bartender
 	title = JOB_BARTENDER
-	description = "Serve booze, mix drinks, keep the crew drunk."
+	description = "Contracted bar operator. Mix drinks, listen to corporate gossip, and keep the alcohol flowing. Everyone needs to unwind."
 	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = FACTION_STATION
 	pinpad_key = "ILOVESERVINGALCOHOLTODRUNKPEOPLE"
@@ -12,7 +12,7 @@
 	starting_paycheck_amount = 2 // They own a bar they have a lil cash.
 
 	employers = list(
-		/datum/employer/none
+		/datum/employer/contractor
 	)
 
 	outfits = list(

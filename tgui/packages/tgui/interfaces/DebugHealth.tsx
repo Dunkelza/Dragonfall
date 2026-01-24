@@ -21,8 +21,8 @@ export const DebugHealth = (props) => {
   const [currentTab, setCurrentTab] = useLocalState('currentTab', tabs[0]);
 
   return (
-    <Window width={400} height={500}>
-      <Window.Content>
+    <Window theme="dragonfall" width={400} height={500}>
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           <Stack.Item>
             <Tabs>

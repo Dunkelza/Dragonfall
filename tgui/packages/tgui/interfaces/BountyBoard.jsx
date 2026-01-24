@@ -16,8 +16,8 @@ import { UserDetails } from './Vending';
 
 export const BountyBoard = (props) => {
   return (
-    <Window width={550} height={600}>
-      <Window.Content scrollable>
+    <Window width={550} height={600} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <BountyBoardContent />
       </Window.Content>
     </Window>

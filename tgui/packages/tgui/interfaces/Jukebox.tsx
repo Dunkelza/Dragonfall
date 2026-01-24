@@ -30,8 +30,8 @@ export const Jukebox = (props) => {
   const { active, track_selected, track_length, track_author, volume } = data;
   const songs = data.songs.toSorted((a, b) => a.name.localeCompare(b.name));
   return (
-    <Window width={370} height={313}>
-      <Window.Content>
+    <Window width={370} height={313} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section
           title="Song Player"
           buttons={

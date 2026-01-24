@@ -8,8 +8,8 @@ export const Electropack = (props) => {
   const { act, data } = useBackend();
   const { power, code, frequency, minFrequency, maxFrequency } = data;
   return (
-    <Window width={260} height={137}>
-      <Window.Content>
+    <Window width={260} height={137} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Power">

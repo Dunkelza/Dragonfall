@@ -70,8 +70,13 @@ export const TrackedPlaytime = (props) => {
     adminTime,
   } = data;
   return (
-    <Window title="Tracked Playtime" width={550} height={650}>
-      <Window.Content scrollable>
+    <Window
+      title="Tracked Playtime"
+      width={550}
+      height={650}
+      theme="dragonfall"
+    >
+      <Window.Content scrollable className="Shadowrun">
         {(failReason &&
           ((failReason === JOB_REPORT_MENU_FAIL_REASON_TRACKING_DISABLED && (
             <Box>This server has disabled tracking.</Box>

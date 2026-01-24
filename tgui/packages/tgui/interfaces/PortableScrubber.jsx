@@ -8,8 +8,8 @@ export const PortableScrubber = (props) => {
   const { act, data } = useBackend();
   const filter_types = data.filter_types || [];
   return (
-    <Window width={320} height={396}>
-      <Window.Content>
+    <Window width={320} height={396} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <PortableBasicInfo />
         <Section title="Filters">
           {filter_types.map((filter) => (

@@ -23,8 +23,8 @@ export const Mancrowave = (props) => {
     current_setting,
   } = data;
   return (
-    <Window width={340} height={360}>
-      <Window.Content>
+    <Window width={340} height={360} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section
           title={occupant.name ? occupant.name : 'No Occupant'}
           buttons={

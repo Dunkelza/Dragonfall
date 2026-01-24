@@ -5,7 +5,7 @@ Assistant
 */
 /datum/job/assistant
 	title = JOB_ASSISTANT
-	description = "The everyman, an essential component to station life."
+	description = "A general worker assigned to whatever department needs extra hands. Low on the corporate ladder, but essential to keeping the arcology running."
 	faction = FACTION_STATION
 	total_positions = 5
 	spawn_positions = 5
@@ -16,7 +16,7 @@ Assistant
 		/datum/employer/aether,
 		/datum/employer/mars_exec,
 		/datum/employer/hermes,
-		/datum/employer/none
+		/datum/employer/contractor
 	)
 
 	outfits = list(

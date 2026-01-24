@@ -22,8 +22,8 @@ export const Intellicard = (props) => {
   } = data;
   const offline = isDead || isBraindead;
   return (
-    <Window width={500} height={500}>
-      <Window.Content scrollable>
+    <Window width={500} height={500} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section
           title={name || 'Empty Card'}
           buttons={

@@ -35,8 +35,8 @@ export const Autolathe = (props) => {
     (material) => material.mineral_amount > 0,
   );
   return (
-    <Window title="Autolathe" width={600} height={600}>
-      <Window.Content scrollable>
+    <Window title="Autolathe" width={600} height={600} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section title="Total Materials">
           <LabeledList>
             <LabeledList.Item label="Total Materials">

@@ -11,8 +11,8 @@ export const PagerConsole = (_) => {
   const { content } = data;
 
   return (
-    <Window width={450} height={70} title="Pager Console">
-      <Window.Content>
+    <Window theme="dragonfall" width={450} height={70} title="Pager Console">
+      <Window.Content className="Shadowrun">
         <Section fitted>
           <TextArea
             autoFocus

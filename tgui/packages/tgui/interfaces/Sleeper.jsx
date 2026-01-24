@@ -37,8 +37,8 @@ export const Sleeper = (props) => {
     return 0;
   });
   return (
-    <Window width={310} height={465}>
-      <Window.Content>
+    <Window width={310} height={465} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section
           title={occupant.name ? occupant.name : 'No Occupant'}
           minHeight="210px"

@@ -8,8 +8,8 @@ export const Holodeck = (props) => {
   const default_programs = data.default_programs || [];
   const emag_programs = data.emag_programs || [];
   return (
-    <Window width={400} height={500}>
-      <Window.Content scrollable>
+    <Window width={400} height={500} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section
           title="Default Programs"
           buttons={

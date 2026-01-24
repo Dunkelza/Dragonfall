@@ -12,8 +12,8 @@ import { Window } from '../layouts';
 export const AtmosMixer = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={370} height={179}>
-      <Window.Content>
+    <Window width={370} height={179} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Power">

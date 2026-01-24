@@ -3,15 +3,8 @@ import { useEffect, useMemo } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { useLocalState } from '../../../../backend';
-import {
-  Box,
-  Button,
-  Divider,
-  Input,
-  Stack,
-  Tabs,
-} from '../../../../components';
-import { createDropdownInput, Feature, FeatureValueProps } from './base';
+import { Box, Button, Icon, Input, Stack, Tabs } from '../../../../components';
+import { Feature, FeatureValueProps } from './base';
 
 type PriorityLetter = 'A' | 'B' | 'C' | 'D' | 'E';
 
@@ -939,7 +932,7 @@ const ShadowrunChargenInput = (
     return map;
   }, [skillsMeta, normalizedFilter, skills]);
 
-  const skillStatTabs = useMemo(() => {
+  const skillStatTabs = useMemo((): string[] => {
     const unique = new Set<string>();
     for (const sk of skillsMeta) {
       if (sk.parent_stat_name) {
@@ -952,7 +945,8 @@ const ShadowrunChargenInput = (
       sortByAttrName.set(a.name, a.sort);
     }
 
-    return [...unique].sort((a, b) => {
+    const result = Array.from(unique);
+    result.sort((a, b) => {
       const sa = sortByAttrName.get(a);
       const sb = sortByAttrName.get(b);
       if (Number.isFinite(sa) && Number.isFinite(sb) && sa !== sb) {
@@ -966,6 +960,7 @@ const ShadowrunChargenInput = (
       }
       return a.localeCompare(b);
     });
+    return result;
   }, [skillsMeta, effectiveAttributesMeta]);
 
   const [activeSkillStat, setActiveSkillStat] = useLocalState(
@@ -1050,12 +1045,7 @@ const ShadowrunChargenInput = (
   const letters = priorityLetters;
   const categories = priorityCategories;
 
-  const [activeTab, setActiveTab] = useLocalState(
-    `${props.featureId}_tab`,
-    'overview',
-  );
-
-  // Calculate validation status for tab badges
+  // Calculate validation status for badges
   const attrStatus =
     attrRemaining < 0 ? 'bad' : attrRemaining === 0 ? 'good' : 'neutral';
   const skillStatus =
@@ -1065,794 +1055,259 @@ const ShadowrunChargenInput = (
 
   return (
     <Stack vertical className="PreferencesMenu__ShadowrunChargen">
-      {/* Enhanced Header */}
+      {/* Enhanced Header with Save Status */}
       <Box
         className="PreferencesMenu__ShadowrunChargen__header"
         style={{
           background:
             'linear-gradient(135deg, rgba(0, 0, 0, 0.5), rgba(15, 15, 15, 0.7))',
-          borderLeft: '4px solid rgba(202, 165, 61, 0.8)',
-          padding: '0.8rem 1rem',
+          borderLeft: saved
+            ? '4px solid rgba(0, 255, 0, 0.8)'
+            : '4px solid rgba(202, 165, 61, 0.8)',
+          padding: '0.6rem 1rem',
           marginBottom: '0.5rem',
         }}
       >
-        <Box
-          style={{
-            fontSize: '1.2rem',
-            fontWeight: 'bold',
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            color: '#caa53d',
-          }}
-        >
-          Priority Allocation
-        </Box>
-        <Box style={{ fontSize: '0.85rem', opacity: '0.7' }}>
-          SR5-style Priority selection and point-buy for attributes/skills.
-        </Box>
-      </Box>
-
-      {/* Enhanced Summary Dashboard */}
-      <Box
-        style={{
-          background: 'rgba(0, 0, 0, 0.25)',
-          border: '2px solid rgba(255, 255, 255, 0.1)',
-          padding: '0.8rem',
-          marginBottom: '0.5rem',
-        }}
-      >
-        <Stack>
+        <Stack align="center">
           <Stack.Item grow>
             <Box
               style={{
-                borderLeft:
-                  attrStatus === 'bad'
-                    ? '3px solid rgba(255, 0, 0, 0.7)'
-                    : attrStatus === 'good'
-                      ? '3px solid rgba(0, 255, 0, 0.5)'
-                      : '3px solid rgba(202, 165, 61, 0.5)',
-                paddingLeft: '0.5rem',
-                marginBottom: '0.3rem',
+                fontSize: '1.1rem',
+                fontWeight: 'bold',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: saved ? '#6bff6b' : '#caa53d',
               }}
             >
-              <HintedLabel text="Attributes" hint={HINTS.attributes} />:{' '}
-              <b
-                style={{
-                  color:
-                    attrRemaining < 0
-                      ? '#ff6b6b'
-                      : attrRemaining === 0
-                        ? '#6bff6b'
-                        : '#caa53d',
-                }}
-              >
-                {attrRemaining}
-              </b>{' '}
-              remaining
+              {saved ? '✓ Sheet Saved' : 'Priority Allocation'}
             </Box>
-            <Box
-              style={{
-                borderLeft:
-                  skillStatus === 'bad'
-                    ? '3px solid rgba(255, 0, 0, 0.7)'
-                    : skillStatus === 'good'
-                      ? '3px solid rgba(0, 255, 0, 0.5)'
-                      : '3px solid rgba(97, 91, 125, 0.5)',
-                paddingLeft: '0.5rem',
-                marginBottom: '0.3rem',
-              }}
-            >
-              <HintedLabel text="Skills" hint={HINTS.skills} />:{' '}
-              <b
-                style={{
-                  color:
-                    skillRemaining < 0
-                      ? '#ff6b6b'
-                      : skillRemaining === 0
-                        ? '#6bff6b'
-                        : '#615b7d',
-                }}
-              >
-                {skillRemaining}
-              </b>{' '}
-              remaining
-              {skillGroupsMeta.length ? (
-                <>
-                  {' '}
-                  (+<b>{skillGroupRemaining}</b> group)
-                </>
-              ) : null}
-            </Box>
-            <Box
-              style={{
-                borderLeft:
-                  specialStatus === 'bad'
-                    ? '3px solid rgba(255, 0, 0, 0.7)'
-                    : specialStatus === 'good'
-                      ? '3px solid rgba(0, 255, 0, 0.5)'
-                      : '3px solid rgba(3, 252, 161, 0.5)',
-                paddingLeft: '0.5rem',
-              }}
-            >
-              <HintedLabel text="Special" hint={HINTS.special} />:{' '}
-              <b
-                style={{
-                  color:
-                    specialRemaining < 0
-                      ? '#ff6b6b'
-                      : specialRemaining === 0
-                        ? '#6bff6b'
-                        : '#03fca1',
-                }}
-              >
-                {specialRemaining}
-              </b>{' '}
-              remaining
+            <Box style={{ fontSize: '0.8rem', opacity: '0.7' }}>
+              {saved
+                ? 'Non-appearance edits locked. Reset All to make changes.'
+                : 'Configure priorities and spend points, then save.'}
             </Box>
           </Stack.Item>
-
           <Stack.Item>
-            <Box
-              style={{
-                background: 'rgba(0, 0, 0, 0.2)',
-                padding: '0.5rem',
-                borderLeft: '3px solid rgba(232, 197, 71, 0.5)',
-              }}
-            >
-              <Box>
-                <HintedLabel text="Magic" hint={HINTS.magic} />:{' '}
-                <b style={{ color: '#e8c547' }}>{magicRating}</b>
-              </Box>
-              <Box>
-                <HintedLabel text="Resources" hint={HINTS.resources} />:{' '}
-                <b style={{ color: '#e8c547' }}>
-                  {formatNuyen(resourcesAmount)}
-                </b>
-              </Box>
-              <Box>
-                <HintedLabel text="Metatype SP" hint={HINTS.metatypeSp} />:{' '}
-                <b style={{ color: '#03fca1' }}>{totalSpecialPoints}</b>
-              </Box>
-            </Box>
-          </Stack.Item>
-        </Stack>
-      </Box>
-
-      <Tabs fluid className="PreferencesMenu__ShadowrunChargen__mainTabs">
-        <Tabs.Tab
-          selected={activeTab === 'overview'}
-          onClick={() => setActiveTab('overview')}
-          icon="clipboard"
-        >
-          <HintedLabel text="Overview" hint={HINTS.overview} />
-        </Tabs.Tab>
-        <Tabs.Tab
-          selected={activeTab === 'priorities'}
-          onClick={() => setActiveTab('priorities')}
-          icon="layer-group"
-        >
-          <HintedLabel text="Priorities" hint={HINTS.priorities} />
-        </Tabs.Tab>
-        <Tabs.Tab
-          selected={activeTab === 'attributes'}
-          onClick={() => setActiveTab('attributes')}
-          icon="chart-bar"
-        >
-          <HintedLabel text="Attributes" hint={HINTS.attributes} />
-        </Tabs.Tab>
-        <Tabs.Tab
-          selected={activeTab === 'skills'}
-          onClick={() => setActiveTab('skills')}
-          icon="tasks"
-        >
-          <HintedLabel text="Skills" hint={HINTS.skills} />
-        </Tabs.Tab>
-        <Tabs.Tab
-          selected={activeTab === 'special'}
-          onClick={() => setActiveTab('special')}
-          icon="star"
-        >
-          <HintedLabel text="Special" hint={HINTS.special} />
-        </Tabs.Tab>
-      </Tabs>
-
-      <Divider />
-
-      {activeTab === 'overview' ? (
-        <Stack
-          vertical
-          className="PreferencesMenu__ShadowrunChargen__tabContent"
-        >
-          {/* Status Banner */}
-          <Box
-            style={{
-              background: saved
-                ? 'rgba(0, 255, 0, 0.1)'
-                : 'rgba(255, 255, 255, 0.05)',
-              border: saved
-                ? '2px solid rgba(0, 255, 0, 0.3)'
-                : '2px solid rgba(255, 255, 255, 0.1)',
-              padding: '0.6rem 0.8rem',
-              marginBottom: '0.5rem',
-            }}
-          >
-            {saved ? (
-              <Box color="good" bold>
-                ✓ Sheet saved. Non-appearance edits are locked until you Reset
-                All.
-              </Box>
-            ) : (
-              <Box color="grey">
-                Save locks non-appearance edits and is required to join.
-              </Box>
-            )}
-          </Box>
-
-          {/* Current Priorities Section */}
-          <Box
-            style={{
-              background: 'rgba(0, 0, 0, 0.2)',
-              border: '2px solid rgba(202, 165, 61, 0.3)',
-              padding: '0.6rem',
-              marginBottom: '0.5rem',
-            }}
-          >
-            <Box
-              bold
-              style={{
-                marginBottom: '0.4rem',
-                color: '#caa53d',
-                borderBottom: '1px solid rgba(202, 165, 61, 0.3)',
-                paddingBottom: '0.3rem',
-              }}
-            >
-              Current Priorities
-            </Box>
-            {categories.map((category) => {
-              const display =
-                constData.priority_display_names?.[category] || category;
-              return (
-                <Stack
-                  key={category}
-                  align="center"
-                  style={{
-                    padding: '0.2rem 0',
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                  }}
-                >
-                  <Stack.Item grow>
-                    <Box>{display}</Box>
-                  </Stack.Item>
-                  <Stack.Item>
-                    <Box
-                      bold
-                      style={{
-                        background: 'rgba(0, 0, 0, 0.3)',
-                        padding: '0.15rem 0.5rem',
-                        minWidth: '2rem',
-                        textAlign: 'center',
-                        color: '#caa53d',
-                      }}
-                    >
-                      {priorities[category] || 'E'}
-                    </Box>
-                  </Stack.Item>
-                </Stack>
-              );
-            })}
-          </Box>
-
-          {/* Character Info */}
-          <Box
-            style={{
-              background: 'rgba(0, 0, 0, 0.2)',
-              border: '2px solid rgba(3, 252, 161, 0.3)',
-              padding: '0.6rem',
-              marginBottom: '0.5rem',
-            }}
-          >
             <Stack>
-              <Stack.Item grow>
-                <Box>
-                  <HintedLabel text="Awakening" hint={HINTS.awakening} />:{' '}
-                  <b style={{ color: '#03fca1' }}>{awakening}</b>
-                </Box>
-              </Stack.Item>
-              <Stack.Item grow>
-                <Box>
-                  <HintedLabel text="Metatype" hint={HINTS.metatype} />:{' '}
-                  <b style={{ color: '#03fca1' }}>
-                    {metatypeChoices.find((c) => c.id === metatypeSpecies)
-                      ?.name || metatypeSpecies}
-                  </b>
-                </Box>
-              </Stack.Item>
-            </Stack>
-          </Box>
-
-          {/* Allocation Summary */}
-          <Box
-            style={{
-              background: 'rgba(0, 0, 0, 0.2)',
-              border: '2px solid rgba(255, 255, 255, 0.1)',
-              padding: '0.6rem',
-              marginBottom: '0.5rem',
-            }}
-          >
-            <Box
-              bold
-              style={{
-                marginBottom: '0.4rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                paddingBottom: '0.3rem',
-              }}
-            >
-              Allocation Summary
-            </Box>
-            <Box>
-              Attributes: <b>{attrSpent}</b> / {totalAttrPoints}{' '}
-              {attrRemaining < 0 ? (
-                <Box as="span" color="bad">
-                  (overspent)
-                </Box>
-              ) : (
-                <Box as="span" color="good">
-                  ({attrRemaining} remaining)
-                </Box>
-              )}
-            </Box>
-            {spentAttributes.length ? (
-              <Box color="grey" ml={0.5}>
-                {spentAttributes.map((a) => `${a.name} ${a.value}`).join(', ')}
-              </Box>
-            ) : (
-              <Box color="grey" ml={0.5}>
-                No attribute points spent.
-              </Box>
-            )}
-
-            <Box mt={0.5}>
-              Skills: <b>{skillSpent}</b> / {totalSkillPoints}{' '}
-              {skillRemaining < 0 ? (
-                <Box as="span" color="bad">
-                  (overspent)
-                </Box>
-              ) : (
-                <Box as="span" color="good">
-                  ({skillRemaining} remaining)
-                </Box>
-              )}
-            </Box>
-            {Array.from(spentSkillsByStat.entries()).length ? (
-              <Box color="grey" ml={0.5}>
-                {Array.from(spentSkillsByStat.entries())
-                  .map(([parent, entries]) => {
-                    const list = entries
-                      .map((sk) => `${sk.name} ${skills[sk.id]}`)
-                      .join(', ');
-                    return `${parent}: ${list}`;
-                  })
-                  .join(' | ')}
-              </Box>
-            ) : (
-              <Box color="grey" ml={0.5}>
-                No skill points spent.
-              </Box>
-            )}
-
-            {skillGroupsMeta.length ? (
-              <>
-                <Box mt={0.5}>
-                  Skill Groups: <b>{skillGroupSpent}</b> /{' '}
-                  {totalSkillGroupPoints}{' '}
-                  {skillGroupRemaining < 0 ? (
-                    <Box as="span" color="bad">
-                      (overspent)
-                    </Box>
-                  ) : (
-                    <Box as="span" color="good">
-                      ({skillGroupRemaining} remaining)
-                    </Box>
-                  )}
-                </Box>
-                {spentSkillGroups.length ? (
-                  <Box color="grey" ml={0.5}>
-                    {spentSkillGroups
-                      .map((g) => `${g.name} ${g.value}`)
-                      .join(', ')}
-                  </Box>
-                ) : (
-                  <Box color="grey" ml={0.5}>
-                    No skill group points spent.
-                  </Box>
-                )}
-              </>
-            ) : null}
-          </Box>
-
-          {/* Tools Section */}
-          <Box
-            style={{
-              background: 'rgba(0, 0, 0, 0.2)',
-              border: '2px solid rgba(255, 255, 255, 0.1)',
-              padding: '0.6rem',
-              marginTop: '0.5rem',
-            }}
-          >
-            <Box
-              bold
-              style={{
-                marginBottom: '0.4rem',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-                paddingBottom: '0.3rem',
-              }}
-            >
-              Tools
-            </Box>
-            <Stack wrap>
               <Stack.Item>
-                <Button color="bad" onClick={onResetAll}>
+                <Button
+                  color="bad"
+                  icon="undo"
+                  onClick={onResetAll}
+                  tooltip="Reset all selections and unlock editing"
+                >
                   Reset All
                 </Button>
               </Stack.Item>
-              <Stack.Item>
+              <Stack.Item ml={0.5}>
                 {!saved ? (
                   <Button
                     color="good"
+                    icon="save"
                     disabled={isAllocationInvalid}
                     onClick={onSaveSheet}
+                    tooltip={
+                      isAllocationInvalid
+                        ? 'Fix allocation errors before saving'
+                        : 'Save and lock character sheet'
+                    }
                   >
                     Save Sheet
                   </Button>
                 ) : (
-                  <Button color="good" disabled>
+                  <Button color="good" icon="check" disabled>
                     Saved
                   </Button>
                 )}
               </Stack.Item>
-              <Stack.Item>
-                <Button disabled={locked} onClick={onClearAttributes}>
-                  Clear Attributes
-                </Button>
-              </Stack.Item>
-              <Stack.Item>
-                <Button disabled={locked} onClick={onClearSkills}>
-                  Clear Skills
-                </Button>
-              </Stack.Item>
-              {skillGroupsMeta.length ? (
-                <Stack.Item>
-                  <Button disabled={locked} onClick={onClearSkillGroups}>
-                    Clear Groups
-                  </Button>
-                </Stack.Item>
-              ) : null}
-              <Stack.Item>
-                <Button disabled={locked} onClick={onClearSpecial}>
-                  Clear Special
-                </Button>
-              </Stack.Item>
-              <Stack.Item>
-                <Button disabled={locked} onClick={onResetMetatype}>
-                  Reset Metatype
-                </Button>
-              </Stack.Item>
-              <Stack.Item>
-                <Button
-                  disabled={locked}
-                  selected={isAllocationInvalid}
-                  onClick={onNormalize}
-                >
-                  Normalize
-                </Button>
-              </Stack.Item>
             </Stack>
-          </Box>
-
-          {/* Note Section */}
-          <Box
-            color="grey"
-            style={{
-              background: 'rgba(0, 0, 0, 0.15)',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              padding: '0.5rem',
-              marginTop: '0.5rem',
-              fontStyle: 'italic',
-            }}
-          >
-            Note: Magic/resources are applied on spawn; metatype currently only
-            grants spendable special points (Edge, and Magic if awakened). Skill
-            group points apply as minimums to group member skills.
-          </Box>
+          </Stack.Item>
         </Stack>
-      ) : null}
+      </Box>
 
-      {activeTab === 'priorities' ? (
-        <Stack
-          vertical
-          className="PreferencesMenu__ShadowrunChargen__tabContent"
-        >
-          {/* Priority Selection Section */}
-          <Box
-            style={{
-              background: 'rgba(0, 0, 0, 0.2)',
-              border: '2px solid rgba(202, 165, 61, 0.3)',
-              padding: '0.6rem',
-              marginBottom: '0.5rem',
-            }}
-          >
-            <Box
-              bold
-              style={{
-                marginBottom: '0.4rem',
-                color: '#caa53d',
-                borderBottom: '1px solid rgba(202, 165, 61, 0.3)',
-                paddingBottom: '0.3rem',
-              }}
+      {/* Quick Tools Row */}
+      <Box
+        style={{
+          background:
+            'linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(15, 15, 20, 0.4))',
+          padding: '0.35rem 0.6rem',
+          marginBottom: '0.5rem',
+          border: '1px solid rgba(202, 165, 61, 0.15)',
+          borderRadius: '2px',
+        }}
+      >
+        <Stack align="center">
+          <Stack.Item grow>
+            <Box style={{ fontSize: '0.85rem', color: '#888' }}>Clear:</Box>
+          </Stack.Item>
+          <Stack.Item>
+            <Button
+              icon="eraser"
+              disabled={locked}
+              onClick={onClearAttributes}
+              tooltip="Clear all attribute points"
             >
-              Priority Selection
-            </Box>
-            <Stack vertical>
-              {categories.map((category) => {
-                const display =
-                  constData.priority_display_names?.[category] || category;
-
-                const choices = Object.fromEntries(
-                  letters.map((l) => [l, l]),
-                ) as Record<PriorityLetter, string>;
-
-                const DropdownInput = createDropdownInput<PriorityLetter>(
-                  choices,
-                  { disabled: locked },
-                );
-
-                const currentLetter = priorities[category] || 'E';
-
-                return (
-                  <Stack
-                    key={category}
-                    align="center"
-                    style={{
-                      padding: '0.3rem 0',
-                      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                    }}
-                  >
-                    <Stack.Item grow>
-                      <Box>{display}</Box>
-                    </Stack.Item>
-                    <Stack.Item>
-                      <Box
-                        style={{
-                          background: 'rgba(0, 0, 0, 0.3)',
-                          padding: '0.1rem 0.4rem',
-                          marginRight: '0.5rem',
-                          color:
-                            currentLetter === 'A'
-                              ? '#4caf50'
-                              : currentLetter === 'B'
-                                ? '#8bc34a'
-                                : currentLetter === 'C'
-                                  ? '#ffeb3b'
-                                  : currentLetter === 'D'
-                                    ? '#ff9800'
-                                    : '#f44336',
-                          fontWeight: 'bold',
-                          minWidth: '1.5rem',
-                          textAlign: 'center',
-                        }}
-                      >
-                        {currentLetter}
-                      </Box>
-                    </Stack.Item>
-                    <Stack.Item width="6em">
-                      <DropdownInput
-                        act={props.act}
-                        featureId={props.featureId}
-                        serverData={undefined}
-                        value={currentLetter}
-                        handleSetValue={(v) => onSetPriorities(category, v)}
-                      />
-                    </Stack.Item>
-                  </Stack>
-                );
-              })}
-            </Stack>
-          </Box>
-
-          {/* Priority Outputs Section */}
-          <Box
-            style={{
-              background: 'rgba(0, 0, 0, 0.2)',
-              border: '2px solid rgba(3, 252, 161, 0.3)',
-              padding: '0.6rem',
-              marginBottom: '0.5rem',
-            }}
-          >
-            <Box
-              bold
-              style={{
-                marginBottom: '0.4rem',
-                color: '#03fca1',
-                borderBottom: '1px solid rgba(3, 252, 161, 0.3)',
-                paddingBottom: '0.3rem',
-              }}
+              Attributes
+            </Button>
+          </Stack.Item>
+          <Stack.Item>
+            <Button
+              icon="eraser"
+              disabled={locked}
+              onClick={onClearSkills}
+              tooltip="Clear all skill points"
             >
-              Priority Outputs
-            </Box>
-            <Stack vertical>
-              <Stack align="center" style={{ marginBottom: '0.2rem' }}>
-                <Stack.Item grow>
-                  <Box>Magic Rating</Box>
-                </Stack.Item>
-                <Stack.Item>
-                  <Box
-                    bold
-                    style={{
-                      color: magicRating > 0 ? '#e8c547' : '#888',
-                      background: 'rgba(0, 0, 0, 0.3)',
-                      padding: '0.1rem 0.5rem',
-                      minWidth: '3rem',
-                      textAlign: 'center',
-                    }}
-                  >
-                    {magicRating}
-                  </Box>
-                </Stack.Item>
-                <Stack.Item ml={0.5}>
-                  <Box color="grey">(Priority {magicLetter})</Box>
-                </Stack.Item>
-              </Stack>
-              <Stack align="center" style={{ marginBottom: '0.2rem' }}>
-                <Stack.Item grow>
-                  <Box>Starting Resources</Box>
-                </Stack.Item>
-                <Stack.Item>
-                  <Box
-                    bold
-                    style={{
-                      color: '#e8c547',
-                      background: 'rgba(0, 0, 0, 0.3)',
-                      padding: '0.1rem 0.5rem',
-                      minWidth: '5rem',
-                      textAlign: 'center',
-                    }}
-                  >
-                    ¥{resourcesAmount.toLocaleString()}
-                  </Box>
-                </Stack.Item>
-                <Stack.Item ml={0.5}>
-                  <Box color="grey">(Priority {resourcesLetter})</Box>
-                </Stack.Item>
-              </Stack>
-              <Stack align="center">
-                <Stack.Item grow>
-                  <Box>Special Points</Box>
-                </Stack.Item>
-                <Stack.Item>
-                  <Box
-                    bold
-                    style={{
-                      color: '#03fca1',
-                      background: 'rgba(0, 0, 0, 0.3)',
-                      padding: '0.1rem 0.5rem',
-                      minWidth: '3rem',
-                      textAlign: 'center',
-                    }}
-                  >
-                    {totalSpecialPoints}
-                  </Box>
-                </Stack.Item>
-                <Stack.Item ml={0.5}>
-                  <Box color="grey">(Metatype {metatypeLetter})</Box>
-                </Stack.Item>
-              </Stack>
-            </Stack>
-          </Box>
-
-          {/* Note Section */}
-          <Box
-            color="grey"
-            style={{
-              background: 'rgba(0, 0, 0, 0.15)',
-              border: '1px solid rgba(255, 255, 255, 0.05)',
-              padding: '0.5rem',
-              fontStyle: 'italic',
-            }}
-          >
-            <b>Note:</b> Metatype (species) and Awakening are configured in the{' '}
-            <b>Biometrics & Metatype</b> section above. Your priority selections
-            here determine which species and awakening options are available.
-          </Box>
+              Skills
+            </Button>
+          </Stack.Item>
+          {skillGroupsMeta.length ? (
+            <Stack.Item>
+              <Button
+                icon="eraser"
+                disabled={locked}
+                onClick={onClearSkillGroups}
+                tooltip="Clear all skill group points"
+              >
+                Groups
+              </Button>
+            </Stack.Item>
+          ) : null}
+          <Stack.Item>
+            <Button
+              icon="eraser"
+              disabled={locked}
+              onClick={onClearSpecial}
+              tooltip="Clear all special points"
+            >
+              Special
+            </Button>
+          </Stack.Item>
+          {isAllocationInvalid && (
+            <Stack.Item>
+              <Button
+                icon="magic"
+                color="caution"
+                onClick={onNormalize}
+                tooltip="Auto-fix allocation errors"
+              >
+                Fix Errors
+              </Button>
+            </Stack.Item>
+          )}
         </Stack>
-      ) : null}
+      </Box>
 
-      {activeTab === 'attributes' ? (
-        <Stack
-          vertical
-          className="PreferencesMenu__ShadowrunChargen__tabContent"
+      {/* Skills Section - Now the main content (Attributes/Special moved to sidebar) */}
+      <Stack vertical className="PreferencesMenu__ShadowrunChargen__tabContent">
+        {/* Skills Points Header */}
+        <Box
+          style={{
+            background: 'rgba(97, 91, 125, 0.12)',
+            border: '1px solid rgba(97, 91, 125, 0.25)',
+            borderRadius: '2px',
+            marginBottom: '0.5rem',
+          }}
         >
-          {/* Points Summary */}
           <Box
             style={{
-              background: 'rgba(0, 0, 0, 0.2)',
-              border:
-                attrRemaining < 0
-                  ? '2px solid rgba(255, 0, 0, 0.4)'
-                  : attrRemaining === 0
-                    ? '2px solid rgba(0, 255, 0, 0.3)'
-                    : '2px solid rgba(202, 165, 61, 0.3)',
-              padding: '0.6rem',
-              marginBottom: '0.5rem',
+              borderBottom: '1px solid rgba(97, 91, 125, 0.25)',
+              padding: '0.35rem 0.5rem',
             }}
           >
             <Stack align="center">
               <Stack.Item grow>
-                <Box bold style={{ color: '#caa53d' }}>
-                  Attribute Points
+                <Box bold style={{ color: '#9b8fc7', fontSize: '0.9rem' }}>
+                  <Icon name="book" mr={0.5} />
+                  Skills
                 </Box>
               </Stack.Item>
               <Stack.Item>
-                <Box>
-                  <b
-                    style={{
-                      color:
-                        attrRemaining < 0
-                          ? '#ff6b6b'
-                          : attrRemaining === 0
-                            ? '#6bff6b'
-                            : '#caa53d',
-                    }}
-                  >
-                    {attrSpent}
-                  </b>{' '}
-                  / {totalAttrPoints} spent
-                </Box>
-              </Stack.Item>
-              <Stack.Item ml={1}>
                 <Box
                   style={{
-                    background: 'rgba(0, 0, 0, 0.3)',
-                    padding: '0.2rem 0.6rem',
+                    fontSize: '0.8rem',
                     color:
-                      attrRemaining < 0
+                      skillRemaining < 0
                         ? '#ff6b6b'
-                        : attrRemaining === 0
+                        : skillRemaining === 0
                           ? '#6bff6b'
-                          : '#caa53d',
-                    fontWeight: 'bold',
+                          : '#9b8fc7',
                   }}
                 >
-                  {attrRemaining} remaining
+                  <b>{skillSpent}</b>/{totalSkillPoints}{' '}
+                  <Box as="span" style={{ opacity: '0.6' }}>
+                    ({skillRemaining} left)
+                  </Box>
                 </Box>
               </Stack.Item>
+              {skillGroupsMeta.length ? (
+                <Stack.Item ml={1}>
+                  <Box
+                    style={{
+                      fontSize: '0.8rem',
+                      color:
+                        skillGroupRemaining < 0
+                          ? '#ff6b6b'
+                          : skillGroupRemaining === 0
+                            ? '#6bff6b'
+                            : '#888',
+                    }}
+                  >
+                    Groups: <b>{skillGroupSpent}</b>/{totalSkillGroupPoints}
+                  </Box>
+                </Stack.Item>
+              ) : null}
             </Stack>
           </Box>
+        </Box>
 
-          {/* Attributes List */}
+        {/* Skill Groups Section */}
+        {skillGroupsMeta.length ? (
           <Box
             style={{
               background: 'rgba(0, 0, 0, 0.15)',
               border: '1px solid rgba(255, 255, 255, 0.1)',
-              padding: '0.4rem',
+              padding: '0.5rem',
+              marginBottom: '0.5rem',
             }}
           >
+            <Stack align="center" mb={0.5}>
+              <Stack.Item grow>
+                <Box bold>
+                  <HintedLabel text="Skill Groups" hint={HINTS.skillGroups} />
+                </Box>
+              </Stack.Item>
+              <Stack.Item>
+                <Button
+                  onClick={() => setShowGroupMembers(!showGroupMembers)}
+                  selected={showGroupMembers}
+                  icon={showGroupMembers ? 'eye' : 'eye-slash'}
+                >
+                  {showGroupMembers ? 'Hide' : 'Show'} members
+                </Button>
+              </Stack.Item>
+            </Stack>
+
             <Stack vertical>
-              {[...effectiveAttributesMeta]
-                .sort((a, b) => a.sort - b.sort)
-                .map((attr) => {
-                  const current = attributes[attr.id] ?? attr.min;
-                  const canDec = current > attr.min;
-                  const canInc = current < attr.max && attrRemaining > 0;
+              {[...skillGroupsMeta]
+                .sort((a, b) => a.name.localeCompare(b.name))
+                .map((g) => {
+                  const current = skillGroups[g.id] ?? 0;
+                  const canDec = current > 0;
+                  const canInc = current < 6 && skillGroupRemaining > 0;
+
+                  const memberNames = (g.skills || [])
+                    .map((id) => skillNameById.get(id) || id)
+                    .sort((a, b) => a.localeCompare(b));
 
                   return (
                     <Box
-                      key={attr.id}
+                      key={g.id}
                       style={{
                         padding: '0.3rem 0.4rem',
                         borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
                         background:
-                          current > attr.min
-                            ? 'rgba(202, 165, 61, 0.1)'
+                          current > 0
+                            ? 'rgba(97, 91, 125, 0.15)'
                             : 'transparent',
                       }}
                     >
@@ -1862,11 +1317,8 @@ const ShadowrunChargenInput = (
                             minWidth: '2rem',
                             textAlign: 'center',
                             fontWeight: 'bold',
-                            fontSize: '1.1em',
                             color:
-                              current > attr.min
-                                ? '#caa53d'
-                                : 'rgba(255,255,255,0.7)',
+                              current > 0 ? '#615b7d' : 'rgba(255,255,255,0.5)',
                           }}
                         >
                           {current}
@@ -1874,19 +1326,24 @@ const ShadowrunChargenInput = (
                         <Stack.Item grow>
                           <Box bold>
                             <HintedLabel
-                              text={attr.name}
-                              hint={attributeHint(attr.id, attr.name)}
+                              text={g.name}
+                              hint={`Skill Group. ${memberNames.length} skills: ${memberNames
+                                .slice(0, 8)
+                                .join(
+                                  ', ',
+                                )}${memberNames.length > 8 ? ', and more' : ''}. Increasing the group raises member skills while group-locked.`}
                             />
                           </Box>
                           <Box color="grey" style={{ fontSize: '0.85em' }}>
-                            Min {attr.min} / Max {attr.max}
+                            {showGroupMembers
+                              ? memberNames.join(', ')
+                              : `${memberNames.length} skills`}
                           </Box>
                         </Stack.Item>
-
                         <Stack.Item>
                           <Button
                             disabled={locked || !canDec}
-                            onClick={() => onBumpAttribute(attr.id, -1)}
+                            onClick={() => onBumpSkillGroup(g.id, -1)}
                           >
                             −
                           </Button>
@@ -1904,7 +1361,7 @@ const ShadowrunChargenInput = (
                         <Stack.Item>
                           <Button
                             disabled={locked || !canInc}
-                            onClick={() => onBumpAttribute(attr.id, +1)}
+                            onClick={() => onBumpSkillGroup(g.id, +1)}
                           >
                             +
                           </Button>
@@ -1915,654 +1372,244 @@ const ShadowrunChargenInput = (
                 })}
             </Stack>
           </Box>
-        </Stack>
-      ) : null}
+        ) : null}
 
-      {activeTab === 'special' ? (
-        <Stack
-          vertical
-          className="PreferencesMenu__ShadowrunChargen__tabContent"
+        {/* Filter and Skill Tabs */}
+        <Box
+          style={{
+            background: 'rgba(0, 0, 0, 0.15)',
+            padding: '0.5rem',
+            marginBottom: '0.3rem',
+          }}
         >
-          {/* Points Summary */}
-          <Box
-            style={{
-              background: 'rgba(0, 0, 0, 0.2)',
-              border:
-                specialRemaining < 0
-                  ? '2px solid rgba(255, 0, 0, 0.4)'
-                  : specialRemaining === 0
-                    ? '2px solid rgba(0, 255, 0, 0.3)'
-                    : '2px solid rgba(3, 252, 161, 0.3)',
-              padding: '0.6rem',
-              marginBottom: '0.5rem',
-            }}
+          <Stack align="center">
+            <Stack.Item grow>
+              <Input
+                placeholder="Filter skills..."
+                value={filterText}
+                onChange={(_, v) => setFilterText(v)}
+              />
+            </Stack.Item>
+            <Stack.Item ml={0.5}>
+              <Button icon="times" onClick={() => setFilterText('')}>
+                Clear
+              </Button>
+            </Stack.Item>
+          </Stack>
+        </Box>
+
+        <Tabs className="PreferencesMenu__ShadowrunChargen__statTabs">
+          <Tabs.Tab
+            selected={activeSkillStat === 'All'}
+            onClick={() => setActiveSkillStat('All')}
+            icon="list"
           >
-            <Stack align="center">
-              <Stack.Item grow>
-                <Box bold style={{ color: '#03fca1' }}>
-                  Special Points
-                </Box>
-              </Stack.Item>
-              <Stack.Item>
-                <Box>
-                  <b
-                    style={{
-                      color:
-                        specialRemaining < 0
-                          ? '#ff6b6b'
-                          : specialRemaining === 0
-                            ? '#6bff6b'
-                            : '#03fca1',
-                    }}
-                  >
-                    {specialSpent}
-                  </b>{' '}
-                  / {totalSpecialPoints} spent
-                </Box>
-              </Stack.Item>
-              <Stack.Item ml={1}>
-                <Box
-                  style={{
-                    background: 'rgba(0, 0, 0, 0.3)',
-                    padding: '0.2rem 0.6rem',
-                    color:
-                      specialRemaining < 0
-                        ? '#ff6b6b'
-                        : specialRemaining === 0
-                          ? '#6bff6b'
-                          : '#03fca1',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  {specialRemaining} remaining
-                </Box>
-              </Stack.Item>
-            </Stack>
-          </Box>
-
-          {/* Special Attributes */}
-          <Box
-            style={{
-              background: 'rgba(0, 0, 0, 0.15)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              padding: '0.5rem',
-            }}
-          >
-            {edgeMeta ? (
-              <Box
-                style={{
-                  padding: '0.4rem',
-                  borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                  background:
-                    edgeBonus > 0 ? 'rgba(3, 252, 161, 0.1)' : 'transparent',
-                }}
-              >
-                <Stack align="center">
-                  <Stack.Item
-                    style={{
-                      minWidth: '2rem',
-                      textAlign: 'center',
-                      fontWeight: 'bold',
-                      fontSize: '1.1em',
-                      color:
-                        edgeBonus > 0 ? '#03fca1' : 'rgba(255,255,255,0.7)',
-                    }}
-                  >
-                    {edgeBase + edgeBonus}
-                  </Stack.Item>
-                  <Stack.Item grow>
-                    <Box bold>
-                      <HintedLabel
-                        text={edgeMeta.name}
-                        hint="Edge is luck and survivability. You can spend Edge to push rolls or avoid bad outcomes."
-                      />
-                    </Box>
-                    <Box color="grey" style={{ fontSize: '0.85em' }}>
-                      Base {edgeBase} / Max {edgeMeta.max}
-                    </Box>
-                  </Stack.Item>
-
-                  <Stack.Item>
-                    <Button
-                      disabled={locked || edgeBonus <= 0}
-                      onClick={() => onBumpSpecial(edgeId, -1)}
-                    >
-                      −
-                    </Button>
-                  </Stack.Item>
-                  <Stack.Item
-                    style={{
-                      minWidth: '2.5rem',
-                      textAlign: 'center',
-                      background: 'rgba(0, 0, 0, 0.3)',
-                      padding: '0.2rem',
-                    }}
-                  >
-                    {edgeBase + edgeBonus}
-                  </Stack.Item>
-                  <Stack.Item>
-                    <Button
-                      disabled={
-                        locked ||
-                        specialRemaining <= 0 ||
-                        edgeBase + edgeBonus >= edgeMeta.max
-                      }
-                      onClick={() => onBumpSpecial(edgeId, +1)}
-                    >
-                      +
-                    </Button>
-                  </Stack.Item>
-                </Stack>
-              </Box>
-            ) : (
-              <Box color="grey" style={{ padding: '0.4rem' }}>
-                No Edge attribute available.
-              </Box>
-            )}
-
-            {magicMeta ? (
-              <Box
-                style={{
-                  padding: '0.4rem',
-                  background:
-                    isAwakened && magicBonus > 0
-                      ? 'rgba(232, 197, 71, 0.1)'
-                      : 'transparent',
-                }}
-              >
-                <Stack align="center">
-                  <Stack.Item
-                    style={{
-                      minWidth: '2rem',
-                      textAlign: 'center',
-                      fontWeight: 'bold',
-                      fontSize: '1.1em',
-                      color:
-                        isAwakened && magicBonus > 0
-                          ? '#e8c547'
-                          : 'rgba(255,255,255,0.4)',
-                    }}
-                  >
-                    {magicBase + magicBonus}
-                  </Stack.Item>
-                  <Stack.Item grow>
-                    <Box bold>
-                      <HintedLabel
-                        text={magicMeta.name}
-                        hint="Magic is only usable if awakened. Magic rating gates spells and other magical capabilities."
-                      />
-                    </Box>
-                    <Box
-                      color={isAwakened ? 'grey' : 'bad'}
-                      style={{ fontSize: '0.85em' }}
-                    >
-                      {isAwakened
-                        ? `Base ${magicBase} / Max ${magicMeta.max}`
-                        : 'Mundane (requires awakening)'}
-                    </Box>
-                  </Stack.Item>
-
-                  <Stack.Item>
-                    <Button
-                      disabled={locked || !isAwakened || magicBonus <= 0}
-                      onClick={() => onBumpSpecial(magicId, -1)}
-                    >
-                      −
-                    </Button>
-                  </Stack.Item>
-                  <Stack.Item
-                    style={{
-                      minWidth: '2.5rem',
-                      textAlign: 'center',
-                      background: 'rgba(0, 0, 0, 0.3)',
-                      padding: '0.2rem',
-                    }}
-                  >
-                    {magicBase + magicBonus}
-                  </Stack.Item>
-                  <Stack.Item>
-                    <Button
-                      disabled={
-                        locked ||
-                        !isAwakened ||
-                        specialRemaining <= 0 ||
-                        magicBase + magicBonus >= magicMeta.max
-                      }
-                      onClick={() => onBumpSpecial(magicId, +1)}
-                    >
-                      +
-                    </Button>
-                  </Stack.Item>
-                </Stack>
-              </Box>
-            ) : null}
-          </Box>
-        </Stack>
-      ) : null}
-
-      {activeTab === 'skills' ? (
-        <Stack
-          vertical
-          className="PreferencesMenu__ShadowrunChargen__tabContent"
-        >
-          {/* Points Summary */}
-          <Box
-            style={{
-              background: 'rgba(0, 0, 0, 0.2)',
-              border:
-                skillRemaining < 0
-                  ? '2px solid rgba(255, 0, 0, 0.4)'
-                  : skillRemaining === 0
-                    ? '2px solid rgba(0, 255, 0, 0.3)'
-                    : '2px solid rgba(97, 91, 125, 0.4)',
-              padding: '0.6rem',
-              marginBottom: '0.5rem',
-            }}
-          >
-            <Stack>
-              <Stack.Item grow>
-                <Box bold style={{ color: '#615b7d' }}>
-                  Skill Points
-                </Box>
-                <Box>
-                  <b
-                    style={{
-                      color:
-                        skillRemaining < 0
-                          ? '#ff6b6b'
-                          : skillRemaining === 0
-                            ? '#6bff6b'
-                            : '#615b7d',
-                    }}
-                  >
-                    {skillSpent}
-                  </b>{' '}
-                  / {totalSkillPoints} spent ({skillRemaining} remaining)
-                </Box>
-              </Stack.Item>
-              {skillGroupsMeta.length ? (
-                <Stack.Item>
-                  <Box bold style={{ color: '#888' }}>
-                    Skill Group Points
-                  </Box>
-                  <Box>
-                    <b
-                      style={{
-                        color:
-                          skillGroupRemaining < 0
-                            ? '#ff6b6b'
-                            : skillGroupRemaining === 0
-                              ? '#6bff6b'
-                              : '#888',
-                      }}
-                    >
-                      {skillGroupSpent}
-                    </b>{' '}
-                    / {totalSkillGroupPoints} ({skillGroupRemaining} remaining)
-                  </Box>
-                </Stack.Item>
-              ) : null}
-            </Stack>
-          </Box>
-
-          {/* Skill Groups Section */}
-          {skillGroupsMeta.length ? (
-            <Box
-              style={{
-                background: 'rgba(0, 0, 0, 0.15)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
-                padding: '0.5rem',
-                marginBottom: '0.5rem',
-              }}
-            >
-              <Stack align="center" mb={0.5}>
-                <Stack.Item grow>
-                  <Box bold>
-                    <HintedLabel text="Skill Groups" hint={HINTS.skillGroups} />
-                  </Box>
-                </Stack.Item>
-                <Stack.Item>
-                  <Button
-                    onClick={() => setShowGroupMembers(!showGroupMembers)}
-                    selected={showGroupMembers}
-                    icon={showGroupMembers ? 'eye' : 'eye-slash'}
-                  >
-                    {showGroupMembers ? 'Hide' : 'Show'} members
-                  </Button>
-                </Stack.Item>
-              </Stack>
-
-              <Stack vertical>
-                {[...skillGroupsMeta]
-                  .sort((a, b) => a.name.localeCompare(b.name))
-                  .map((g) => {
-                    const current = skillGroups[g.id] ?? 0;
-                    const canDec = current > 0;
-                    const canInc = current < 6 && skillGroupRemaining > 0;
-
-                    const memberNames = (g.skills || [])
-                      .map((id) => skillNameById.get(id) || id)
-                      .sort((a, b) => a.localeCompare(b));
-
-                    return (
-                      <Box
-                        key={g.id}
-                        style={{
-                          padding: '0.3rem 0.4rem',
-                          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-                          background:
-                            current > 0
-                              ? 'rgba(97, 91, 125, 0.15)'
-                              : 'transparent',
-                        }}
-                      >
-                        <Stack align="center">
-                          <Stack.Item
-                            style={{
-                              minWidth: '2rem',
-                              textAlign: 'center',
-                              fontWeight: 'bold',
-                              color:
-                                current > 0
-                                  ? '#615b7d'
-                                  : 'rgba(255,255,255,0.5)',
-                            }}
-                          >
-                            {current}
-                          </Stack.Item>
-                          <Stack.Item grow>
-                            <Box bold>
-                              <HintedLabel
-                                text={g.name}
-                                hint={`Skill Group. ${memberNames.length} skills: ${memberNames
-                                  .slice(0, 8)
-                                  .join(
-                                    ', ',
-                                  )}${memberNames.length > 8 ? ', and more' : ''}. Increasing the group raises member skills while group-locked.`}
-                              />
-                            </Box>
-                            <Box color="grey" style={{ fontSize: '0.85em' }}>
-                              {showGroupMembers
-                                ? memberNames.join(', ')
-                                : `${memberNames.length} skills`}
-                            </Box>
-                          </Stack.Item>
-                          <Stack.Item>
-                            <Button
-                              disabled={locked || !canDec}
-                              onClick={() => onBumpSkillGroup(g.id, -1)}
-                            >
-                              −
-                            </Button>
-                          </Stack.Item>
-                          <Stack.Item
-                            style={{
-                              minWidth: '2.5rem',
-                              textAlign: 'center',
-                              background: 'rgba(0, 0, 0, 0.3)',
-                              padding: '0.2rem',
-                            }}
-                          >
-                            {current}
-                          </Stack.Item>
-                          <Stack.Item>
-                            <Button
-                              disabled={locked || !canInc}
-                              onClick={() => onBumpSkillGroup(g.id, +1)}
-                            >
-                              +
-                            </Button>
-                          </Stack.Item>
-                        </Stack>
-                      </Box>
-                    );
-                  })}
-              </Stack>
-            </Box>
-          ) : null}
-
-          {/* Filter and Skill Tabs */}
-          <Box
-            style={{
-              background: 'rgba(0, 0, 0, 0.15)',
-              padding: '0.5rem',
-              marginBottom: '0.3rem',
-            }}
-          >
-            <Stack align="center">
-              <Stack.Item grow>
-                <Input
-                  placeholder="Filter skills..."
-                  value={filterText}
-                  onChange={(_, v) => setFilterText(v)}
-                />
-              </Stack.Item>
-              <Stack.Item ml={0.5}>
-                <Button icon="times" onClick={() => setFilterText('')}>
-                  Clear
-                </Button>
-              </Stack.Item>
-            </Stack>
-          </Box>
-
-          <Tabs className="PreferencesMenu__ShadowrunChargen__statTabs">
+            <HintedLabel text="All" hint={HINTS.tabAllSkills} />
+          </Tabs.Tab>
+          {skillStatTabs.map((stat) => (
             <Tabs.Tab
-              selected={activeSkillStat === 'All'}
-              onClick={() => setActiveSkillStat('All')}
-              icon="list"
+              key={stat}
+              selected={activeSkillStat === stat}
+              onClick={() => setActiveSkillStat(stat)}
             >
-              <HintedLabel text="All" hint={HINTS.tabAllSkills} />
+              <HintedLabel
+                text={stat}
+                hint={`Shows skills that roll with ${stat}.`}
+              />
             </Tabs.Tab>
-            {skillStatTabs.map((stat) => (
-              <Tabs.Tab
-                key={stat}
-                selected={activeSkillStat === stat}
-                onClick={() => setActiveSkillStat(stat)}
-              >
-                <HintedLabel
-                  text={stat}
-                  hint={`Shows skills that roll with ${stat}.`}
-                />
-              </Tabs.Tab>
-            ))}
-          </Tabs>
+          ))}
+        </Tabs>
 
-          {/* Skills List */}
-          <Box
-            style={{
-              maxHeight: '340px',
-              overflowY: 'auto',
-              background: 'rgba(0, 0, 0, 0.2)',
-              border: '1px solid rgba(255, 255, 255, 0.1)',
-              padding: '0.4rem',
-            }}
-          >
-            {(() => {
-              const allSections = Array.from(skillsByStat.entries()) as Array<
-                [string, SkillMeta[]]
-              >;
-              const oneSection: Array<[string, SkillMeta[]]> = [
-                [
-                  activeSkillStat,
-                  (skillsByStat.get(activeSkillStat) || []) as SkillMeta[],
-                ],
-              ];
+        {/* Skills List */}
+        <Box
+          style={{
+            maxHeight: '340px',
+            overflowY: 'auto',
+            background: 'rgba(0, 0, 0, 0.2)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            padding: '0.4rem',
+          }}
+        >
+          {(() => {
+            const allSections = Array.from(skillsByStat.entries()) as Array<
+              [string, SkillMeta[]]
+            >;
+            const oneSection: Array<[string, SkillMeta[]]> = [
+              [
+                activeSkillStat,
+                (skillsByStat.get(activeSkillStat) || []) as SkillMeta[],
+              ],
+            ];
 
-              const visibleSections =
-                activeSkillStat === 'All' ? allSections : oneSection;
+            const visibleSections =
+              activeSkillStat === 'All' ? allSections : oneSection;
 
-              return visibleSections.map(([parent, skillEntries]) => {
-                if (!skillEntries.length) {
-                  return (
-                    <Box key={parent} color="grey">
-                      No skills match your filter.
-                    </Box>
-                  );
-                }
-
+            return visibleSections.map(([parent, skillEntries]) => {
+              if (!skillEntries.length) {
                 return (
-                  <Box key={parent} mb={1}>
-                    {activeSkillStat === 'All' ? (
-                      <Box
-                        bold
-                        style={{
-                          color: '#615b7d',
-                          borderBottom: '1px solid rgba(97, 91, 125, 0.3)',
-                          paddingBottom: '0.2rem',
-                          marginBottom: '0.3rem',
-                        }}
-                      >
-                        {parent}
-                      </Box>
-                    ) : null}
-
-                    <Stack vertical>
-                      {skillEntries.map((sk) => {
-                        const current = skills[sk.id] ?? 0;
-
-                        const groupInfo = groupInfoBySkillId.get(sk.id);
-                        const groupRating = groupInfo?.groups?.length
-                          ? Math.max(...groupInfo.groups.map((g) => g.rating))
-                          : 0;
-                        const lockedByGroup = groupRating > 0;
-
-                        const canDec = current > 0 && !lockedByGroup;
-                        const canInc =
-                          current < 6 && skillRemaining > 0 && !lockedByGroup;
-
-                        const statMeta = effectiveAttributesMeta.find(
-                          (a) => a.id === sk.parent_stat_id,
-                        );
-                        const statRating =
-                          attributes[sk.parent_stat_id] ?? statMeta?.min ?? 1;
-
-                        const effectiveSkillRating = Math.max(
-                          current,
-                          groupRating,
-                        );
-                        const pool = statRating + effectiveSkillRating;
-
-                        const groupLabel = groupInfo?.groups
-                          ?.slice()
-                          .sort((a, b) => b.rating - a.rating)
-                          .map((g) => `${g.name} ${g.rating}`)
-                          .join(', ');
-
-                        const lockTooltip = lockedByGroup
-                          ? `Locked by skill group: ${groupLabel}. ${HINTS.skillGroupLock}`
-                          : undefined;
-
-                        const hasPoints =
-                          current > 0 || effectiveSkillRating > 0;
-
-                        return (
-                          <Box
-                            key={sk.id}
-                            style={{
-                              padding: '0.3rem 0.4rem',
-                              borderBottom:
-                                '1px solid rgba(255, 255, 255, 0.05)',
-                              background: lockedByGroup
-                                ? 'rgba(97, 91, 125, 0.15)'
-                                : hasPoints
-                                  ? 'rgba(97, 91, 125, 0.1)'
-                                  : 'transparent',
-                            }}
-                          >
-                            <Stack align="center">
-                              <Stack.Item
-                                style={{
-                                  minWidth: '2rem',
-                                  textAlign: 'center',
-                                  fontWeight: 'bold',
-                                  fontSize: '1.1em',
-                                  color: hasPoints
-                                    ? '#615b7d'
-                                    : 'rgba(255,255,255,0.5)',
-                                }}
-                              >
-                                {pool}
-                              </Stack.Item>
-                              <Stack.Item grow>
-                                <Box bold>
-                                  <HintedLabel
-                                    text={sk.name}
-                                    hint={`${sk.name}. Uses ${sk.parent_stat_name}. Current pool: ${pool}. Dice pools typically use Attribute + Skill.`}
-                                  />
-                                </Box>
-                                <Box
-                                  color="grey"
-                                  style={{ fontSize: '0.85em' }}
-                                >
-                                  {statRating} + {effectiveSkillRating}
-                                  {groupLabel ? (
-                                    <Box as="span" ml={0.5}>
-                                      (Group: <b>{groupLabel}</b>)
-                                    </Box>
-                                  ) : null}
-                                </Box>
-                              </Stack.Item>
-                              <Stack.Item>
-                                <Button
-                                  disabled={locked || !canDec}
-                                  tooltip={lockTooltip || 'Decrease skill'}
-                                  tooltipPosition="left"
-                                  onClick={() => {
-                                    if (lockedByGroup) {
-                                      return;
-                                    }
-                                    onBumpSkill(sk.id, -1);
-                                  }}
-                                >
-                                  −
-                                </Button>
-                              </Stack.Item>
-                              <Stack.Item
-                                style={{
-                                  minWidth: '2.5rem',
-                                  textAlign: 'center',
-                                  background: 'rgba(0, 0, 0, 0.3)',
-                                  padding: '0.2rem',
-                                }}
-                              >
-                                <Tooltip
-                                  content={
-                                    groupLabel
-                                      ? `Skill: ${current}, Group: ${groupRating}, Effective: ${effectiveSkillRating}`
-                                      : `Skill: ${current}`
-                                  }
-                                  position="left"
-                                >
-                                  <Box>{effectiveSkillRating}</Box>
-                                </Tooltip>
-                              </Stack.Item>
-                              <Stack.Item>
-                                <Button
-                                  disabled={locked || !canInc}
-                                  tooltip={lockTooltip || 'Increase skill'}
-                                  tooltipPosition="left"
-                                  onClick={() => {
-                                    if (lockedByGroup) {
-                                      return;
-                                    }
-                                    onBumpSkill(sk.id, +1);
-                                  }}
-                                >
-                                  +
-                                </Button>
-                              </Stack.Item>
-                            </Stack>
-                          </Box>
-                        );
-                      })}
-                    </Stack>
+                  <Box key={parent} color="grey">
+                    No skills match your filter.
                   </Box>
                 );
-              });
-            })()}
-          </Box>
-        </Stack>
-      ) : null}
+              }
+
+              return (
+                <Box key={parent} mb={1}>
+                  {activeSkillStat === 'All' ? (
+                    <Box
+                      bold
+                      style={{
+                        color: '#615b7d',
+                        borderBottom: '1px solid rgba(97, 91, 125, 0.3)',
+                        paddingBottom: '0.2rem',
+                        marginBottom: '0.3rem',
+                      }}
+                    >
+                      {parent}
+                    </Box>
+                  ) : null}
+
+                  <Stack vertical>
+                    {skillEntries.map((sk) => {
+                      const current = skills[sk.id] ?? 0;
+
+                      const groupInfo = groupInfoBySkillId.get(sk.id);
+                      const groupRating = groupInfo?.groups?.length
+                        ? Math.max(...groupInfo.groups.map((g) => g.rating))
+                        : 0;
+                      const lockedByGroup = groupRating > 0;
+
+                      const canDec = current > 0 && !lockedByGroup;
+                      const canInc =
+                        current < 6 && skillRemaining > 0 && !lockedByGroup;
+
+                      const statMeta = effectiveAttributesMeta.find(
+                        (a) => a.id === sk.parent_stat_id,
+                      );
+                      const statRating =
+                        attributes[sk.parent_stat_id] ?? statMeta?.min ?? 1;
+
+                      const effectiveSkillRating = Math.max(
+                        current,
+                        groupRating,
+                      );
+                      const pool = statRating + effectiveSkillRating;
+
+                      const groupLabel = groupInfo?.groups
+                        ?.slice()
+                        .sort((a, b) => b.rating - a.rating)
+                        .map((g) => `${g.name} ${g.rating}`)
+                        .join(', ');
+
+                      const lockTooltip = lockedByGroup
+                        ? `Locked by skill group: ${groupLabel}. ${HINTS.skillGroupLock}`
+                        : undefined;
+
+                      const hasPoints = current > 0 || effectiveSkillRating > 0;
+
+                      return (
+                        <Box
+                          key={sk.id}
+                          style={{
+                            padding: '0.3rem 0.4rem',
+                            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                            background: lockedByGroup
+                              ? 'rgba(97, 91, 125, 0.15)'
+                              : hasPoints
+                                ? 'rgba(97, 91, 125, 0.1)'
+                                : 'transparent',
+                          }}
+                        >
+                          <Stack align="center">
+                            <Stack.Item
+                              style={{
+                                minWidth: '2rem',
+                                textAlign: 'center',
+                                fontWeight: 'bold',
+                                fontSize: '1.1em',
+                                color: hasPoints
+                                  ? '#615b7d'
+                                  : 'rgba(255,255,255,0.5)',
+                              }}
+                            >
+                              {pool}
+                            </Stack.Item>
+                            <Stack.Item grow>
+                              <Box bold>
+                                <HintedLabel
+                                  text={sk.name}
+                                  hint={`${sk.name}. Uses ${sk.parent_stat_name}. Current pool: ${pool}. Dice pools typically use Attribute + Skill.`}
+                                />
+                              </Box>
+                              <Box color="grey" style={{ fontSize: '0.85em' }}>
+                                {statRating} + {effectiveSkillRating}
+                                {groupLabel ? (
+                                  <Box as="span" ml={0.5}>
+                                    (Group: <b>{groupLabel}</b>)
+                                  </Box>
+                                ) : null}
+                              </Box>
+                            </Stack.Item>
+                            <Stack.Item>
+                              <Button
+                                disabled={locked || !canDec}
+                                tooltip={lockTooltip || 'Decrease skill'}
+                                tooltipPosition="left"
+                                onClick={() => {
+                                  if (lockedByGroup) {
+                                    return;
+                                  }
+                                  onBumpSkill(sk.id, -1);
+                                }}
+                              >
+                                −
+                              </Button>
+                            </Stack.Item>
+                            <Stack.Item
+                              style={{
+                                minWidth: '2.5rem',
+                                textAlign: 'center',
+                                background: 'rgba(0, 0, 0, 0.3)',
+                                padding: '0.2rem',
+                              }}
+                            >
+                              <Tooltip
+                                content={
+                                  groupLabel
+                                    ? `Skill: ${current}, Group: ${groupRating}, Effective: ${effectiveSkillRating}`
+                                    : `Skill: ${current}`
+                                }
+                                position="left"
+                              >
+                                <Box>{effectiveSkillRating}</Box>
+                              </Tooltip>
+                            </Stack.Item>
+                            <Stack.Item>
+                              <Button
+                                disabled={locked || !canInc}
+                                tooltip={lockTooltip || 'Increase skill'}
+                                tooltipPosition="left"
+                                onClick={() => {
+                                  if (lockedByGroup) {
+                                    return;
+                                  }
+                                  onBumpSkill(sk.id, +1);
+                                }}
+                              >
+                                +
+                              </Button>
+                            </Stack.Item>
+                          </Stack>
+                        </Box>
+                      );
+                    })}
+                  </Stack>
+                </Box>
+              );
+            });
+          })()}
+        </Box>
+      </Stack>
     </Stack>
   );
 };

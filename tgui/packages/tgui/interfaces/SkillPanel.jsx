@@ -16,8 +16,8 @@ export const SkillPanel = (props) => {
   const { act, data } = useBackend();
   const skills = data.skills || [];
   return (
-    <Window title="Manage Skills" width={600} height={500}>
-      <Window.Content scrollable>
+    <Window title="Manage Skills" width={600} height={500} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section title={skills.playername}>
           <LabeledList>
             {skills.map((skill) => (

@@ -12,8 +12,8 @@ export const CargoHoldTerminal = (props) => {
   const { act, data } = useBackend();
   const { points, pad, sending, status_report } = data;
   return (
-    <Window width={600} height={230}>
-      <Window.Content scrollable>
+    <Window width={600} height={230} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Current Cargo Value">

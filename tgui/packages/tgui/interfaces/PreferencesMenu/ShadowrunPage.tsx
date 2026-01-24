@@ -253,10 +253,24 @@ const MetatypeSelector = (props: MetatypeSelectorProps) => {
       return;
     }
 
-    // Update the chargen state
+    // Reset attributes to minimum values for the new metatype
+    // This ensures the player sees correct bounds immediately
+    const newMetatypeBounds =
+      chargenConstData?.metatype_attribute_bounds?.[newSpecies] || {};
+    const attributesMeta = chargenConstData?.attributes || [];
+    const resetAttributes: Record<string, number> = {};
+    attributesMeta.forEach((a: any) => {
+      const range = newMetatypeBounds[a.id];
+      const newMin =
+        Array.isArray(range) && range.length >= 2 ? range[0] : a.min;
+      resetAttributes[a.id] = newMin;
+    });
+
+    // Update the chargen state with reset attributes
     const newState = {
       ...value,
       metatype_species: newSpecies,
+      attributes: resetAttributes,
     };
 
     // Optimistic update for immediate UI feedback
@@ -416,6 +430,742 @@ const MetatypeSelector = (props: MetatypeSelectorProps) => {
           </Stack.Item>
         )}
       </Stack>
+    </Box>
+  );
+};
+
+// Priority Selector Component - for sidebar
+type PrioritySelectorProps = {
+  act: any;
+  chargenConstData: any;
+  chargenState: any;
+  featureId: string;
+  isSaved: boolean;
+  setPredictedValue: (value: any) => void;
+  value: any;
+};
+
+const priorityLetters = ['A', 'B', 'C', 'D', 'E'] as const;
+type PriorityLetter = (typeof priorityLetters)[number];
+
+const priorityCategories = [
+  'metatype',
+  'attributes',
+  'magic',
+  'skills',
+  'resources',
+] as const;
+type PriorityCategory = (typeof priorityCategories)[number];
+
+const PrioritySelector = (props: PrioritySelectorProps) => {
+  const {
+    chargenState,
+    chargenConstData,
+    isSaved,
+    act,
+    featureId,
+    setPredictedValue,
+    value,
+  } = props;
+
+  const priorities = chargenState?.priorities || {};
+  const displayNames = chargenConstData?.priority_display_names || {};
+
+  const getLetterColor = (letter: string) => {
+    switch (letter) {
+      case 'A':
+        return '#4caf50';
+      case 'B':
+        return '#8bc34a';
+      case 'C':
+        return '#ffeb3b';
+      case 'D':
+        return '#ff9800';
+      default:
+        return '#f44336';
+    }
+  };
+
+  const handleSetPriority = (category: string, newLetter: PriorityLetter) => {
+    const newPriorities = { ...priorities, [category]: newLetter };
+    const newState = {
+      ...chargenState,
+      priorities: newPriorities,
+    };
+    setPredictedValue(newState);
+    act('set_preference', {
+      preference: featureId,
+      value: newState,
+    });
+  };
+
+  return (
+    <Box
+      className="PreferencesMenu__ShadowrunSheet__prioritySelector"
+      style={{
+        background: 'rgba(0, 0, 0, 0.25)',
+        border: '2px solid rgba(202, 165, 61, 0.4)',
+        padding: '0.5rem',
+        marginTop: '0.5rem',
+      }}
+    >
+      <Box
+        bold
+        style={{
+          color: '#caa53d',
+          borderBottom: '1px solid rgba(202, 165, 61, 0.3)',
+          paddingBottom: '0.3rem',
+          marginBottom: '0.4rem',
+          fontSize: '0.9rem',
+        }}
+      >
+        <Icon name="layer-group" mr={0.5} />
+        Priorities
+      </Box>
+      {priorityCategories.map((category) => {
+        const display = displayNames[category] || category;
+        const currentLetter = (priorities[category] as PriorityLetter) || 'E';
+        const letterColor = getLetterColor(currentLetter);
+
+        return (
+          <Stack
+            key={category}
+            align="center"
+            style={{
+              padding: '0.2rem 0',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+            }}
+          >
+            <Stack.Item grow>
+              <Box style={{ fontSize: '0.85rem' }}>{display}</Box>
+            </Stack.Item>
+            <Stack.Item>
+              {isSaved ? (
+                <Box
+                  bold
+                  style={{
+                    color: letterColor,
+                    background: 'rgba(0, 0, 0, 0.3)',
+                    padding: '0.1rem 0.4rem',
+                    minWidth: '1.5rem',
+                    textAlign: 'center',
+                    fontSize: '0.85rem',
+                  }}
+                >
+                  {currentLetter}
+                </Box>
+              ) : (
+                <Dropdown
+                  width="3.5rem"
+                  selected={currentLetter}
+                  options={priorityLetters.map((l) => ({
+                    value: l,
+                    displayText: l,
+                  }))}
+                  onSelected={(v) =>
+                    handleSetPriority(category, v as PriorityLetter)
+                  }
+                />
+              )}
+            </Stack.Item>
+          </Stack>
+        );
+      })}
+    </Box>
+  );
+};
+
+// ============================================================================
+// ATTRIBUTE SELECTOR (Sidebar)
+// ============================================================================
+
+// Attribute descriptions for tooltips
+const ATTRIBUTE_DESCRIPTIONS: Record<string, string> = {
+  // Physical attributes
+  body: 'Body (BOD) measures physical health, resilience, and resistance to damage. Used for resisting toxins, diseases, and physical trauma.',
+  agility:
+    'Agility (AGI) represents coordination, balance, and fine motor control. Governs most combat skills, stealth, and physical manipulation.',
+  reaction:
+    'Reaction (REA) determines reflexes and response time. Critical for initiative, defense, and vehicle handling.',
+  strength:
+    'Strength (STR) measures raw physical power. Affects melee damage, carrying capacity, and climbing.',
+  // Mental attributes
+  willpower:
+    'Willpower (WIL) reflects mental fortitude and resistance to mental attacks. Used for resisting magic and intimidation.',
+  logic:
+    'Logic (LOG) represents analytical thinking and memory. Key for technical skills, hacking, and medicine.',
+  intuition:
+    'Intuition (INT) measures gut instincts and situational awareness. Important for perception, navigation, and street smarts.',
+  charisma:
+    'Charisma (CHA) determines social influence and force of personality. Governs social skills and leadership.',
+};
+
+const getAttributeDescription = (
+  attrId: string,
+  attrName: string,
+  min: number,
+  max: number,
+): string => {
+  const baseId = attrId.split('/').pop()?.toLowerCase() || attrId.toLowerCase();
+  const desc = ATTRIBUTE_DESCRIPTIONS[baseId];
+  if (desc) {
+    return `${desc} Range: ${min}-${max}.`;
+  }
+  return `${attrName}. Range: ${min}-${max}.`;
+};
+
+type AttributeSelectorProps = {
+  act: any;
+  chargenConstData: any;
+  chargenState: any;
+  featureId: string;
+  isSaved: boolean;
+  setPredictedValue: (value: any) => void;
+  value: any;
+};
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, value));
+
+const AttributeSelector = (props: AttributeSelectorProps) => {
+  const {
+    chargenState,
+    chargenConstData,
+    isSaved,
+    act,
+    featureId,
+    setPredictedValue,
+    value,
+  } = props;
+
+  const attributesMeta = chargenConstData?.attributes || [];
+  const metatypeBounds =
+    chargenConstData?.metatype_attribute_bounds?.[
+      chargenState?.metatype_species || '/datum/species/human'
+    ] || {};
+  const priorityTables = chargenConstData?.priority_tables;
+  const priorities = chargenState?.priorities || {};
+  const attributes = chargenState?.attributes || {};
+
+  // Calculate effective attribute meta with metatype bounds
+  const effectiveAttributesMeta = attributesMeta.map((a: any) => {
+    const range = metatypeBounds[a.id];
+    if (Array.isArray(range) && range.length >= 2) {
+      return { ...a, min: range[0], max: range[1] };
+    }
+    return a;
+  });
+
+  // Calculate totals
+  const attrLetter = priorities['attributes'] || 'E';
+  const totalPoints = priorityTables?.attributes?.[attrLetter] || 0;
+  const spentPoints = effectiveAttributesMeta.reduce((sum: number, a: any) => {
+    const current = attributes[a.id] ?? a.min;
+    return sum + Math.max(0, current - a.min);
+  }, 0);
+  const remainingPoints = totalPoints - spentPoints;
+
+  const handleBumpAttribute = (attrId: string, delta: number) => {
+    if (isSaved) return;
+
+    const attrMeta = effectiveAttributesMeta.find((a: any) => a.id === attrId);
+    if (!attrMeta) return;
+
+    const current = attributes[attrId] ?? attrMeta.min;
+    const nextValue = clamp(current + delta, attrMeta.min, attrMeta.max);
+
+    const nextAttrs = { ...attributes, [attrId]: nextValue };
+    const newState = { ...chargenState, attributes: nextAttrs };
+
+    setPredictedValue(newState);
+    act('set_preference', { preference: featureId, value: newState });
+  };
+
+  const getValueColor = (current: number, min: number) => {
+    if (current === min) return '#888';
+    if (current >= min + 4) return '#4caf50';
+    if (current >= min + 2) return '#8bc34a';
+    return '#fff';
+  };
+
+  return (
+    <Box
+      style={{
+        background: 'rgba(0, 0, 0, 0.25)',
+        border: '2px solid rgba(100, 149, 237, 0.4)',
+        padding: '0.5rem',
+        marginTop: '0.5rem',
+      }}
+    >
+      <Stack
+        align="center"
+        style={{
+          borderBottom: '1px solid rgba(100, 149, 237, 0.3)',
+          paddingBottom: '0.3rem',
+          marginBottom: '0.4rem',
+        }}
+      >
+        <Stack.Item grow>
+          <Box bold style={{ color: '#6495ed', fontSize: '0.9rem' }}>
+            <Icon name="user" mr={0.5} />
+            Attributes
+          </Box>
+        </Stack.Item>
+        <Stack.Item>
+          <Box
+            style={{
+              fontSize: '0.75rem',
+              color: remainingPoints > 0 ? '#ffeb3b' : '#4caf50',
+            }}
+          >
+            {remainingPoints}/{totalPoints}
+          </Box>
+        </Stack.Item>
+      </Stack>
+      {effectiveAttributesMeta.map((attr: any) => {
+        const current = attributes[attr.id] ?? attr.min;
+        const valueColor = getValueColor(current, attr.min);
+        const canDecrease = !isSaved && current > attr.min;
+        const canIncrease =
+          !isSaved && current < attr.max && remainingPoints > 0;
+
+        return (
+          <Stack
+            key={attr.id}
+            align="center"
+            style={{
+              padding: '0.15rem 0',
+              borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+            }}
+          >
+            <Stack.Item grow>
+              <Tooltip
+                content={getAttributeDescription(
+                  attr.id,
+                  attr.name,
+                  attr.min,
+                  attr.max,
+                )}
+                position="right"
+              >
+                <Box
+                  style={{
+                    fontSize: '0.75rem',
+                    cursor: 'help',
+                    borderBottom: '1px dotted rgba(255,255,255,0.2)',
+                  }}
+                >
+                  {attr.name}
+                </Box>
+              </Tooltip>
+            </Stack.Item>
+            <Stack.Item>
+              {isSaved ? (
+                <Box
+                  bold
+                  style={{
+                    color: valueColor,
+                    fontSize: '0.85rem',
+                    minWidth: '1.5rem',
+                    textAlign: 'center',
+                  }}
+                >
+                  {current}
+                </Box>
+              ) : (
+                <Stack align="center">
+                  <Stack.Item>
+                    <Button
+                      icon="minus"
+                      compact
+                      disabled={!canDecrease}
+                      onClick={() => handleBumpAttribute(attr.id, -1)}
+                      style={{
+                        minWidth: '1.2rem',
+                        padding: '0.1rem',
+                        fontSize: '0.7rem',
+                      }}
+                    />
+                  </Stack.Item>
+                  <Stack.Item>
+                    <Tooltip
+                      content={`Range: ${attr.min} - ${attr.max}`}
+                      position="top"
+                    >
+                      <Box
+                        bold
+                        style={{
+                          color: valueColor,
+                          fontSize: '0.85rem',
+                          minWidth: '1.5rem',
+                          textAlign: 'center',
+                          cursor: 'help',
+                        }}
+                      >
+                        {current}
+                      </Box>
+                    </Tooltip>
+                  </Stack.Item>
+                  <Stack.Item>
+                    <Button
+                      icon="plus"
+                      compact
+                      disabled={!canIncrease}
+                      onClick={() => handleBumpAttribute(attr.id, 1)}
+                      style={{
+                        minWidth: '1.2rem',
+                        padding: '0.1rem',
+                        fontSize: '0.7rem',
+                      }}
+                    />
+                  </Stack.Item>
+                </Stack>
+              )}
+            </Stack.Item>
+          </Stack>
+        );
+      })}
+    </Box>
+  );
+};
+
+// ============================================================================
+// SPECIAL SELECTOR (Sidebar)
+// ============================================================================
+
+type SpecialSelectorProps = {
+  act: any;
+  chargenConstData: any;
+  chargenState: any;
+  featureId: string;
+  isSaved: boolean;
+  setPredictedValue: (value: any) => void;
+  value: any;
+};
+
+const SpecialSelector = (props: SpecialSelectorProps) => {
+  const {
+    chargenState,
+    chargenConstData,
+    isSaved,
+    act,
+    featureId,
+    setPredictedValue,
+    value,
+  } = props;
+
+  const specialAttributesMeta = chargenConstData?.special_attributes || [];
+  const priorityTables = chargenConstData?.priority_tables;
+  const priorities = chargenState?.priorities || {};
+  const special = chargenState?.special || {};
+  const awakening = chargenState?.awakening || 'mundane';
+
+  const metatypeLetter = priorities['metatype'] || 'E';
+  const magicLetter = priorities['magic'] || 'E';
+
+  const totalPoints = priorityTables?.metatype_special?.[metatypeLetter] || 0;
+  const magicBase = priorityTables?.magic?.[magicLetter] || 0;
+  const edgeBase = 1; // Edge always starts at 1
+
+  const isAwakened = awakening !== 'mundane';
+
+  // Find edge and magic IDs
+  const edgeMeta = specialAttributesMeta.find((s: any) =>
+    s.id?.toLowerCase().includes('edge'),
+  );
+  const magicMeta = specialAttributesMeta.find((s: any) =>
+    s.id?.toLowerCase().includes('magic'),
+  );
+
+  const edgeId = edgeMeta?.id || 'edge';
+  const magicId = magicMeta?.id || 'magic';
+
+  const spentPoints = Object.values(special).reduce<number>(
+    (sum, v) => sum + Math.max(0, Number(v) || 0),
+    0,
+  );
+  const remainingPoints = totalPoints - spentPoints;
+
+  const handleBumpSpecial = (specialId: string, delta: number) => {
+    if (isSaved) return;
+
+    const meta = specialAttributesMeta.find((s: any) => s.id === specialId);
+    if (!meta) return;
+
+    const isMagic = specialId === magicId;
+    if (isMagic && !isAwakened) return;
+
+    const currentBonus = special[specialId] ?? 0;
+    const base = isMagic ? magicBase : edgeBase;
+    const maxBonusFromStat = Math.max(0, meta.max - base);
+    const poolRemainingIfRemoveCurrent =
+      totalPoints - (spentPoints - currentBonus);
+    const maxBonusFromPool = Math.max(0, poolRemainingIfRemoveCurrent);
+    const nextBonus = clamp(
+      currentBonus + delta,
+      0,
+      Math.min(maxBonusFromStat, maxBonusFromPool),
+    );
+
+    const newState = {
+      ...chargenState,
+      special: { ...special, [specialId]: nextBonus },
+    };
+
+    setPredictedValue(newState);
+    act('set_preference', { preference: featureId, value: newState });
+  };
+
+  const edgeBonus = special[edgeId] ?? 0;
+  const magicBonus = special[magicId] ?? 0;
+  const edgeTotal = edgeBase + edgeBonus;
+  const magicTotal = magicBase + magicBonus;
+
+  const canDecreaseEdge = !isSaved && edgeBonus > 0;
+  const canIncreaseEdge =
+    !isSaved &&
+    edgeBonus < (edgeMeta?.max ?? 6) - edgeBase &&
+    remainingPoints > 0;
+  const canDecreaseMagic = !isSaved && magicBonus > 0;
+  const canIncreaseMagic =
+    !isSaved &&
+    isAwakened &&
+    magicBonus < (magicMeta?.max ?? 6) - magicBase &&
+    remainingPoints > 0;
+
+  return (
+    <Box
+      style={{
+        background: 'rgba(0, 0, 0, 0.25)',
+        border: '2px solid rgba(186, 85, 211, 0.4)',
+        padding: '0.5rem',
+        marginTop: '0.5rem',
+      }}
+    >
+      <Stack
+        align="center"
+        style={{
+          borderBottom: '1px solid rgba(186, 85, 211, 0.3)',
+          paddingBottom: '0.3rem',
+          marginBottom: '0.4rem',
+        }}
+      >
+        <Stack.Item grow>
+          <Box bold style={{ color: '#ba55d3', fontSize: '0.9rem' }}>
+            <Icon name="star" mr={0.5} />
+            Special
+          </Box>
+        </Stack.Item>
+        <Stack.Item>
+          <Box
+            style={{
+              fontSize: '0.75rem',
+              color: remainingPoints > 0 ? '#ffeb3b' : '#4caf50',
+            }}
+          >
+            {remainingPoints}/{totalPoints}
+          </Box>
+        </Stack.Item>
+      </Stack>
+
+      {/* Edge */}
+      <Stack
+        align="center"
+        style={{
+          padding: '0.15rem 0',
+          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+        }}
+      >
+        <Stack.Item grow>
+          <Tooltip
+            content="Edge represents luck and fate. Spend Edge points during play to push your limits, reroll failures, or survive deadly situations. Higher Edge means more chances to defy the odds."
+            position="right"
+          >
+            <Box
+              style={{
+                fontSize: '0.75rem',
+                cursor: 'help',
+                borderBottom: '1px dotted rgba(255,255,255,0.2)',
+              }}
+            >
+              Edge (Base: {edgeBase})
+            </Box>
+          </Tooltip>
+        </Stack.Item>
+        <Stack.Item>
+          {isSaved ? (
+            <Box
+              bold
+              style={{
+                color: edgeBonus > 0 ? '#ba55d3' : '#888',
+                fontSize: '0.85rem',
+                minWidth: '1.5rem',
+                textAlign: 'center',
+              }}
+            >
+              {edgeTotal}
+            </Box>
+          ) : (
+            <Stack align="center">
+              <Stack.Item>
+                <Button
+                  icon="minus"
+                  compact
+                  disabled={!canDecreaseEdge}
+                  onClick={() => handleBumpSpecial(edgeId, -1)}
+                  style={{
+                    minWidth: '1.2rem',
+                    padding: '0.1rem',
+                    fontSize: '0.7rem',
+                  }}
+                />
+              </Stack.Item>
+              <Stack.Item>
+                <Tooltip
+                  content={`Range: ${edgeBase} - ${edgeMeta?.max ?? 6}`}
+                  position="top"
+                >
+                  <Box
+                    bold
+                    style={{
+                      color: edgeBonus > 0 ? '#ba55d3' : '#888',
+                      fontSize: '0.85rem',
+                      minWidth: '1.5rem',
+                      textAlign: 'center',
+                      cursor: 'help',
+                    }}
+                  >
+                    {edgeTotal}
+                  </Box>
+                </Tooltip>
+              </Stack.Item>
+              <Stack.Item>
+                <Button
+                  icon="plus"
+                  compact
+                  disabled={!canIncreaseEdge}
+                  onClick={() => handleBumpSpecial(edgeId, 1)}
+                  style={{
+                    minWidth: '1.2rem',
+                    padding: '0.1rem',
+                    fontSize: '0.7rem',
+                  }}
+                />
+              </Stack.Item>
+            </Stack>
+          )}
+        </Stack.Item>
+      </Stack>
+
+      {/* Magic/Resonance (only if awakened) */}
+      {isAwakened && (
+        <Stack
+          align="center"
+          style={{
+            padding: '0.15rem 0',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+          }}
+        >
+          <Stack.Item grow>
+            <Tooltip
+              content={
+                awakening === 'technomancer'
+                  ? `Resonance determines your connection to the Matrix and ability to compile sprites and use complex forms. Higher Resonance means stronger technomancer abilities. Base: ${magicBase}`
+                  : `Magic rating determines your mystical power for casting spells, summoning spirits, or using adept powers. Also affects your ability to resist drain. Base: ${magicBase}`
+              }
+              position="right"
+            >
+              <Box
+                style={{
+                  fontSize: '0.75rem',
+                  cursor: 'help',
+                  borderBottom: '1px dotted rgba(255,255,255,0.2)',
+                }}
+              >
+                {awakening === 'technomancer' ? 'Resonance' : 'Magic'} (Base:{' '}
+                {magicBase})
+              </Box>
+            </Tooltip>
+          </Stack.Item>
+          <Stack.Item>
+            {isSaved ? (
+              <Box
+                bold
+                style={{
+                  color: magicBonus > 0 ? '#ba55d3' : '#888',
+                  fontSize: '0.85rem',
+                  minWidth: '1.5rem',
+                  textAlign: 'center',
+                }}
+              >
+                {magicTotal}
+              </Box>
+            ) : (
+              <Stack align="center">
+                <Stack.Item>
+                  <Button
+                    icon="minus"
+                    compact
+                    disabled={!canDecreaseMagic}
+                    onClick={() => handleBumpSpecial(magicId, -1)}
+                    style={{
+                      minWidth: '1.2rem',
+                      padding: '0.1rem',
+                      fontSize: '0.7rem',
+                    }}
+                  />
+                </Stack.Item>
+                <Stack.Item>
+                  <Tooltip
+                    content={`Range: ${magicBase} - ${magicMeta?.max ?? 6}`}
+                    position="top"
+                  >
+                    <Box
+                      bold
+                      style={{
+                        color: magicBonus > 0 ? '#ba55d3' : '#888',
+                        fontSize: '0.85rem',
+                        minWidth: '1.5rem',
+                        textAlign: 'center',
+                        cursor: 'help',
+                      }}
+                    >
+                      {magicTotal}
+                    </Box>
+                  </Tooltip>
+                </Stack.Item>
+                <Stack.Item>
+                  <Button
+                    icon="plus"
+                    compact
+                    disabled={!canIncreaseMagic}
+                    onClick={() => handleBumpSpecial(magicId, 1)}
+                    style={{
+                      minWidth: '1.2rem',
+                      padding: '0.1rem',
+                      fontSize: '0.7rem',
+                    }}
+                  />
+                </Stack.Item>
+              </Stack>
+            )}
+          </Stack.Item>
+        </Stack>
+      )}
+
+      {/* Status */}
+      <Box
+        mt={0.3}
+        style={{
+          fontSize: '0.7rem',
+          color: 'rgba(255, 255, 255, 0.5)',
+          textAlign: 'center',
+        }}
+      >
+        {isAwakened
+          ? `${awakening.charAt(0).toUpperCase() + awakening.slice(1)}`
+          : 'Mundane'}
+      </Box>
     </Box>
   );
 };
@@ -737,15 +1487,7 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
     }
 
     return (
-      <LabeledList.Item
-        key={preferenceId}
-        label={
-          <HintedLabel
-            text={feature.name}
-            hint={`Preference: ${feature.name}`}
-          />
-        }
-      >
+      <LabeledList.Item key={preferenceId} label={feature.name}>
         <FeatureValueInput
           act={act}
           feature={feature}
@@ -820,6 +1562,39 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                       updated_preview: value,
                     })
                   }
+                />
+
+                {/* Priority Selector in left sidebar */}
+                <PrioritySelector
+                  chargenState={chargenState}
+                  chargenConstData={chargenConstData}
+                  isSaved={isSaved}
+                  act={act}
+                  featureId={featureId}
+                  setPredictedValue={setPredictedValue}
+                  value={value}
+                />
+
+                {/* Attribute Selector in left sidebar */}
+                <AttributeSelector
+                  chargenState={chargenState}
+                  chargenConstData={chargenConstData}
+                  isSaved={isSaved}
+                  act={act}
+                  featureId={featureId}
+                  setPredictedValue={setPredictedValue}
+                  value={value}
+                />
+
+                {/* Special Selector in left sidebar */}
+                <SpecialSelector
+                  chargenState={chargenState}
+                  chargenConstData={chargenConstData}
+                  isSaved={isSaved}
+                  act={act}
+                  featureId={featureId}
+                  setPredictedValue={setPredictedValue}
+                  value={value}
                 />
               </Box>
             </Stack.Item>
@@ -994,14 +1769,7 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                         >
                           <Box className="PreferencesMenu__ShadowrunSheet__labeledList">
                             <LabeledList>
-                              <LabeledList.Item
-                                label={
-                                  <HintedLabel
-                                    text="Name:"
-                                    hint={FIELD_HINTS.Name}
-                                  />
-                                }
-                              >
+                              <LabeledList.Item label="Name:">
                                 <Box style={{ maxWidth: '28rem' }}>
                                   <Stack align="center">
                                     <Stack.Item grow>
@@ -1043,14 +1811,7 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                                 </Box>
                               </LabeledList.Item>
 
-                              <LabeledList.Item
-                                label={
-                                  <HintedLabel
-                                    text="Gender:"
-                                    hint={FIELD_HINTS.Gender}
-                                  />
-                                }
-                              >
+                              <LabeledList.Item label="Gender:">
                                 <Box style={{ maxWidth: '16rem' }}>
                                   <Dropdown
                                     width="100%"
@@ -1069,8 +1830,6 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                                         displayText: text,
                                       }),
                                     )}
-                                    tooltip={FIELD_HINTS.Gender}
-                                    tooltipPosition="bottom"
                                     onSelected={createSetPreference(
                                       act,
                                       'gender',
@@ -1078,6 +1837,8 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                                   />
                                 </Box>
                               </LabeledList.Item>
+
+                              {renderPreference('employer')}
 
                               {renderPreference('age')}
                             </LabeledList>
@@ -1091,7 +1852,7 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                           stateKey={`sr_bio_${data.active_slot}`}
                           defaultOpen
                         >
-                          {/* Metatype Selector - Moved here from chargen */}
+                          {/* Metatype Selector */}
                           <MetatypeSelector
                             chargenState={chargenState}
                             chargenConstData={chargenConstData}
@@ -1247,6 +2008,11 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                         )}
                       </>
                     ) : null}
+                    {tab === ShadowrunTab.Occupations ? (
+                      <Box className="PreferencesMenu__ShadowrunSheet__jobsContent">
+                        <JobsPage />
+                      </Box>
+                    ) : null}
                   </Box>
                 </Stack>
               </Box>
@@ -1264,18 +2030,6 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                 value={value}
               />
             </Box>
-          ) : null}
-
-          {tab === ShadowrunTab.Occupations ? (
-            isSaved ? (
-              <Box color="good" p={1}>
-                <Icon name="lock" mr={0.5} />
-                Sheet saved. Job selection is locked until you use Reset All in
-                the Shadowrun tab.
-              </Box>
-            ) : (
-              <JobsPage />
-            )
           ) : null}
         </Stack.Item>
       </Stack>

@@ -161,8 +161,13 @@ export const AdventureBrowser = (props) => {
   const { data } = useBackend<AdventureBrowserData>();
 
   return (
-    <Window width={650} height={500} title="Adventure Manager">
-      <Window.Content>
+    <Window
+      width={650}
+      height={500}
+      title="Adventure Manager"
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         {!!data.feedback_message && (
           <NoticeBox>{data.feedback_message}</NoticeBox>
         )}

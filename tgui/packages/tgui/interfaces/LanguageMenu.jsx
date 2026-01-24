@@ -12,8 +12,8 @@ export const LanguageMenu = (props) => {
     unknown_languages = [],
   } = data;
   return (
-    <Window title="Language Menu" width={700} height={600}>
-      <Window.Content scrollable>
+    <Window title="Language Menu" width={700} height={600} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section title="Known Languages">
           <LabeledList>
             {languages.map((language) => (

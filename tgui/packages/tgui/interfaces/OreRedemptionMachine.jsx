@@ -15,8 +15,13 @@ export const OreRedemptionMachine = (props) => {
   const { act, data } = useBackend();
   const { unclaimedPoints, materials, alloys, diskDesigns, hasDisk } = data;
   return (
-    <Window title="Ore Redemption Machine" width={440} height={550}>
-      <Window.Content scrollable>
+    <Window
+      title="Ore Redemption Machine"
+      width={440}
+      height={550}
+      theme="dragonfall"
+    >
+      <Window.Content scrollable className="Shadowrun">
         <Section>
           <BlockQuote mb={1}>
             This machine only accepts ore.

@@ -13,8 +13,8 @@ export const Teleporter = (props) => {
     target,
   } = data;
   return (
-    <Window width={360} height={130}>
-      <Window.Content>
+    <Window width={360} height={130} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           {(!power_station && (
             <Box color="bad" textAlign="center">

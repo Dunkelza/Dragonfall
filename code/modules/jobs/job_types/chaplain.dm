@@ -1,7 +1,6 @@
 /datum/job/chaplain
 	title = JOB_CHAPLAIN
-	description = "Hold services and funerals, cremate people, preach your \
-		religion, protect the crew against cults."
+	description = "Contracted spiritual advisor. Provide comfort, conduct services, and handle matters of faith. In a world of megacorps and shadow wars, souls still need tending."
 
 	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = FACTION_STATION
@@ -13,7 +12,7 @@
 	exp_granted_type = EXP_TYPE_CREW
 
 	employers = list(
-		/datum/employer/none
+		/datum/employer/contractor
 	)
 
 	outfits = list(

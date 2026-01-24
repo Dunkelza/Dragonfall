@@ -14,8 +14,8 @@ export const Aquarium = (props) => {
     allow_breeding,
   } = data;
   return (
-    <Window width={500} height={400}>
-      <Window.Content>
+    <Window width={500} height={400} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="Aquarium Controls">
           <LabeledControls>
             <LabeledControls.Item label="Temperature">

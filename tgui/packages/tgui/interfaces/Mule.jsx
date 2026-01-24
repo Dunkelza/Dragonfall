@@ -31,8 +31,8 @@ export const Mule = (props) => {
   } = data;
   const locked = data.locked && !data.siliconUser;
   return (
-    <Window width={350} height={425}>
-      <Window.Content>
+    <Window width={350} height={425} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <InterfaceLockNoticeBox />
         <Section
           title="Status"

@@ -303,6 +303,7 @@ GLOBAL_LIST_INIT(all_pref_groups, init_all_pref_groups())
 /// Will perform an update on the preference, but not write to the savefile.
 /// This will, for instance, update the character preference view.
 /// Performs sanity checks.
+/// Auto-saves character preferences after update.
 /datum/preferences/proc/update_preference(datum/preference/preference, preference_value)
 	if (!preference.is_accessible(src))
 		return FALSE
@@ -326,7 +327,21 @@ GLOBAL_LIST_INIT(all_pref_groups, init_all_pref_groups())
 		spawn(-1)
 			character_preview_view?.update_body()
 
+	// Auto-save character preferences after each update (debounced)
+	queue_autosave()
+
 	return TRUE
+
+/// Queue an auto-save that will execute after a short delay
+/// This batches multiple rapid updates into a single save
+/datum/preferences/proc/queue_autosave()
+	// Use TIMER_UNIQUE | TIMER_OVERRIDE to debounce - resets timer on each call
+	addtimer(CALLBACK(src, PROC_REF(do_autosave)), 2 SECONDS, TIMER_UNIQUE | TIMER_OVERRIDE)
+
+/// Perform the actual auto-save
+/datum/preferences/proc/do_autosave()
+	save_character()
+	save_preferences()
 
 /// Called when a user updates the value of this preference.
 /datum/preference/proc/value_changed(datum/preferences/prefs, new_value, old_value)

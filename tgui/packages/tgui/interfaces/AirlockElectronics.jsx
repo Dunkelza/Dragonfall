@@ -9,8 +9,8 @@ export const AirlockElectronics = (props) => {
   const regions = data.regions || [];
   const accesses = data.accesses || [];
   return (
-    <Window width={420} height={485}>
-      <Window.Content>
+    <Window width={420} height={485} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="Main">
           <LabeledList>
             <LabeledList.Item label="Access Required">

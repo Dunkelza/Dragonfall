@@ -13,8 +13,8 @@ export const BorgPanel = (props) => {
   const ais = data.ais || [];
   const laws = data.laws || [];
   return (
-    <Window title="Borg Panel" width={700} height={700}>
-      <Window.Content scrollable>
+    <Window title="Borg Panel" width={700} height={700} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section
           title={borg.name}
           buttons={

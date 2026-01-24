@@ -23,8 +23,8 @@ export const ReligiousTool = (props) => {
   const [tab, setTab] = useSharedState('tab', 1);
   const { sects, alignment, toolname } = data;
   return (
-    <Window title={toolname} width={560} height={500}>
-      <Window.Content scrollable>
+    <Window title={toolname} width={560} height={500} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Stack vertical fill>
           <Stack.Item>
             <Tabs textAlign="center" fluid>

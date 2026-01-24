@@ -24,8 +24,8 @@ export const DnaVault = (props) => {
     animals_max,
   } = data;
   return (
-    <Window width={350} height={400}>
-      <Window.Content>
+    <Window width={350} height={400} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="DNA Vault Database">
           <LabeledList>
             <LabeledList.Item label="Human DNA">

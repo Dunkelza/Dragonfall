@@ -35,8 +35,8 @@ export const ProcCallMenu = (props) => {
     resolve_weakref,
   } = data;
   return (
-    <Window width={500} height={400}>
-      <Window.Content scrollable>
+    <Window theme="dragonfall" width={500} height={400}>
+      <Window.Content className="Shadowrun" scrollable>
         <Stack fill>
           <Stack.Item>
             <Section fill title="Options">

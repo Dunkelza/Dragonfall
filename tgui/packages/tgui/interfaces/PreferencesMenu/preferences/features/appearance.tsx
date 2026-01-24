@@ -39,3 +39,9 @@ export const socks: FeatureChoiced = {
   name: 'Socks',
   component: FeatureDropdownInput,
 };
+
+export const employer: FeatureChoiced = {
+  name: 'Employer',
+  description: 'Your corporate employer determines which jobs you can take.',
+  component: FeatureDropdownInput,
+};

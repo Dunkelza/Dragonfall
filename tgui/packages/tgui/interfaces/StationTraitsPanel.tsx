@@ -229,8 +229,13 @@ export const StationTraitsPanel = (props) => {
   }
 
   return (
-    <Window title="Modify Station Traits" height={500} width={500}>
-      <Window.Content scrollable>
+    <Window
+      theme="dragonfall"
+      title="Modify Station Traits"
+      height={500}
+      width={500}
+    >
+      <Window.Content className="Shadowrun" scrollable>
         <Tabs>
           <Tabs.Tab
             icon="eye"

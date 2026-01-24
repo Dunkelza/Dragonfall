@@ -14,8 +14,8 @@ export const PortablePump = (props) => {
     max_pressure,
   } = data;
   return (
-    <Window width={300} height={315}>
-      <Window.Content>
+    <Window width={300} height={315} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <PortableBasicInfo />
         <Section
           title="Pump"

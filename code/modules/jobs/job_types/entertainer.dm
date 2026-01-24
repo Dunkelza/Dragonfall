@@ -1,6 +1,6 @@
 /datum/job/clown
 	title = JOB_CLOWN
-	description = "Entertain the crew, make bad jokes, go on a holy quest to find bananium, HONK!"
+	description = "Contracted entertainer. Boost morale through comedy, pranks, and the occasional pie to the face. Corporate life is grim — someone has to lighten the mood."
 	faction = FACTION_STATION
 
 	pinpad_key = "pantomime"
@@ -10,17 +10,12 @@
 	exp_granted_type = EXP_TYPE_CREW
 
 	employers = list(
-		/datum/employer/none
+		/datum/employer/contractor
 	)
 
-	alt_titles = list(JOB_CLOWN, "Mime")
 	outfits = list(
 		"Default" = list(
 			SPECIES_HUMAN = /datum/outfit/job/clown,
-		),
-
-		"Mime" = list(
-			SPECIES_HUMAN = /datum/outfit/job/mime,
 		),
 	)
 

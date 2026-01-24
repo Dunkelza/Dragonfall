@@ -57,8 +57,8 @@ export const SparringContract = (props) => {
   const [area, setArea] = useLocalState('area', set_area);
   const [stakes, setStakes] = useLocalState('stakes', set_stakes);
   return (
-    <Window width={420} height={380}>
-      <Window.Content>
+    <Window theme="dragonfall" width={420} height={380}>
+      <Window.Content className="Shadowrun">
         <Section fill>
           <Stack vertical fill>
             <Stack.Item>

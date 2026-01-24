@@ -23,8 +23,8 @@ export const AntagInfoThief = (props) => {
   const { data } = useBackend<Info>();
   const { intro, goal, hideout, policy } = data;
   return (
-    <Window width={620} height={340}>
-      <Window.Content>
+    <Window theme="dragonfall" width={620} height={340}>
+      <Window.Content className="Shadowrun">
         <Stack vertical fill>
           <Stack.Item grow>
             <Section scrollable fill>

@@ -5,8 +5,8 @@ import { Window } from '../layouts';
 export const ImplantChair = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={375} height={280}>
-      <Window.Content>
+    <Window width={375} height={280} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="Occupant Information" textAlign="center">
           <LabeledList>
             <LabeledList.Item label="Name">

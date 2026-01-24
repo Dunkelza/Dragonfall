@@ -7,8 +7,13 @@ import { Window } from '../layouts';
 export const ComputerFabricator = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window title="Personal Computer Vendor" width={500} height={400}>
-      <Window.Content>
+    <Window
+      title="Personal Computer Vendor"
+      width={500}
+      height={400}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Section italic fontSize="20px">
           Your perfect device, only three steps away...
         </Section>

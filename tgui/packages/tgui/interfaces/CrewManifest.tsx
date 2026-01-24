@@ -31,8 +31,8 @@ export const CrewManifest = (props) => {
   } = useBackend<CrewManifestData>();
 
   return (
-    <Window title="Staff Manifest" width={350} height={500}>
-      <Window.Content scrollable>
+    <Window title="Staff Manifest" width={350} height={500} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         {Object.entries(manifest).map(([dept, crew]) => (
           <ManifestDepartment
             key={dept}

@@ -47,8 +47,12 @@ export const FaxMachine = (props) => {
   });
 
   return (
-    <Window width={550} height={630} theme={emagged ? 'syndicate' : 'ntos'}>
-      <Window.Content>
+    <Window
+      width={550}
+      height={630}
+      theme={emagged ? 'syndicate' : 'dragonfall'}
+    >
+      <Window.Content className="Shadowrun">
         <Section
           title="Renraku Fax Device"
           height={6.5}

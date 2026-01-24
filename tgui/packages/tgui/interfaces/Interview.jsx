@@ -56,8 +56,8 @@ export const Interview = (props) => {
   };
 
   return (
-    <Window width={500} height={600} canClose={is_admin}>
-      <Window.Content scrollable>
+    <Window width={500} height={600} canClose={is_admin} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         {(!read_only && (
           <Section title="Welcome!">
             <p>{linkify_text(welcome_message)}</p>

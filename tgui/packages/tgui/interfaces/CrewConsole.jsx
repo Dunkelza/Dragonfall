@@ -62,8 +62,13 @@ const statusToText = (life_status) => {
 
 export const CrewConsole = () => {
   return (
-    <Window title="Crew Monitor" width={600} height={600}>
-      <Window.Content scrollable>
+    <Window
+      title="Personnel Monitor"
+      width={600}
+      height={600}
+      theme="dragonfall"
+    >
+      <Window.Content scrollable className="Shadowrun">
         <Section minHeight="540px">
           <CrewTable />
         </Section>

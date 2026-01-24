@@ -17,8 +17,8 @@ export const PortableGenerator = (props) => {
     (stack_percent > 15 && 'average') ||
     'bad';
   return (
-    <Window width={450} height={340}>
-      <Window.Content scrollable>
+    <Window width={450} height={340} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         {!data.anchored && <NoticeBox>Generator not anchored.</NoticeBox>}
         <Section title="Status">
           <LabeledList>

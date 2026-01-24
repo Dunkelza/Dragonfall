@@ -13,8 +13,8 @@ export const GravityGenerator = (props) => {
   const { data } = useBackend();
   const { operational } = data;
   return (
-    <Window width={400} height={155}>
-      <Window.Content>
+    <Window width={400} height={155} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         {!operational && <NoticeBox>No data available</NoticeBox>}
         {!!operational && <GravityGeneratorContent />}
       </Window.Content>

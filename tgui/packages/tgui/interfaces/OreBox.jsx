@@ -8,8 +8,8 @@ export const OreBox = (props) => {
   const { act, data } = useBackend();
   const { materials } = data;
   return (
-    <Window width={335} height={415}>
-      <Window.Content scrollable>
+    <Window width={335} height={415} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section
           title="Ores"
           buttons={<Button content="Empty" onClick={() => act('removeall')} />}

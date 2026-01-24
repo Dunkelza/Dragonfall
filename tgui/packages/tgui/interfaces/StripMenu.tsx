@@ -264,8 +264,13 @@ export const StripMenu = (props) => {
   }
 
   return (
-    <Window title={`Stripping ${data.name}`} width={400} height={400}>
-      <Window.Content>
+    <Window
+      title={`Stripping ${data.name}`}
+      width={400}
+      height={400}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           {range(0, ROWS).map((row) => (
             <Stack.Item key={row}>

@@ -17,8 +17,13 @@ export const NotificationPreferences = (props) => {
     return 0;
   });
   return (
-    <Window title="Notification Preferences" width={270} height={360}>
-      <Window.Content scrollable>
+    <Window
+      title="Notification Preferences"
+      width={270}
+      height={360}
+      theme="dragonfall"
+    >
+      <Window.Content scrollable className="Shadowrun">
         <Section title="Ghost Role Notifications">
           {ignores.map((ignore) => (
             <Button

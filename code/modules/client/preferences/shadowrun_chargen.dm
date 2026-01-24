@@ -27,8 +27,15 @@
 	return !!state["saved"]
 
 /// Returns TRUE if non-appearance preferences should be locked.
-/// Design: lock during active rounds, and lock permanently once sheet is saved.
+/// Only lock during active rounds - job selection is always allowed.
 /proc/shadowrun_should_lock_nonappearance_prefs(datum/preferences/preferences)
+	if (!isnull(SSticker) && SSticker.IsRoundInProgress())
+		return TRUE
+	return FALSE // Allow job/quirk selection even after sheet is saved
+
+/// Returns TRUE if character creation (stats, metatype, etc.) should be locked.
+/// Lock during active rounds AND after sheet is saved.
+/proc/shadowrun_should_lock_chargen(datum/preferences/preferences)
 	if (!isnull(SSticker) && SSticker.IsRoundInProgress())
 		return TRUE
 	return shadowrun_chargen_is_saved(preferences)

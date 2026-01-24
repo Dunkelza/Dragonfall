@@ -16,8 +16,8 @@ export const CivCargoHoldTerminal = (props) => {
   const in_text = 'Welcome valued employee.';
   const out_text = 'To begin, insert your ID into the console.';
   return (
-    <Window width={580} height={375}>
-      <Window.Content scrollable>
+    <Window width={580} height={375} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Flex>
           <Flex.Item>
             <NoticeBox color={!id_inserted ? 'default' : 'blue'}>

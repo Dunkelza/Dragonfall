@@ -94,8 +94,8 @@ export const HotkeysHelp = (_) => {
   const { data } = useBackend<HotkeysHelpData>();
 
   return (
-    <Window title="Hotkeys Help" width={500} height={800}>
-      <Window.Content scrollable>
+    <Window theme="dragonfall" title="Hotkeys Help" width={500} height={800}>
+      <Window.Content className="Shadowrun" scrollable>
         <Section title="Sorted by Key">
           <Table>
             <Table.Row header>

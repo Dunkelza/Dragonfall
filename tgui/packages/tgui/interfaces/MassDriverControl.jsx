@@ -6,8 +6,8 @@ export const MassDriverControl = (props) => {
   const { act, data } = useBackend();
   const { connected, minutes, seconds, timing, power, poddoor } = data;
   return (
-    <Window width={300} height={connected ? 215 : 107}>
-      <Window.Content>
+    <Window width={300} height={connected ? 215 : 107} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         {!!connected && (
           <Section
             title="Auto Launch"

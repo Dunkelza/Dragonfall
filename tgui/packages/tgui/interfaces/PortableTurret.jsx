@@ -20,8 +20,8 @@ export const PortableTurret = (props) => {
     lasertag_turret,
   } = data;
   return (
-    <Window width={310} height={lasertag_turret ? 110 : 292}>
-      <Window.Content>
+    <Window width={310} height={lasertag_turret ? 110 : 292} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <NoticeBox>
           Swipe an ID card to {locked ? 'unlock' : 'lock'} this interface.
         </NoticeBox>

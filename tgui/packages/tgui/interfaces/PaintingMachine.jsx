@@ -18,8 +18,8 @@ export const PaintingMachine = (props) => {
   );
 
   return (
-    <Window width={500} height={620}>
-      <Window.Content scrollable>
+    <Window width={500} height={620} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section
           title="PDA Painter"
           buttons={

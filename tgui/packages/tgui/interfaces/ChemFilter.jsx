@@ -57,8 +57,8 @@ export const ChemFilter = (props) => {
   const [leftName, setLeftName] = useLocalState('leftName', '');
   const [rightName, setRightName] = useLocalState('rightName', '');
   return (
-    <Window width={500} height={300}>
-      <Window.Content scrollable>
+    <Window width={500} height={300} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Stack>
           <Stack.Item grow>
             <ChemFilterPane

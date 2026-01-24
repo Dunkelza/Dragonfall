@@ -1,18 +1,18 @@
 /datum/job/head_of_personnel
 	title = JOB_HEAD_OF_PERSONNEL
-	description = "The Superintendent's right hand, and Management's workhorse. Completes tasks on behalf of the Superintendent."
+	description = "The Superintendent's administrative second. Handle personnel assignments, credential management, and the endless paperwork that keeps the arcology functioning."
 	department_head = list(JOB_CAPTAIN)
 	faction = FACTION_STATION
 	total_positions = 1
 	spawn_positions = 1
-	supervisors = "the superintendent"
+	supervisors = "the Superintendent"
 	selection_color = "#1d1d4f"
 	req_admin_notify = 1
 	minimal_player_age = 10
 	exp_granted_type = EXP_TYPE_CREW
 
 	employers = list(
-		/datum/employer/government
+		/datum/employer/daedalus
 	)
 
 	outfits = list(

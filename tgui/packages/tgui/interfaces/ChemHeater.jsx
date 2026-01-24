@@ -32,8 +32,8 @@ export const ChemHeater = (props) => {
     activeReactions = [],
   } = data;
   return (
-    <Window width={330} height={350}>
-      <Window.Content scrollable>
+    <Window width={330} height={350} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section
           title="Controls"
           buttons={

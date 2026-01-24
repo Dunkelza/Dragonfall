@@ -6,8 +6,8 @@ export const BluespaceArtillery = (props) => {
   const { act, data } = useBackend();
   const { notice, connected, unlocked, target } = data;
   return (
-    <Window width={400} height={220}>
-      <Window.Content>
+    <Window width={400} height={220} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         {!!notice && <NoticeBox>{notice}</NoticeBox>}
         {connected ? (
           <>

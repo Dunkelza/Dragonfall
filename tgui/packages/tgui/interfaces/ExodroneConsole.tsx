@@ -170,10 +170,10 @@ export const ExodroneConsole = (props) => {
   );
 
   return (
-    <Window width={750} height={600}>
+    <Window width={750} height={600} theme="dragonfall">
       {!!signal_lost && <SignalLostModal />}
       {!!choosingTools && <ToolSelectionModal />}
-      <Window.Content>
+      <Window.Content className="Shadowrun">
         <ExodroneConsoleContent />
       </Window.Content>
     </Window>

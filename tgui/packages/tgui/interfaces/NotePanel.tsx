@@ -16,8 +16,8 @@ export const NotePanel = (props) => {
   const [tab, setTab] = useSharedState('tab', 0);
   const memories = data.memories || [];
   return (
-    <Window title={'Notes'} width={400} height={500}>
-      <Window.Content>
+    <Window title={'Notes'} width={400} height={500} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Tabs>
           {memories.map((Note, i) => (
             <Tabs.Tab key={i} selected={i === tab} onClick={() => setTab(i)}>

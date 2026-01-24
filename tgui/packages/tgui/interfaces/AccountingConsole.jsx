@@ -17,8 +17,8 @@ export const AccountingConsole = (props) => {
   const AUDIT_SCREEN = 2;
   const [screenmode, setScreenmode] = useLocalState('tab_main', USER_SCREEN);
   return (
-    <Window width={300} height={360}>
-      <Window.Content scrollable>
+    <Window width={300} height={360} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <MarketCrashing />
         <Tabs fluid textAlign="center">
           <Tabs.Tab

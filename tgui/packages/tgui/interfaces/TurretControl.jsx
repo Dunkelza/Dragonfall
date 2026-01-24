@@ -8,8 +8,12 @@ export const TurretControl = (props) => {
   const locked = data.locked && !data.siliconUser;
   const { enabled, lethal, shootCyborgs } = data;
   return (
-    <Window width={305} height={data.siliconUser ? 168 : 164}>
-      <Window.Content>
+    <Window
+      width={305}
+      height={data.siliconUser ? 168 : 164}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <InterfaceLockNoticeBox />
         <Section>
           <LabeledList>

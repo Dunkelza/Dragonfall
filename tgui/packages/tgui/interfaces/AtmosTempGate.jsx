@@ -5,8 +5,8 @@ import { Window } from '../layouts';
 export const AtmosTempGate = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={335} height={115}>
-      <Window.Content>
+    <Window width={335} height={115} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Power">

@@ -24,14 +24,14 @@ export const Biogenerator = (props) => {
   const { data } = useBackend();
   const { beaker, processing } = data;
   return (
-    <Window width={550} height={420}>
+    <Window width={550} height={420} theme="dragonfall">
       {!!processing && (
         <Dimmer fontSize="32px">
           <Icon name="cog" spin={1} />
           {' Processing...'}
         </Dimmer>
       )}
-      <Window.Content scrollable>
+      <Window.Content scrollable className="Shadowrun">
         {!beaker && <NoticeBox>No Container</NoticeBox>}
         {!!beaker && <BiogeneratorContent />}
       </Window.Content>

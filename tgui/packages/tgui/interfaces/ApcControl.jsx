@@ -9,7 +9,7 @@ import { AreaCharge, powerRank } from './PowerMonitor';
 export const ApcControl = (props) => {
   const { data } = useBackend();
   return (
-    <Window title="APC Controller" width={550} height={500}>
+    <Window title="APC Controller" width={550} height={500} theme="dragonfall">
       {data.authenticated === 1 && <ApcLoggedIn />}
       {data.authenticated === 0 && <ApcLoggedOut />}
     </Window>
@@ -21,7 +21,7 @@ const ApcLoggedOut = (props) => {
   const { emagged } = data;
   const text = emagged === 1 ? 'Open' : 'Log In';
   return (
-    <Window.Content>
+    <Window.Content className="Shadowrun">
       <Button
         fluid
         color={emagged === 1 ? '' : 'good'}

@@ -1,6 +1,6 @@
 /datum/job/botanist
 	title = JOB_BOTANIST
-	description = "Grow plants for the cook, for medicine, and for recreation."
+	description = "Contracted hydroponics specialist. Grow produce for the kitchen, cultivate medicinal herbs, and maybe something for personal use."
 	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = FACTION_STATION
 
@@ -11,7 +11,7 @@
 	exp_granted_type = EXP_TYPE_CREW
 
 	employers = list(
-		/datum/employer/none
+		/datum/employer/contractor
 	)
 
 	outfits = list(

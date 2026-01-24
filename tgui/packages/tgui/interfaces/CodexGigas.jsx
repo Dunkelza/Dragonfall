@@ -52,8 +52,8 @@ const SUFFIXES = [
 export const CodexGigas = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={450} height={450}>
-      <Window.Content>
+    <Window width={450} height={450} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           {data.name}
           <LabeledList>

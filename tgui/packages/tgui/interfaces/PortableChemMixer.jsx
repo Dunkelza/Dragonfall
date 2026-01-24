@@ -26,8 +26,8 @@ export const PortableChemMixer = (props) => {
     [];
   const chemicals = sortBy((chem) => chem.title)(data.chemicals);
   return (
-    <Window width={465} height={550}>
-      <Window.Content scrollable>
+    <Window width={465} height={550} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section
           title="Dispense"
           buttons={beakerTransferAmounts.map((amount) => (

@@ -9,8 +9,8 @@ export const CircuitAccessChecker = (props) => {
   const regions = data.regions || [];
   const accesses = data.accesses || [];
   return (
-    <Window width={420} height={360}>
-      <Window.Content>
+    <Window width={420} height={360} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <LabeledList>
           <LabeledList.Item label="Access Required">
             <Button

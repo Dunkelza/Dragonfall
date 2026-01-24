@@ -202,10 +202,10 @@ export const ExoscannerConsole = (_) => {
   const can_start_wide_scan = scan_power > 0;
 
   return (
-    <Window width={550} height={600}>
+    <Window theme="dragonfall" width={550} height={600}>
       {!!scan_in_progress && <ScanInProgressModal />}
       {!!failed && <ScanFailedModal />}
-      <Window.Content>
+      <Window.Content className="Shadowrun">
         <Stack vertical fill>
           <Stack.Item>
             <Section fill title="Available array power">

@@ -34,8 +34,8 @@ export const Telecomms = (props) => {
   const linked = data.linked || [];
   const frequencies = data.frequencies || [];
   return (
-    <Window title={id} width={400} height={600}>
-      <Window.Content scrollable>
+    <Window title={id} width={400} height={600} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         {!multitool && <NoticeBox>Use a multitool to make changes.</NoticeBox>}
         <Section title="Settings">
           <LabeledList>

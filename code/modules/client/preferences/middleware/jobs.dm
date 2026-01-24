@@ -86,6 +86,12 @@
 		if (length(job.alt_titles))
 			job_entry["alt_titles"] = job.alt_titles
 
+		// Add employer names for job filtering
+		var/list/employer_names = list()
+		for (var/datum/employer/employer_type as anything in job.employers)
+			employer_names += initial(employer_type.name)
+		job_entry["employers"] = employer_names
+
 		jobs[job.title] = job_entry
 
 	return list(

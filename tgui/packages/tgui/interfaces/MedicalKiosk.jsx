@@ -18,8 +18,8 @@ export const MedicalKiosk = (props) => {
   const { active_status_1, active_status_2, active_status_3, active_status_4 } =
     data;
   return (
-    <Window width={575} height={420}>
-      <Window.Content scrollable>
+    <Window width={575} height={420} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Flex mb={1}>
           <Flex.Item mr={1}>
             <Section minHeight="100%">

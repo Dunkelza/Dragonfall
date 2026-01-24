@@ -15,8 +15,13 @@ export const Pager = (_) => {
   const { messages, receiving, the_time } = data;
 
   return (
-    <Window width={450} height={320} title="ThinkTronic Pager">
-      <Window.Content>
+    <Window
+      width={450}
+      height={320}
+      title="ThinkTronic Pager"
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Section height="240px" title={'ThinkDOS 1.04p | ' + the_time}>
           {messages.toReversed().map((message, i) => (
             <BlockQuote key={i}>{message}</BlockQuote>

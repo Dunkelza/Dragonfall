@@ -1,14 +1,12 @@
 /datum/job/warden
 	title = JOB_WARDEN
-	description = "Watch over the Brig and Prison Wing, manage prisoners, \
-		issue equipment to security, work with the Security Marshal \
-		to organize security."
+	description = "Lone Star's brig commander. Manage detainees, distribute tactical equipment, and coordinate with the Security Marshal on threat response."
 	auto_deadmin_role_flags = DEADMIN_POSITION_SECURITY
 	department_head = list(JOB_SECURITY_MARSHAL)
 	faction = FACTION_STATION
 	total_positions = 1
 	spawn_positions = 1
-	supervisors = "the security marshal"
+	supervisors = "the Security Marshal"
 	selection_color = "#602f1c"
 	minimal_player_age = 7
 	exp_requirements = 300

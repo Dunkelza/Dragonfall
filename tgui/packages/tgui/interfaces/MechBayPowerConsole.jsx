@@ -15,8 +15,8 @@ export const MechBayPowerConsole = (props) => {
   const mech = recharge_port && recharge_port.mech;
   const cell = mech && mech.cell;
   return (
-    <Window width={400} height={200}>
-      <Window.Content>
+    <Window width={400} height={200} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section
           title="Mech status"
           textAlign="center"

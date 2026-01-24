@@ -14,8 +14,8 @@ export const CargoExpress = (props) => {
   const { act, data } = useBackend();
   const { locked } = data;
   return (
-    <Window width={600} height={700}>
-      <Window.Content scrollable>
+    <Window width={600} height={700} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <InterfaceLockNoticeBox />
         {!locked && <CargoExpressContent />}
       </Window.Content>

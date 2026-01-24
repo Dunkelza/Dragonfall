@@ -17,8 +17,8 @@ export const Photocopier = (props) => {
   const { isAI, has_toner, has_item, forms_exist } = data;
 
   return (
-    <Window title="Photocopier" width={320} height={512}>
-      <Window.Content>
+    <Window title="Photocopier" width={320} height={512} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         {has_toner ? (
           <Toner />
         ) : (

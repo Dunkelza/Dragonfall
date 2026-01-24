@@ -13,8 +13,13 @@ export const SentienceFunBalloon = (props) => {
   const { act, data } = useBackend();
   const { group_name, range } = data;
   return (
-    <Window title={'Sentience Fun Balloon'} width={400} height={175}>
-      <Window.Content>
+    <Window
+      title={'Sentience Fun Balloon'}
+      width={400}
+      height={175}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Stack vertical>
           <Section title="Configure balloon effect:">
             <LabeledList>

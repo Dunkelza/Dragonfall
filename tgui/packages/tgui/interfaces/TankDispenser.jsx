@@ -5,8 +5,8 @@ import { Window } from '../layouts';
 export const TankDispenser = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={275} height={103}>
-      <Window.Content>
+    <Window width={275} height={103} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item

@@ -13,8 +13,8 @@ export const EmergencyShuttleConsole = (props) => {
     authorizations = [],
   } = data;
   return (
-    <Window width={400} height={350}>
-      <Window.Content>
+    <Window width={400} height={350} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <Box bold fontSize="40px" textAlign="center" fontFamily="monospace">
             {timer_str}

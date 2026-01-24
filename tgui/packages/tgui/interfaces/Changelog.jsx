@@ -351,8 +351,8 @@ export class Changelog extends Component {
         ));
 
     return (
-      <Window title="Changelog" width={675} height={650}>
-        <Window.Content scrollable>
+      <Window title="Changelog" width={675} height={650} theme="dragonfall">
+        <Window.Content scrollable className="Shadowrun">
           {header}
           {changes}
           {typeof data === 'string' && <p>{data}</p>}

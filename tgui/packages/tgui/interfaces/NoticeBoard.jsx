@@ -7,8 +7,8 @@ export const NoticeBoard = (props) => {
   const { allowed, items = {} } = data;
 
   return (
-    <Window width={425} height={176}>
-      <Window.Content backgroundColor="#704D25">
+    <Window width={425} height={176} theme="dragonfall">
+      <Window.Content backgroundColor="#704D25" className="Shadowrun">
         {!items.length ? (
           <Section>
             <Box color="white" align="center">

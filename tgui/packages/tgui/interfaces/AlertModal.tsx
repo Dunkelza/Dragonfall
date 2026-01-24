@@ -52,9 +52,15 @@ export const AlertModal = (_) => {
   };
 
   return (
-    <Window height={windowHeight} title={title} width={windowWidth}>
+    <Window
+      theme="dragonfall"
+      height={windowHeight}
+      title={title}
+      width={windowWidth}
+    >
       {!!timeout && <Loader value={timeout} />}
       <Window.Content
+        className="Shadowrun"
         onKeyDown={(e) => {
           const keyCode = window.event ? e.which : e.keyCode;
           /**

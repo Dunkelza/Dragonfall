@@ -18,8 +18,8 @@ export const SpawnersMenu = (props) => {
   const { act, data } = useBackend<SpawnersMenuContext>();
   const spawners = data.spawners || [];
   return (
-    <Window title="Spawners Menu" width={700} height={525}>
-      <Window.Content scrollable>
+    <Window theme="dragonfall" title="Spawners Menu" width={700} height={525}>
+      <Window.Content className="Shadowrun" scrollable>
         <Stack vertical>
           {spawners.map((spawner) => (
             <Stack.Item key={spawner.name}>

@@ -1,0 +1,397 @@
+// =============================================================================
+// SHADOWRUN GLOBAL UI STYLES
+// =============================================================================
+// Shared styling variables and utility classes for consistent Shadowrun theming
+// across all tgui interfaces.
+
+@use 'sass:color';
+@use '../colors.scss';
+
+// =============================================================================
+// COLOR PALETTE
+// =============================================================================
+
+// Core accent colors
+$sr-gold: #caa53d; // Primary gold accent (physical/resources)
+$sr-gold-bright: #e8c547;
+$sr-gold-dim: color.scale($sr-gold, $lightness: -20%);
+
+$sr-teal: #03fca1; // Secondary accent (special/magic)
+$sr-purple: #615b7d; // Tertiary accent (mental)
+
+// Corporation colors
+$sr-renraku-red: #cc2222;
+$sr-shiawase-orange: #f1a839;
+$sr-lone-star-blue: #3366aa;
+$sr-docwagon-green: #44aa66;
+$sr-ares-gold: #ccaa33;
+
+// Status colors
+$sr-good: #06bb6c;
+$sr-bad: #f2545b;
+$sr-caution: #e8c547;
+$sr-neutral: #888888;
+
+// Background colors
+$sr-bg-dark: rgba(0, 0, 0, 0.35);
+$sr-bg-darker: rgba(0, 0, 0, 0.5);
+$sr-bg-panel: rgba(20, 20, 25, 0.95);
+$sr-bg-input: rgba(25, 25, 30, 0.95);
+
+// Border colors
+$sr-border-light: rgba(255, 255, 255, 0.15);
+$sr-border-medium: rgba(255, 255, 255, 0.25);
+$sr-border-gold: rgba($sr-gold, 0.5);
+
+// =============================================================================
+// TYPOGRAPHY
+// =============================================================================
+
+// Font stacks
+$sr-font-display: 'Libre Baskerville', Georgia, serif;
+$sr-font-body: 'Jost', 'Segoe UI', sans-serif;
+$sr-font-mono: 'Consolas', 'Monaco', monospace;
+
+// =============================================================================
+// GLOBAL SHADOWRUN CONTAINER CLASS
+// =============================================================================
+// Apply .Shadowrun to any container to get consistent styling
+
+.Shadowrun {
+  font-family: $sr-font-body;
+
+  // Section styling
+  .Section {
+    background: $sr-bg-dark;
+    border: 2px solid $sr-border-light;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  }
+
+  .Section__title {
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.35),
+      rgba(0, 0, 0, 0.15)
+    );
+    border-bottom: 1px solid rgba($sr-gold, 0.5);
+  }
+
+  .Section__titleText {
+    font-family: $sr-font-display;
+    letter-spacing: 0.02em;
+  }
+
+  // Button styling
+  .Button {
+    background: linear-gradient(
+      135deg,
+      rgba(40, 40, 45, 0.9),
+      rgba(25, 25, 30, 0.95)
+    );
+    border: 1px solid $sr-border-light;
+    border-radius: 2px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.3);
+    clip-path: none;
+    font-family: $sr-font-body;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    transition: all 0.15s ease;
+
+    &:hover:not(.Button--disabled) {
+      background: linear-gradient(
+        135deg,
+        rgba(55, 55, 60, 0.95),
+        rgba(35, 35, 40, 0.95)
+      );
+      border-color: $sr-border-gold;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.15),
+        0 2px 6px rgba(0, 0, 0, 0.4),
+        0 0 8px rgba($sr-gold, 0.2);
+    }
+  }
+
+  .Button--selected {
+    background: linear-gradient(
+      135deg,
+      rgba($sr-gold, 0.3),
+      rgba($sr-gold, 0.15)
+    ) !important;
+    border-color: rgba($sr-gold, 0.6) !important;
+    color: $sr-gold !important;
+  }
+
+  .Button--disabled {
+    background: rgba(40, 40, 45, 0.5) !important;
+    border-color: rgba(255, 255, 255, 0.05) !important;
+    color: rgba(255, 255, 255, 0.35) !important;
+    cursor: not-allowed;
+  }
+
+  // Input styling
+  .Input {
+    background: $sr-bg-input;
+    border: 1px solid $sr-border-light;
+    border-radius: 2px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+
+    &:focus,
+    &:focus-within {
+      border-color: $sr-border-gold;
+      box-shadow:
+        inset 0 2px 4px rgba(0, 0, 0, 0.3),
+        0 0 8px rgba($sr-gold, 0.2);
+    }
+  }
+
+  // Dropdown styling
+  .Dropdown__control {
+    background: linear-gradient(
+      135deg,
+      rgba(40, 40, 45, 0.9),
+      rgba(25, 25, 30, 0.95)
+    );
+    border: 1px solid $sr-border-light;
+    border-radius: 2px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 2px 4px rgba(0, 0, 0, 0.3);
+
+    &:hover {
+      border-color: $sr-border-gold;
+    }
+  }
+
+  .Dropdown__arrow-button {
+    background: rgba($sr-gold, 0.2);
+    border-left: 1px solid $sr-border-light;
+
+    &:hover {
+      background: rgba($sr-gold, 0.35);
+    }
+  }
+
+  .Dropdown__menu {
+    background: $sr-bg-panel;
+    border: 1px solid $sr-border-light;
+    border-radius: 2px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  }
+
+  .Dropdown__menuentry {
+    transition: all 0.1s ease;
+
+    &:hover {
+      background: rgba($sr-gold, 0.25);
+    }
+  }
+
+  .Dropdown__menuentry--selected {
+    background: rgba($sr-gold, 0.35);
+    border-left: 2px solid $sr-gold;
+  }
+
+  // LabeledList styling
+  .LabeledList__row {
+    border-bottom: 1px solid $sr-border-light;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .LabeledList__cell {
+    padding: 0.4em 0.5em;
+    vertical-align: middle;
+  }
+
+  .LabeledList__label {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.95em;
+    letter-spacing: 0.02em;
+  }
+
+  // Table styling
+  .Table__row {
+    border-bottom: 1px solid $sr-border-light;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+  }
+
+  // Tabs styling
+  .Tabs__Tab {
+    border: 2px solid $sr-border-light;
+    background: $sr-bg-dark;
+    font-family: $sr-font-display;
+    letter-spacing: 0.01em;
+  }
+
+  .Tabs__Tab--selected {
+    border-color: rgba($sr-gold, 0.85);
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  // NoticeBox styling
+  .NoticeBox {
+    border-left: 3px solid $sr-gold;
+    background: rgba($sr-gold, 0.1);
+  }
+
+  .NoticeBox--danger {
+    border-left-color: $sr-bad;
+    background: rgba($sr-bad, 0.1);
+  }
+
+  .NoticeBox--success {
+    border-left-color: $sr-good;
+    background: rgba($sr-good, 0.1);
+  }
+
+  // ProgressBar styling
+  .ProgressBar {
+    background: $sr-bg-darker;
+    border-radius: 2px;
+  }
+
+  .ProgressBar__fill {
+    background: linear-gradient(90deg, $sr-gold-dim, $sr-gold);
+  }
+
+  .ProgressBar__fill--good {
+    background: linear-gradient(90deg, darken($sr-good, 10%), $sr-good);
+  }
+
+  .ProgressBar__fill--bad {
+    background: linear-gradient(90deg, darken($sr-bad, 10%), $sr-bad);
+  }
+}
+
+// =============================================================================
+// UTILITY CLASSES
+// =============================================================================
+
+// Text hints with subtle underline
+.Shadowrun__hint {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+  cursor: help;
+}
+
+// Gold accent text
+.Shadowrun__accent {
+  color: $sr-gold;
+}
+
+// Credit/currency display
+.Shadowrun__credits {
+  color: $sr-gold-bright;
+  font-weight: bold;
+
+  &::before {
+    content: '¥';
+  }
+}
+
+// Corp badge styling
+.Shadowrun__corp-badge {
+  display: inline-block;
+  padding: 0.15em 0.5em;
+  border: 1px solid $sr-border-light;
+  border-radius: 2px;
+  background: $sr-bg-dark;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+
+  &--renraku {
+    border-color: rgba($sr-renraku-red, 0.5);
+    color: $sr-renraku-red;
+  }
+
+  &--shiawase {
+    border-color: rgba($sr-shiawase-orange, 0.5);
+    color: $sr-shiawase-orange;
+  }
+
+  &--lone-star {
+    border-color: rgba($sr-lone-star-blue, 0.5);
+    color: $sr-lone-star-blue;
+  }
+
+  &--docwagon {
+    border-color: rgba($sr-docwagon-green, 0.5);
+    color: $sr-docwagon-green;
+  }
+}
+
+// Panel header styling
+.Shadowrun__header {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.6),
+    rgba(15, 15, 15, 0.8)
+  );
+  border-left: 4px solid $sr-gold;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 120px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba($sr-gold, 0.08));
+    pointer-events: none;
+  }
+}
+
+.Shadowrun__header__title {
+  font-family: $sr-font-display;
+  font-size: 1.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $sr-gold;
+  text-shadow: 0 0 10px rgba($sr-gold, 0.3);
+}
+
+.Shadowrun__header__subtitle {
+  font-family: $sr-font-body;
+  font-size: 1.15rem;
+  opacity: 0.85;
+  letter-spacing: 0.02em;
+}
+
+// Status indicator
+.Shadowrun__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+
+  &--good {
+    color: $sr-good;
+  }
+
+  &--bad {
+    color: $sr-bad;
+  }
+
+  &--caution {
+    color: $sr-caution;
+  }
+
+  &--neutral {
+    color: $sr-neutral;
+  }
+}

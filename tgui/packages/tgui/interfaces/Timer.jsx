@@ -6,8 +6,8 @@ export const Timer = (props) => {
   const { act, data } = useBackend();
   const { minutes, seconds, timing, loop } = data;
   return (
-    <Window width={275} height={115}>
-      <Window.Content>
+    <Window width={275} height={115} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section
           title="Timing Unit"
           buttons={

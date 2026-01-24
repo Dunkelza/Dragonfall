@@ -22,8 +22,8 @@ export const AntagInfoGeneric = (props) => {
   const { data } = useBackend<Info>();
   const { antag_name } = data;
   return (
-    <Window width={620} height={250}>
-      <Window.Content>
+    <Window width={620} height={250} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section scrollable fill>
           <Stack vertical>
             <Stack.Item textColor="red" fontSize="20px">

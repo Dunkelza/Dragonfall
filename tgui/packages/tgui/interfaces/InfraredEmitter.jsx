@@ -6,8 +6,8 @@ export const InfraredEmitter = (props) => {
   const { act, data } = useBackend();
   const { on, visible } = data;
   return (
-    <Window width={225} height={110}>
-      <Window.Content>
+    <Window width={225} height={110} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Status">

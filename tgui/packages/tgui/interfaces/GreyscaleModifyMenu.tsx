@@ -281,8 +281,13 @@ const LoadingAnimation = () => {
 export const GreyscaleModifyMenu = (props) => {
   const { act, data } = useBackend<GreyscaleMenuData>();
   return (
-    <Window title="Color Configuration" width={325} height={800}>
-      <Window.Content scrollable>
+    <Window
+      theme="dragonfall"
+      title="Color Configuration"
+      width={325}
+      height={800}
+    >
+      <Window.Content className="Shadowrun" scrollable>
         <ConfigDisplay />
         <ColorDisplay />
         <IconStatesDisplay />

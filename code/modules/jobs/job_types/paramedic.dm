@@ -1,7 +1,6 @@
 /datum/job/paramedic
 	title = JOB_PARAMEDIC
-	description = "Run around the station looking for patients, respond to \
-		emergencies, give patients a roller bed ride to medbay."
+	description = "Respond to DocWagon panic button activations, extract clients from hot zones, and stabilize casualties for transport. Your response time is your reputation."
 	department_head = list(JOB_AUGUR)
 	faction = FACTION_STATION
 	total_positions = 2

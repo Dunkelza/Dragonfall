@@ -42,8 +42,8 @@ export const Canister = (props) => {
     restricted,
   } = data;
   return (
-    <Window width={350} height={275}>
-      <Window.Content>
+    <Window width={350} height={275} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Flex direction="column" height="100%">
           <Flex.Item mb={1}>
             <Section

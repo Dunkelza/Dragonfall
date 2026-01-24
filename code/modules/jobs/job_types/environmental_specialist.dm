@@ -1,11 +1,11 @@
 /datum/job/atmospheric_technician
 	title = JOB_ATMOSPHERIC_TECHNICIAN
-	description = "Ensure the air is breathable on the station, fill oxygen tanks, fight fires, purify the air."
+	description = "Renraku environmental systems specialist. Regulate arcology atmosphere, respond to hazmat situations, and ensure everyone keeps breathing."
 	department_head = list(JOB_CHIEF_ENGINEER)
 	faction = FACTION_STATION
 	total_positions = 3
 	spawn_positions = 2
-	supervisors = "the chief engineer"
+	supervisors = "the Facilities Director"
 	selection_color = "#5b4d20"
 	exp_requirements = 60
 	exp_required_type = EXP_TYPE_CREW

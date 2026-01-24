@@ -26,8 +26,8 @@ export const Crystallizer = (props) => {
     selected,
   } = data;
   return (
-    <Window width={500} height={600}>
-      <Window.Content scrollable>
+    <Window width={500} height={600} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section title="Controls">
           <LabeledList>
             <LabeledList.Item label="Power">

@@ -11,8 +11,8 @@ import { Window } from '../layouts';
 
 export const AiRestorer = () => {
   return (
-    <Window width={370} height={360}>
-      <Window.Content scrollable>
+    <Window width={370} height={360} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <AiRestorerContent />
       </Window.Content>
     </Window>

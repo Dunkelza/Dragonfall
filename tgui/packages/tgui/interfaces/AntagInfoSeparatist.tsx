@@ -18,8 +18,8 @@ export const AntagInfoSeparatist = (props) => {
   const { data } = useBackend<Info>();
   const { nationColor } = data;
   return (
-    <Window width={620} height={450}>
-      <Window.Content backgroundColor={nationColor}>
+    <Window width={620} height={450} theme="dragonfall">
+      <Window.Content className="Shadowrun" backgroundColor={nationColor}>
         <Stack vertical fill>
           <Stack.Item grow>
             <IntroductionObjectives />

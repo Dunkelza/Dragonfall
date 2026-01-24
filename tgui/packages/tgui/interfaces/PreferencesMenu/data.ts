@@ -74,6 +74,7 @@ export type Job = {
   alt_titles?: string[];
   department: string;
   description: string;
+  employers?: string[];
   // PARIAH EDIT END
 };
 
@@ -132,6 +133,7 @@ export type PreferencesMenuData = {
     features: Record<string, string>;
     game_preferences: Record<string, unknown>;
     misc: {
+      employer?: string;
       gender: Gender;
       joblessrole: JoblessRole;
       species: string;

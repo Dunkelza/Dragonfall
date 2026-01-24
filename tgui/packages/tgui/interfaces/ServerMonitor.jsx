@@ -145,8 +145,8 @@ export const ServerMonitor = (props) => {
   const { act, data } = useBackend();
   const { screen, error } = data;
   return (
-    <Window width={575} height={400}>
-      <Window.Content>
+    <Window width={575} height={400} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Stack vertical fill>
           <Stack.Item>
             {error !== '' && <NoticeBox>{error}</NoticeBox>}

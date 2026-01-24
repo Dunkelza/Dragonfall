@@ -5,8 +5,12 @@ import { Window } from '../layouts';
 export const KeycardAuth = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={375} height={58 + data.optmap.length * 22}>
-      <Window.Content>
+    <Window
+      width={375}
+      height={58 + data.optmap.length * 22}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Section>
           <Box>
             {data.waiting === 1 && (

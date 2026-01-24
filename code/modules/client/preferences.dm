@@ -71,6 +71,11 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 	/// Used to avoid expensive READ_FILE every time a preference is retrieved.
 	var/value_cache = list()
 
+	/// Last time save_character was called, used for rate limiting
+	var/last_save_time = 0
+	/// Minimum time between saves in deciseconds (2 seconds)
+	var/save_rate_limit = 20
+
 	/// If set to TRUE, will update character_profiles on the next ui_data tick.
 	var/tainted_character_profiles = FALSE
 
@@ -272,14 +277,10 @@ GLOBAL_LIST_EMPTY(preferences_datums)
 
 			// Persist certain character-critical edits immediately.
 			// This avoids user confusion when they close/reopen the menu before ui_close runs,
-			// and ensures Shadowrun "Save Sheet" and name edits survive reconnects.
+			// and ensures Shadowrun chargen and name edits survive reconnects.
 			if (requested_preference.savefile_identifier == PREFERENCE_CHARACTER)
-				if (istype(requested_preference, /datum/preference/name))
+				if (istype(requested_preference, /datum/preference/name) || requested_preference.type == /datum/preference/blob/shadowrun_chargen)
 					save_character()
-				else if (requested_preference.type == /datum/preference/blob/shadowrun_chargen)
-					var/list/sr_state = value_cache[requested_preference.type]
-					if (islist(sr_state) && !!sr_state["saved"])
-						save_character()
 
 			if (istype(requested_preference, /datum/preference/name))
 				tainted_character_profiles = TRUE

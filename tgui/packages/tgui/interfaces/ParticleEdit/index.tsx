@@ -52,9 +52,14 @@ export const ParticleEdit = (props) => {
   } = data.particle_data;
 
   return (
-    <Window title={data.target_name + "'s particles"} width={940} height={890}>
+    <Window
+      theme="dragonfall"
+      title={data.target_name + "'s particles"}
+      width={940}
+      height={890}
+    >
       {desc ? <ShowDesc /> : null}
-      <Window.Content scrollable>
+      <Window.Content className="Shadowrun" scrollable>
         <LabeledList>
           <Section
             title={'Affects entire set'}

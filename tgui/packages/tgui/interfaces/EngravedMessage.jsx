@@ -19,8 +19,8 @@ export const EngravedMessage = (props) => {
     realdate,
   } = data;
   return (
-    <Window width={600} height={300}>
-      <Window.Content scrollable>
+    <Window width={600} height={300} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section>
           <Box bold textAlign="center" fontSize="20px" mb={2}>
             {decodeHtmlEntities(hidden_message)}

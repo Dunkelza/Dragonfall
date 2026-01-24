@@ -33,8 +33,8 @@ export const OperatingComputer = (props) => {
   const [tab, setTab] = useSharedState('tab', 1);
 
   return (
-    <Window width={350} height={470}>
-      <Window.Content scrollable>
+    <Window width={350} height={470} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Tabs>
           <Tabs.Tab selected={tab === 1} onClick={() => setTab(1)}>
             Patient State

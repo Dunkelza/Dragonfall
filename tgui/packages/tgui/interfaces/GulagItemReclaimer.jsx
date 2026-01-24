@@ -6,8 +6,8 @@ export const GulagItemReclaimer = (props) => {
   const { act, data } = useBackend();
   const { mobs = [] } = data;
   return (
-    <Window width={325} height={400}>
-      <Window.Content scrollable>
+    <Window width={325} height={400} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         {mobs.length === 0 && <NoticeBox>No stored items</NoticeBox>}
         {mobs.length > 0 && (
           <Section title="Stored Items">

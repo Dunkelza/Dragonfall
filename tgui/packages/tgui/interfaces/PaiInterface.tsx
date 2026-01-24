@@ -122,8 +122,13 @@ export const PaiInterface = (_) => {
   };
 
   return (
-    <Window title="pAI Software Interface v2.4" width={380} height={480}>
-      <Window.Content>
+    <Window
+      theme="dragonfall"
+      title="pAI Software Interface v2.4"
+      width={380}
+      height={480}
+    >
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           <Stack.Item grow>
             {tab === Tab.System && <SystemDisplay />}

@@ -1,7 +1,6 @@
 /datum/job/chemist
 	title = JOB_CHEMIST
-	description = "Supply the doctors with chemicals, make medicine, as well as \
-		less likable substances in the comfort of a fully reinforced room."
+	description = "Compound pharmaceuticals for DocWagon's trauma teams, synthesize combat stims, and formulate the chemical edge that keeps clients breathing."
 	department_head = list("Medical Director")
 	faction = FACTION_STATION
 	total_positions = 2

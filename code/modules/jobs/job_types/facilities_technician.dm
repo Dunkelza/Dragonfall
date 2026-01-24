@@ -1,12 +1,11 @@
 /datum/job/station_engineer
 	title = JOB_STATION_ENGINEER
-	description = "Start the Supermatter, wire the solars, repair station hull \
-		and wiring damage."
+	description = "Renraku facilities maintenance. Manage power systems, repair structural damage, and keep the arcology running at peak efficiency."
 	department_head = list(JOB_CHIEF_ENGINEER)
 	faction = FACTION_STATION
 	total_positions = 5
 	spawn_positions = 5
-	supervisors = "the chief engineer"
+	supervisors = "the Facilities Director"
 	selection_color = "#5b4d20"
 	exp_requirements = 60
 	exp_required_type = EXP_TYPE_CREW

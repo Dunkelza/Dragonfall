@@ -42,8 +42,8 @@ export const ChemRecipeDebug = (props) => {
     queuedReactions = [],
   } = data;
   return (
-    <Window width={450} height={850}>
-      <Window.Content scrollable>
+    <Window width={450} height={850} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section
           title="Controls"
           buttons={

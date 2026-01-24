@@ -57,9 +57,10 @@ export const TextInputModal = (props) => {
     (message.length && large_buttons ? 5 : 0);
 
   return (
-    <Window title={title} width={325} height={windowHeight}>
+    <Window title={title} width={325} height={windowHeight} theme="dragonfall">
       {timeout && <Loader value={timeout} />}
       <Window.Content
+        className="Shadowrun"
         onKeyDown={(event) => {
           if (
             event.key === KEY.Enter &&

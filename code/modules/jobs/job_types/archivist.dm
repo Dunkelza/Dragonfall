@@ -1,7 +1,6 @@
 /datum/job/curator
 	title = JOB_ARCHIVIST
-	description = "Read and write books and hand them to people, stock \
-		bookshelves, report on station news."
+	description = "Contracted information specialist. Maintain the arcology's records, preserve knowledge, and occasionally dig up intel best left buried."
 	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = FACTION_STATION
 
@@ -13,7 +12,7 @@
 	exp_granted_type = EXP_TYPE_CREW
 
 	employers = list(
-		/datum/employer/none,
+		/datum/employer/contractor,
 	)
 
 	outfits = list(

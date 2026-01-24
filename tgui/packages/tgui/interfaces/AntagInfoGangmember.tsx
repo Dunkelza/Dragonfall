@@ -13,8 +13,9 @@ export const AntagInfoGangmember = (props) => {
   const { data } = useBackend<Info>();
   const { gang_name, antag_name } = data;
   return (
-    <Window width={620} height={500}>
+    <Window width={620} height={500} theme="dragonfall">
       <Window.Content
+        className="Shadowrun"
         style={{
           backgroundImage: 'none',
         }}

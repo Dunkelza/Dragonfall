@@ -15,8 +15,8 @@ export const LoadoutManager = (props) => {
   });
 
   return (
-    <Window title="Loadout Manager" width={500} height={650}>
-      <Window.Content>
+    <Window title="Loadout Manager" width={500} height={650} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           <Stack.Item>
             <Section

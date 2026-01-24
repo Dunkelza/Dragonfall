@@ -8,8 +8,8 @@ export const ChemSplitter = (props) => {
   const { act, data } = useBackend();
   const { straight, side, max_transfer } = data;
   return (
-    <Window width={220} height={105}>
-      <Window.Content>
+    <Window width={220} height={105} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Straight">

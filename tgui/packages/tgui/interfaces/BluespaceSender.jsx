@@ -30,8 +30,13 @@ export const BluespaceSender = (props) => {
     ...bluespace_network_gases.map((gas) => gas.amount),
   );
   return (
-    <Window title="Bluespace Sender" width={500} height={600}>
-      <Window.Content>
+    <Window
+      title="Bluespace Sender"
+      width={500}
+      height={600}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Section
           scrollable
           fill

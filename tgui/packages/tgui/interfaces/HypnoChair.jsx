@@ -5,8 +5,8 @@ import { Window } from '../layouts';
 export const HypnoChair = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={375} height={480}>
-      <Window.Content>
+    <Window width={375} height={480} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="Information" backgroundColor="#450F44">
           The Enhanced Interrogation Chamber is designed to induce a deep-rooted
           trance trigger into the subject. Once the procedure is complete, by

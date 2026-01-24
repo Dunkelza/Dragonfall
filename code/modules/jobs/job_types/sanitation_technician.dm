@@ -1,6 +1,6 @@
 /datum/job/janitor
 	title = JOB_JANITOR
-	description = "Clean up trash and blood. Replace broken lights. Slip people over."
+	description = "Contracted sanitation worker. Clean up the messes — blood, chemical spills, whatever corporate life leaves behind. Nobody notices you until the floors are dirty."
 	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = FACTION_STATION
 
@@ -12,7 +12,7 @@
 	exp_granted_type = EXP_TYPE_CREW
 
 	employers = list(
-		/datum/employer/none
+		/datum/employer/contractor
 	)
 
 	outfits = list(

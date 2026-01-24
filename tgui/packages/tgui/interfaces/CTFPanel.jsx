@@ -7,8 +7,8 @@ export const CTFPanel = (props) => {
   const teams = data.teams || [];
   const enabled = data.enabled || [];
   return (
-    <Window title="CTF Panel" width={700} height={600}>
-      <Window.Content scrollable>
+    <Window title="CTF Panel" width={700} height={600} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Box textAlign="center" fontSize="18px">
           {enabled}
         </Box>

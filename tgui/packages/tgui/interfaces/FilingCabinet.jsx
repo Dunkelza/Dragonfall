@@ -6,8 +6,17 @@ export const FilingCabinet = (props) => {
   const { act, data } = useBackend();
   const { cabinet_name, contents, contents_ref } = data;
   return (
-    <Window title={cabinet_name || 'Filing Cabinet'} width={350} height={300}>
-      <Window.Content backgroundColor="#B88F3D" scrollable>
+    <Window
+      title={cabinet_name || 'Filing Cabinet'}
+      width={350}
+      height={300}
+      theme="dragonfall"
+    >
+      <Window.Content
+        backgroundColor="#B88F3D"
+        scrollable
+        className="Shadowrun"
+      >
         {contents.map((object, index) => (
           <Flex
             key={contents_ref[index]}

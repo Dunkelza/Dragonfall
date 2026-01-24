@@ -23,8 +23,8 @@ export const ChemPress = (props) => {
     patch_styles = [],
   } = data;
   return (
-    <Window width={300} height={227}>
-      <Window.Content>
+    <Window width={300} height={227} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Product">

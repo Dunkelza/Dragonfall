@@ -1,17 +1,17 @@
 /datum/job/shaft_miner
 	title = JOB_PROSPECTOR
-	description = "Gather valuable resources for the station. Hit rocks with tools. Do trigonometry."
+	description = "Shiawase resource extraction specialist. Venture into hostile territory, harvest valuable materials, and survive what the wasteland throws at you."
 	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = FACTION_STATION
 	total_positions = 3
 	spawn_positions = 3
-	supervisors = "the quartermaster"
+	supervisors = "the Logistics Chief"
 	selection_color = "#15381b"
 	exp_granted_type = EXP_TYPE_CREW
 
 	employers = list(
 		/datum/employer/hermes,
-		/datum/employer/none,
+		/datum/employer/contractor,
 	)
 
 	outfits = list(

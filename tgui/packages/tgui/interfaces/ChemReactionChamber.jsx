@@ -34,8 +34,8 @@ export const ChemReactionChamber = (props) => {
   } = data;
   const reagents = data.reagents || [];
   return (
-    <Window width={290} height={400}>
-      <Window.Content>
+    <Window width={290} height={400} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Stack vertical fill>
           <Stack.Item>
             <Section

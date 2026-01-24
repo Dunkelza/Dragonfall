@@ -8,8 +8,8 @@ export const EightBallVote = (props) => {
   const { act, data } = useBackend();
   const { shaking } = data;
   return (
-    <Window width={400} height={600}>
-      <Window.Content>
+    <Window width={400} height={600} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         {(!shaking && (
           <NoticeBox>No question is currently being asked.</NoticeBox>
         )) || <EightBallVoteQuestion />}

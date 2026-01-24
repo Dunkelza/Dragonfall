@@ -37,8 +37,8 @@ export const AirlockController = (props) => {
       break;
   }
   return (
-    <Window width={500} height={190}>
-      <Window.Content>
+    <Window width={500} height={190} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section
           title="Airlock Status"
           buttons={

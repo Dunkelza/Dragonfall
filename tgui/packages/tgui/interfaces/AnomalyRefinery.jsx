@@ -14,8 +14,13 @@ import { GasmixParser } from './common/GasmixParser';
 export const AnomalyRefinery = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window title="Anomaly Refinery" width={550} height={350}>
-      <Window.Content>
+    <Window
+      title="Anomaly Refinery"
+      width={550}
+      height={350}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <AnomalyRefineryContent />
       </Window.Content>
     </Window>

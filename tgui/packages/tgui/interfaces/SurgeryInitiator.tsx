@@ -73,8 +73,13 @@ class SurgeryInitiatorInner extends Component<
     const { selected_zone, surgeries, target_name } = this.props;
 
     return (
-      <Window width={400} height={350} title={`Surgery on ${target_name}`}>
-        <Window.Content>
+      <Window
+        theme="dragonfall"
+        width={400}
+        height={350}
+        title={`Surgery on ${target_name}`}
+      >
+        <Window.Content className="Shadowrun">
           <Stack fill height="100%">
             <Stack.Item width="30%">
               <BodyZoneSelector

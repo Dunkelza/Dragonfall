@@ -99,7 +99,7 @@ export const DnaConsole = (props) => {
   const { isPulsing, timeToPulse, subjectUNI, subjectUF } = data;
   const { consoleMode } = data.view;
   return (
-    <Window title="DNA Console" width={539} height={710}>
+    <Window title="DNA Console" width={539} height={710} theme="dragonfall">
       {!!isPulsing && (
         <Dimmer fontSize="14px" textAlign="center">
           <Icon mr={1} name="spinner" spin />
@@ -108,7 +108,7 @@ export const DnaConsole = (props) => {
           {timeToPulse}s
         </Dimmer>
       )}
-      <Window.Content scrollable>
+      <Window.Content scrollable className="Shadowrun">
         <DnaScanner />
         <DnaConsoleCommands />
         {consoleMode === CONSOLE_MODE_STORAGE && <DnaConsoleStorage />}

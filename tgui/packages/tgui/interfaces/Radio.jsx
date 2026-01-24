@@ -37,8 +37,8 @@ export const Radio = (props) => {
     }
   }
   return (
-    <Window width={360} height={height}>
-      <Window.Content>
+    <Window width={360} height={height} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Frequency">

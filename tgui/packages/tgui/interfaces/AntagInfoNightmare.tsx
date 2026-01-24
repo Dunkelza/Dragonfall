@@ -11,8 +11,8 @@ const noticestyle = {
 
 export const AntagInfoNightmare = (props) => {
   return (
-    <Window width={620} height={340}>
-      <Window.Content backgroundColor="#0d0d0d">
+    <Window theme="dragonfall" width={620} height={340}>
+      <Window.Content className="Shadowrun" backgroundColor="#0d0d0d">
         <Stack fill>
           <Stack.Item width="46.2%">
             <Section fill>

@@ -16,8 +16,8 @@ const directionToIcon = {
 export const BluespaceLocator = (props) => {
   const [tab, setTab] = useSharedState('tab', 'implant');
   return (
-    <Window width={300} height={300}>
-      <Window.Content scrollable>
+    <Window width={300} height={300} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Tabs>
           <Tabs.Tab
             selected={tab === 'implant'}

@@ -192,6 +192,16 @@ const JobRow = (props: { className?: string; job: Job; name: string }) => {
     data.job_required_experience && data.job_required_experience[name];
   const daysLeft = data.job_days_left ? data.job_days_left[name] : 0;
 
+  // PARIAH EDIT - Check employer compatibility
+  const selectedEmployer = data.character_preferences?.misc?.employer;
+  const jobEmployers = job.employers || [];
+  // A job is available if no employer is selected (None), or the selected employer is in the job's employers list
+  const isEmployerCompatible =
+    !selectedEmployer ||
+    selectedEmployer === 'None' ||
+    jobEmployers.includes(selectedEmployer);
+  // PARIAH EDIT END
+
   // PARIAH EDIT
   const altTitles = Array.isArray(job.alt_titles)
     ? job.alt_titles.filter((t) => typeof t === 'string' && t.length)
@@ -207,7 +217,18 @@ const JobRow = (props: { className?: string; job: Job; name: string }) => {
 
   let rightSide: ReactNode;
 
-  if (experienceNeeded) {
+  // PARIAH EDIT - Show employer incompatibility
+  if (!isEmployerCompatible) {
+    rightSide = (
+      <Stack align="center" height="100%" pr={1}>
+        <Stack.Item grow textAlign="right">
+          <Box color="label" italic>
+            Wrong Employer
+          </Box>
+        </Stack.Item>
+      </Stack>
+    );
+  } else if (experienceNeeded) {
     const { experience_type, required_playtime } = experienceNeeded;
     const hoursNeeded = Math.ceil(required_playtime / 60);
 
@@ -245,10 +266,14 @@ const JobRow = (props: { className?: string; job: Job; name: string }) => {
   }
   return (
     <Box
-      className={className}
+      className={classes([
+        className,
+        !isEmployerCompatible && 'employer-incompatible',
+      ])}
       style={{
         // PARIAH EDIT
         marginTop: '0',
+        ...(isEmployerCompatible ? {} : { opacity: 0.5 }),
       }}
     >
       <Stack align="center" /* PARIAH EDIT */>
@@ -403,25 +428,23 @@ export const JobsPage = () => {
       <JoblessRoleDropdown />
 
       <Stack vertical fill>
-        <Gap amount={22} />
-
         <Stack.Item>
           <Stack fill className="PreferencesMenu__Jobs">
             <Stack.Item mr={1}>
-              <Gap amount={36} />
+              <Gap amount={24} />
 
               <PriorityHeaders />
 
               <Department department="Renraku Facilities">
-                <Gap amount={6} />
+                <Gap amount={2} />
               </Department>
 
               <Department department="Science">
-                <Gap amount={6} />
+                <Gap amount={2} />
               </Department>
 
               <Department department="Silicon">
-                <Gap amount={12} />
+                <Gap amount={2} />
               </Department>
 
               <Department department="Civilian" />
@@ -431,23 +454,23 @@ export const JobsPage = () => {
               <PriorityHeaders />
 
               <Department department="Arcology Command">
-                <Gap amount={6} />
+                <Gap amount={2} />
               </Department>
 
               <Department department="Independent">
-                <Gap amount={6} />
+                <Gap amount={2} />
               </Department>
 
               <Department department="Shiawase Logistics" />
             </Stack.Item>
 
             <Stack.Item>
-              <Gap amount={36} />
+              <Gap amount={24} />
 
               <PriorityHeaders />
 
               <Department department="Lone Star">
-                <Gap amount={6} />
+                <Gap amount={2} />
               </Department>
 
               <Department department="DocWagon" />

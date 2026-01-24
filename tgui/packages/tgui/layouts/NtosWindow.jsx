@@ -10,7 +10,13 @@ import { Box, Button } from '../components';
 import { Window } from './Window';
 
 export const NtosWindow = (props) => {
-  const { title, width = 575, height = 700, theme = 'ntos', children } = props;
+  const {
+    title,
+    width = 575,
+    height = 700,
+    theme = 'ntos_darkmode',
+    children,
+  } = props;
   const { act, data } = useBackend();
   const {
     PC_device_theme,
@@ -119,7 +125,7 @@ export const NtosWindow = (props) => {
 const NtosWindowContent = (props) => {
   return (
     <div className="NtosWindow__content">
-      <Window.Content {...props} />
+      <Window.Content {...props} className="Shadowrun" />
     </div>
   );
 };

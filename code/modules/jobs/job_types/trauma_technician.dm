@@ -43,9 +43,8 @@
 
 /datum/job/acolyte/New()
 	. = ..()
-	description = "A member of a strange religious organization, you aid the elder member known as the \
-	<span style='color:[/datum/job/augur::selection_color]'>Augur</span> in maintaining the Sacred Cycle. \
-	Aid those who are not yet ready to pass unto the Ephemeral Twilight, and condemn those who attempt to avoid it."
+	description = "A DocWagon Medical Technician. Handle triage, perform emergency surgery, and keep clients stable. \
+	Work alongside the <span style='color:[/datum/job/augur::selection_color]'>Medical Director</span> to maintain DocWagon's reputation for rapid, reliable medical response."
 
 /datum/job/acolyte/after_spawn(mob/living/spawned, client/player_client)
 	. = ..()

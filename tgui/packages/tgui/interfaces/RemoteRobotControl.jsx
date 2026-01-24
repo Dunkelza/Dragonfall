@@ -6,8 +6,13 @@ import { Window } from '../layouts';
 
 export const RemoteRobotControl = (props) => {
   return (
-    <Window title="Remote Robot Control" width={500} height={500}>
-      <Window.Content scrollable>
+    <Window
+      title="Remote Robot Control"
+      width={500}
+      height={500}
+      theme="dragonfall"
+    >
+      <Window.Content scrollable className="Shadowrun">
         <RemoteRobotControlContent />
       </Window.Content>
     </Window>

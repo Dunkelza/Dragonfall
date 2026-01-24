@@ -1,12 +1,12 @@
 /datum/job/security_officer
 	title = JOB_SECURITY_OFFICER
-	description = "Carry out the Federation's will."
+	description = "Lone Star's boots on the ground. Patrol the arcology, respond to incidents, and maintain corporate order."
 	auto_deadmin_role_flags = DEADMIN_POSITION_SECURITY
 	department_head = list(JOB_SECURITY_MARSHAL)
 	faction = FACTION_STATION
-	total_positions = 5 //Handled in /datum/controller/occupations/proc/setup_officer_positions()
-	spawn_positions = 5 //Handled in /datum/controller/occupations/proc/setup_officer_positions()
-	supervisors = "the security marshal"
+	total_positions = 5
+	spawn_positions = 5
+	supervisors = "the Security Marshal"
 	selection_color = "#602f1c"
 	minimal_player_age = 7
 	exp_requirements = 300

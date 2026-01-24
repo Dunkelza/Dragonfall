@@ -14,8 +14,8 @@ import { Window } from '../layouts';
 export const DopplerArray = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={650} height={320} resizable>
-      <Window.Content>
+    <Window width={650} height={320} resizable theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <DopplerArrayContent />
       </Window.Content>
     </Window>

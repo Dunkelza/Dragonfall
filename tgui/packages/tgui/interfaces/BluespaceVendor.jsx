@@ -28,8 +28,13 @@ export const BluespaceVendor = (props) => {
     ...bluespace_network_gases.map((gas) => gas.amount),
   );
   return (
-    <Window title="Bluespace Vendor" width={500} height={600}>
-      <Window.Content>
+    <Window
+      title="Bluespace Vendor"
+      width={500}
+      height={600}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Stack vertical fill>
           <Stack.Item>
             <Section

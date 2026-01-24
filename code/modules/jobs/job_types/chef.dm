@@ -1,6 +1,6 @@
 /datum/job/cook
 	title = JOB_COOK
-	description = "Serve food, cook meat, keep the crew fed."
+	description = "Contracted culinary specialist. Keep the arcology fed, from executive dining to cafeteria slop. Good food keeps morale up."
 	department_head = list(JOB_HEAD_OF_PERSONNEL)
 	faction = FACTION_STATION
 
@@ -17,7 +17,7 @@
 	var/list/kitchen_areas = list(/area/station/service/kitchen)
 
 	employers = list(
-		/datum/employer/none
+		/datum/employer/contractor
 	)
 
 	outfits = list(

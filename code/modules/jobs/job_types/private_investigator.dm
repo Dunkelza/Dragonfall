@@ -1,6 +1,6 @@
 /datum/job/detective
 	title = JOB_DETECTIVE
-	description = "Investigate crimes. Solve crimes. Cover up crimes."
+	description = "An independent investigator contracted to Lone Star. Dig into cold cases, track persons of interest, and find the truth — or bury it."
 	faction = FACTION_STATION
 
 	pinpad_key = "columbo"
@@ -15,7 +15,7 @@
 	exp_granted_type = EXP_TYPE_CREW
 
 	employers = list(
-		/datum/employer/none
+		/datum/employer/mars_exec
 	)
 
 	outfits = list(

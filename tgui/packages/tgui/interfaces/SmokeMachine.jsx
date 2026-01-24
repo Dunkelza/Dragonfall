@@ -22,8 +22,8 @@ export const SmokeMachine = (props) => {
     maxSetting = [],
   } = data;
   return (
-    <Window width={350} height={350}>
-      <Window.Content>
+    <Window width={350} height={350} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section
           title="Dispersal Tank"
           buttons={

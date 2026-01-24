@@ -58,8 +58,8 @@ export const MechpadConsole = (props) => {
   const { act, data } = useBackend();
   const { mechpads = [], selected_id } = data;
   return (
-    <Window width={475} height={130}>
-      <Window.Content>
+    <Window width={475} height={130} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         {(mechpads.length === 0 && (
           <NoticeBox>No Pads Connected</NoticeBox>
         )) || (

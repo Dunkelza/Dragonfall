@@ -32,8 +32,8 @@ export const Achievements = (props) => {
     (x) => x.category === selectedCategory,
   );
   return (
-    <Window title="Achievements" width={540} height={680}>
-      <Window.Content scrollable>
+    <Window title="Achievements" width={540} height={680} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Tabs>
           {categories.map((category) => (
             <Tabs.Tab

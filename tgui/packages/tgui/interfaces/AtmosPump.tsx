@@ -32,8 +32,8 @@ export const AtmosPump = (props) => {
     regulate_mode = 0,
   } = data;
   return (
-    <Window width={335} height={129}>
-      <Window.Content>
+    <Window width={335} height={129} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Power">

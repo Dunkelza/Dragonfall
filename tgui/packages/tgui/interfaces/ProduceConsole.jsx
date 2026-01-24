@@ -220,8 +220,8 @@ export const ProduceConsole = (props) => {
   const [tabIndex, setTabIndex] = useLocalState('tab-index', 1);
   const TabComponent = TAB2NAME[tabIndex - 1].component();
   return (
-    <Window title="Produce Orders" width={500} height={400}>
-      <Window.Content>
+    <Window title="Produce Orders" width={500} height={400} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         {!off_cooldown && <OrderSent />}
         <Stack vertical fill>
           <Stack.Item>

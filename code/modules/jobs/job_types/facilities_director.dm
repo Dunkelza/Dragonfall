@@ -1,7 +1,6 @@
 /datum/job/chief_engineer
 	title = JOB_CHIEF_ENGINEER
-	description = "Coordinate engineering, ensure equipment doesn't get stolen, \
-		make sure the Supermatter doesn't blow up, maintain telecommunications."
+	description = "Renraku's head of infrastructure. Keep the arcology's power grid stable, maintain critical systems, and ensure nothing explodes on your watch."
 	auto_deadmin_role_flags = DEADMIN_POSITION_HEAD
 	head_announce = list(RADIO_CHANNEL_ENGINEERING)
 	faction = FACTION_STATION

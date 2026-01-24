@@ -38,8 +38,15 @@ export const PaiCard = (_) => {
   const { pai } = data;
 
   return (
-    <Window width={400} height={400} title="pAI Options Menu">
-      <Window.Content>{!pai ? <PaiDownload /> : <PaiOptions />}</Window.Content>
+    <Window
+      theme="dragonfall"
+      width={400}
+      height={400}
+      title="pAI Options Menu"
+    >
+      <Window.Content className="Shadowrun">
+        {!pai ? <PaiDownload /> : <PaiOptions />}
+      </Window.Content>
     </Window>
   );
 };

@@ -139,8 +139,8 @@ export const Orbit = (props) => {
   };
 
   return (
-    <Window title="Orbit" width={350} height={700}>
-      <Window.Content scrollable>
+    <Window title="Orbit" width={350} height={700} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section>
           <Flex>
             <Flex.Item>

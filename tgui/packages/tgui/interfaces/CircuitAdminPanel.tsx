@@ -17,8 +17,14 @@ export const CircuitAdminPanel = (props) => {
   const { act, data } = useBackend<CircuitAdminPanelData>();
 
   return (
-    <Window title="Circuit Admin Panel" width={1200} height={500} resizable>
-      <Window.Content>
+    <Window
+      theme="dragonfall"
+      title="Circuit Admin Panel"
+      width={1200}
+      height={500}
+      resizable
+    >
+      <Window.Content className="Shadowrun">
         <Table>
           <Table.Row header>
             <Table.Cell>Circuit name</Table.Cell>

@@ -68,8 +68,8 @@ export const MODpaint = (props) => {
   const presets = ['red', 'yellow', 'green', 'teal', 'blue', 'purple'];
   const prefixes = ['r', 'g', 'b'];
   return (
-    <Window width={600} height={365}>
-      <Window.Content>
+    <Window width={600} height={365} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Stack fill>
           <Stack.Item fill width="30%">
             {[0, 1, 2].map((row) => (

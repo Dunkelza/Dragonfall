@@ -19,8 +19,8 @@ import { GasmixParser } from './common/GasmixParser';
 export const TankCompressor = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window title="Tank Compressor" width={650} height={550}>
-      <Window.Content>
+    <Window title="Tank Compressor" width={650} height={550} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <TankCompressorContent />
       </Window.Content>
     </Window>

@@ -37,9 +37,10 @@ export const NumberInputModal = (props) => {
     (message.length && large_buttons ? 5 : 0);
 
   return (
-    <Window title={title} width={270} height={windowHeight}>
+    <Window title={title} width={270} height={windowHeight} theme="dragonfall">
       {timeout && <Loader value={timeout} />}
       <Window.Content
+        className="Shadowrun"
         onKeyDown={(event) => {
           if (event.key === KEY.Enter) {
             act('submit', { entry: input });

@@ -23,8 +23,8 @@ export const SolarControl = (props) => {
     connected_tracker,
   } = data;
   return (
-    <Window width={380} height={230}>
-      <Window.Content>
+    <Window width={380} height={230} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section
           title="Status"
           buttons={

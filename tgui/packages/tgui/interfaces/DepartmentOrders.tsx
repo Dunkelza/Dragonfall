@@ -57,8 +57,13 @@ export const DepartmentOrders = (props) => {
   const { data } = useBackend<Info>();
   const { time_left } = data;
   return (
-    <Window title="Department Orders" width={620} height={580}>
-      <Window.Content>
+    <Window
+      title="Department Orders"
+      width={620}
+      height={580}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         {(!!time_left && <CooldownDimmer />) || (
           <Stack vertical fill>
             <Stack.Item grow>

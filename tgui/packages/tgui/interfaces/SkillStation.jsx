@@ -243,8 +243,13 @@ export const SkillStation = (props) => {
   const { data } = useBackend();
   const { working, timeleft, error } = data;
   return (
-    <Window title="Skillsoft Station" width={500} height={500}>
-      <Window.Content>
+    <Window
+      title="Skillsoft Station"
+      width={500}
+      height={500}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         {!!error && <NoticeBox>{error}</NoticeBox>}
         {!!working && (
           <NoticeBox danger>

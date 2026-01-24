@@ -15,8 +15,8 @@ export const Reagents = (props) => {
   const [page, setPage] = useLocalState('page', 1);
 
   return (
-    <Window width={720} height={850}>
-      <Window.Content>
+    <Window width={720} height={850} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           <Stack.Item>
             <Stack fill>

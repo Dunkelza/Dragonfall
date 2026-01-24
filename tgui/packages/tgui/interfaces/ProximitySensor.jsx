@@ -6,8 +6,8 @@ export const ProximitySensor = (props) => {
   const { act, data } = useBackend();
   const { minutes, seconds, timing, scanning, sensitivity } = data;
   return (
-    <Window width={250} height={185}>
-      <Window.Content>
+    <Window width={250} height={185} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Status">

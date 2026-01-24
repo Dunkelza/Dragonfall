@@ -6,8 +6,8 @@ export const CircuitModule = (props) => {
   const { act, data } = useBackend();
   const { input_ports, output_ports, global_port_types } = data;
   return (
-    <Window width={600} height={300}>
-      <Window.Content scrollable>
+    <Window width={600} height={300} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Stack vertical>
           <Stack.Item>
             <Button

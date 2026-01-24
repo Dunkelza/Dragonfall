@@ -647,8 +647,8 @@ export const OrionGame = (props) => {
   const GameStatusComponent = STATUS2COMPONENT[gamestatus].component();
   const MarketRaid = STATUS2COMPONENT[2].component();
   return (
-    <Window title={gamename} width={420} height={510}>
-      <Window.Content scrollable>
+    <Window title={gamename} width={420} height={510} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         {(eventname === 'Space Port Raid' && <MarketRaid />) || (
           <GameStatusComponent />
         )}

@@ -5,8 +5,8 @@ import { Window } from '../layouts';
 export const Electrolyzer = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={400} height={305}>
-      <Window.Content>
+    <Window width={400} height={305} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section
           title="Power"
           buttons={

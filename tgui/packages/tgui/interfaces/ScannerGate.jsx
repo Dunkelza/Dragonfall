@@ -75,8 +75,8 @@ const TARGET_NUTRITION_LIST = [
 export const ScannerGate = (props) => {
   const { act, data } = useBackend();
   return (
-    <Window width={400} height={300}>
-      <Window.Content scrollable>
+    <Window width={400} height={300} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <InterfaceLockNoticeBox
           onLockedStatusChange={() => act('toggle_lock')}
         />

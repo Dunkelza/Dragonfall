@@ -82,8 +82,8 @@ export const Vending = (_) => {
   const { onstation } = data;
 
   return (
-    <Window width={450} height={600}>
-      <Window.Content>
+    <Window width={450} height={600} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           {!!onstation && (
             <Stack.Item>
@@ -106,7 +106,7 @@ export const UserDetails = (_) => {
 
   if (!user) {
     return (
-      <NoticeBox>No ID detected! Contact the Head of Personnel.</NoticeBox>
+      <NoticeBox>No SIN detected! Contact Personnel Administration.</NoticeBox>
     );
   } else {
     return (
@@ -118,8 +118,8 @@ export const UserDetails = (_) => {
           <Stack.Item>
             <LabeledList>
               <LabeledList.Item label="User">{user.name}</LabeledList.Item>
-              <LabeledList.Item label="Occupation">
-                {user.job || 'Unemployed'}
+              <LabeledList.Item label="Assignment">
+                {user.job || 'Unassigned'}
               </LabeledList.Item>
             </LabeledList>
           </Stack.Item>

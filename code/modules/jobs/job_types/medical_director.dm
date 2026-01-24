@@ -50,11 +50,9 @@
 
 /datum/job/augur/New()
 	. = ..()
-	description = "You are high ranking member of the Aether Association, and a powerful Hematic. \
-	Lead your <span style='color:[/datum/job/acolyte::selection_color]'>Acolytes</span> in ensuring the Sacred Cycle is upheld. \
-	Save those whose time has not yet come, \
-	and end those who violate the circle of life. \
-	Protect the Biblion tou Hema with your life."
+	description = "DocWagon's senior medical authority on-site. \
+	Coordinate trauma response, authorize high-risk extractions, and ensure every platinum-tier client receives the care their contract guarantees. \
+	Your <span style='color:[/datum/job/acolyte::selection_color]'>Trauma Technicians</span> look to you for leadership."
 
 /datum/job/augur/get_captaincy_announcement(mob/living/captain)
 	return "Due to staffing shortages, newly promoted Acting Captain [captain.real_name] on deck!"

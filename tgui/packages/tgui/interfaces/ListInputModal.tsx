@@ -115,9 +115,10 @@ export const ListInputModal = (_) => {
   }
 
   return (
-    <Window title={title} width={325} height={windowHeight}>
+    <Window theme="dragonfall" title={title} width={325} height={windowHeight}>
       {timeout && <Loader value={timeout} />}
       <Window.Content
+        className="Shadowrun"
         onKeyDown={(event) => {
           const keyCode = window.event ? event.which : event.keyCode;
           if (keyCode === KEY_DOWN || keyCode === KEY_UP) {

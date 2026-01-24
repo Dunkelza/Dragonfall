@@ -12,8 +12,13 @@ export const NtnetRelay = (props) => {
   const { act, data } = useBackend();
   const { enabled, dos_capacity, dos_overload, dos_crashed } = data;
   return (
-    <Window title="NtNet Quantum Relay" width={400} height={300}>
-      <Window.Content>
+    <Window
+      title="NtNet Quantum Relay"
+      width={400}
+      height={300}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Section
           title="Network Buffer"
           buttons={

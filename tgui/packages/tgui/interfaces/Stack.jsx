@@ -37,8 +37,8 @@ export const Stack = (props) => {
   const height = Math.max(94 + Object.keys(recipes).length * 26, 250);
 
   return (
-    <Window width={400} height={Math.min(height, 500)}>
-      <Window.Content scrollable>
+    <Window width={400} height={Math.min(height, 500)} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section
           title={'Amount: ' + amount}
           buttons={

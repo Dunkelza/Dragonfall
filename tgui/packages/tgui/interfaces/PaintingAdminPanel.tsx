@@ -35,8 +35,13 @@ export const PaintingAdminPanel = (props) => {
   const { paintings } = data;
   const chosenPainting = paintings.find((p) => p.ref === chosenPaintingRef);
   return (
-    <Window title="Painting Admin Panel" width={800} height={600}>
-      <Window.Content scrollable>
+    <Window
+      theme="dragonfall"
+      title="Painting Admin Panel"
+      width={800}
+      height={600}
+    >
+      <Window.Content className="Shadowrun" scrollable>
         {chosenPainting && (
           <Section
             title="Painting Information"

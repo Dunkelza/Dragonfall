@@ -7,8 +7,8 @@ export const Vendatray = (props) => {
   const { product_name, product_cost, tray_open, registered, owner_name } =
     data;
   return (
-    <Window width={300} height={270}>
-      <Window.Content>
+    <Window width={300} height={270} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Flex mb={1}>
           <Flex.Item mr={1}>{!!product_name && <VendingImage />}</Flex.Item>
           <Flex.Item grow={1}>

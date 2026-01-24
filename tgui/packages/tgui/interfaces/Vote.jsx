@@ -25,8 +25,14 @@ export const Vote = (props) => {
   }
 
   return (
-    <Window resizable title={windowTitle} width={400} height={500}>
-      <Window.Content>
+    <Window
+      resizable
+      title={windowTitle}
+      width={400}
+      height={500}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           <Section title="Create Vote">
             <VoteOptions />

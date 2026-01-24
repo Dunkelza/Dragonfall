@@ -13,8 +13,8 @@ export const ChemSynthesizer = (props) => {
     possible_amounts = [],
   } = data;
   return (
-    <Window width={300} height={375}>
-      <Window.Content>
+    <Window width={300} height={375} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <Box>
             {possible_amounts.map((possible_amount) => (

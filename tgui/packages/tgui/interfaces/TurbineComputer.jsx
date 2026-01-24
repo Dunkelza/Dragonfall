@@ -41,8 +41,8 @@ export const TurbineComputer = (props) => {
     </Modal>
   );
   return (
-    <Window width={310} height={240}>
-      <Window.Content>
+    <Window width={310} height={240} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section
           title="Status"
           buttons={

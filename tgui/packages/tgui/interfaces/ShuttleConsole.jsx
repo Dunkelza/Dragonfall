@@ -16,7 +16,7 @@ export const ShuttleConsole = (props) => {
   const { type = 'shuttle', blind_drop } = props;
   const { authorization_required } = data;
   return (
-    <Window width={350} height={230}>
+    <Window width={350} height={230} theme="dragonfall">
       {!!authorization_required && (
         <Modal
           ml={1}
@@ -46,7 +46,7 @@ export const ShuttleConsole = (props) => {
           </Box>
         </Modal>
       )}
-      <Window.Content>
+      <Window.Content className="Shadowrun">
         <ShuttleConsoleContent type={type} blind_drop={blind_drop} />
       </Window.Content>
     </Window>

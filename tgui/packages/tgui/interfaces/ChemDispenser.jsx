@@ -15,8 +15,8 @@ export const ChemDispenser = (props) => {
   const beakerTransferAmounts = data.beakerTransferAmounts || [];
   const beakerContents = data.beakerContents || [];
   return (
-    <Window width={565} height={620}>
-      <Window.Content scrollable>
+    <Window width={565} height={620} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section
           title="Status"
           buttons={

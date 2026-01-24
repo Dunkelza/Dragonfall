@@ -11,8 +11,9 @@ export const Wires = (props) => {
     <Window
       width={350}
       height={150 + wires.length * 30 + (!!proper_name && 30)}
+      theme="dragonfall"
     >
-      <Window.Content>
+      <Window.Content className="Shadowrun">
         {!!proper_name && (
           <NoticeBox textAlign="center">
             {proper_name} Wire Configuration

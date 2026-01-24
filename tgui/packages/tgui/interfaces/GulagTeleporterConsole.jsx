@@ -18,8 +18,8 @@ export const GulagTeleporterConsole = (props) => {
     prisoner = {},
   } = data;
   return (
-    <Window width={350} height={295}>
-      <Window.Content>
+    <Window width={350} height={295} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section
           title="Teleporter Console"
           buttons={

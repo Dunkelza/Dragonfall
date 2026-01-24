@@ -42,8 +42,8 @@ export const DecalPainter = (props) => {
   const preview_color = custom_color_selected ? 'custom' : data.current_color;
 
   return (
-    <Window width={550} height={400}>
-      <Window.Content>
+    <Window width={550} height={400} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="Decal Color">
           {data.color_list.map((color) => {
             return (

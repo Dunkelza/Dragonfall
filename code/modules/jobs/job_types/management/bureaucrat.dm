@@ -1,11 +1,11 @@
 /datum/job/bureaucrat
 	title = "Bureaucrat"
-	description = "Handles relationships with Mars Executive Outcomes. Acts as a guard for Management."
+	description = "Renraku's liaison to Lone Star. Navigate corporate politics, handle security contracts, and ensure inter-departmental cooperation runs smoothly."
 	department_head = list(JOB_CAPTAIN)
 	faction = FACTION_STATION
 	total_positions = 1
 	spawn_positions = 1
-	supervisors = "the superintendent"
+	supervisors = "the Superintendent"
 	selection_color = "#1d1d4f"
 	req_admin_notify = 1
 	minimal_player_age = 10
@@ -15,7 +15,7 @@
 	exp_granted_type = EXP_TYPE_CREW
 
 	employers = list(
-		/datum/employer/government
+		/datum/employer/daedalus
 	)
 
 	outfits = list(

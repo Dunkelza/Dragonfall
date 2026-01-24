@@ -23,8 +23,8 @@ export const AiAirlock = (props) => {
   const statusBackup = dangerMap[data.power.backup] || dangerMap[0];
   const statusElectrify = dangerMap[data.shock] || dangerMap[0];
   return (
-    <Window width={500} height={390}>
-      <Window.Content>
+    <Window width={500} height={390} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section title="Power Status">
           <LabeledList>
             <LabeledList.Item

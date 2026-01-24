@@ -275,6 +275,15 @@ SAVEFILE UPDATING/VERSIONING - 'Simplified', or rather, more coder-friendly ~Car
 	SHOULD_NOT_SLEEP(TRUE)
 	if(!path)
 		return FALSE
+
+	// Rate limiting: skip save if called too recently
+	var/current_time = world.time
+	if(current_time - last_save_time < save_rate_limit)
+		// Queue a delayed save to ensure data is eventually saved
+		addtimer(CALLBACK(src, PROC_REF(save_character)), save_rate_limit, TIMER_UNIQUE | TIMER_OVERRIDE)
+		return FALSE
+	last_save_time = current_time
+
 	var/tree_key = "character[default_slot]"
 	if(!(tree_key in savefile.get_entry()))
 		savefile.set_entry(tree_key, list())

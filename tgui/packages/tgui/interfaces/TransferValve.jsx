@@ -6,8 +6,8 @@ export const TransferValve = (props) => {
   const { act, data } = useBackend();
   const { tank_one, tank_two, attached_device, valve } = data;
   return (
-    <Window width={310} height={300}>
-      <Window.Content>
+    <Window width={310} height={300} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Section>
           <LabeledList>
             <LabeledList.Item label="Valve Status">

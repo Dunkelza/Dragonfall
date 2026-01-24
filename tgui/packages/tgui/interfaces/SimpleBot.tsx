@@ -44,8 +44,8 @@ export const SimpleBot = (_) => {
   const access = !locked || can_hack;
 
   return (
-    <Window width={450} height={300}>
-      <Window.Content>
+    <Window width={450} height={300} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           <Stack.Item>
             <Section title="Settings" buttons={<TabDisplay />}>

@@ -1,7 +1,6 @@
 /datum/job/quartermaster
 	title = JOB_QUARTERMASTER
-	description = "Manage your Deckhands and Prospectors, assist with \
-		economical purchasing."
+	description = "Shiawase's logistics coordinator. Manage supply chains, oversee cargo operations, and ensure the arcology has what it needs — on time and under budget."
 	faction = FACTION_STATION
 	total_positions = 1
 	spawn_positions = 1

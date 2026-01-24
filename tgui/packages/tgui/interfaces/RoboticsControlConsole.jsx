@@ -14,8 +14,8 @@ export const RoboticsControlConsole = (props) => {
   const [tab, setTab] = useSharedState('tab', 1);
   const { can_hack, can_detonate, cyborgs = [], drones = [] } = data;
   return (
-    <Window width={500} height={460}>
-      <Window.Content scrollable>
+    <Window width={500} height={460} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Tabs>
           <Tabs.Tab
             icon="list"

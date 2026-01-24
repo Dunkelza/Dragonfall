@@ -48,8 +48,8 @@ export const ChameleonCard = (props) => {
   });
 
   return (
-    <Window width={500} height={620}>
-      <Window.Content scrollable>
+    <Window theme="dragonfall" width={500} height={620}>
+      <Window.Content className="Shadowrun" scrollable>
         <AccessList
           accessGroups={parsedAccessGroups}
           selectedList={accessOnCard}

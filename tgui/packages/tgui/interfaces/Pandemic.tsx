@@ -104,8 +104,8 @@ export const Pandemic = (_) => {
   const { has_beaker, has_blood } = data;
 
   return (
-    <Window width={650} height={500}>
-      <Window.Content>
+    <Window width={650} height={500} theme="dragonfall">
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           <Stack.Item>
             <BeakerDisplay />

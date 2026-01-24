@@ -7,8 +7,8 @@ export const Crayon = (props) => {
   const capOrChanges = data.has_cap || data.can_change_colour;
   const drawables = data.drawables || [];
   return (
-    <Window width={600} height={600}>
-      <Window.Content scrollable>
+    <Window width={600} height={600} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         {!!capOrChanges && (
           <Section title="Basic">
             <LabeledList>

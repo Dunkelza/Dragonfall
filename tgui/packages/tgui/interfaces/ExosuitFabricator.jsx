@@ -133,8 +133,13 @@ export const ExosuitFabricator = (props) => {
     false,
   );
   return (
-    <Window title="Exosuit Fabricator" width={1100} height={640}>
-      <Window.Content>
+    <Window
+      title="Exosuit Fabricator"
+      width={1100}
+      height={640}
+      theme="dragonfall"
+    >
+      <Window.Content className="Shadowrun">
         <Stack fill vertical>
           <Stack.Item>
             <Stack fill>

@@ -34,8 +34,8 @@ export const AtmosControlConsole = (props) => {
       ? chambers[0]
       : chambers.find((chamber) => chamber.id === chamberId);
   return (
-    <Window width={550} height={350}>
-      <Window.Content scrollable>
+    <Window width={550} height={350} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         {chambers.length > 1 && (
           <Section title="Chamber Selection">
             <Dropdown

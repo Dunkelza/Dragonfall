@@ -15,8 +15,8 @@ export const ForbiddenLore = (props) => {
     ),
   ])(data.to_know || []);
   return (
-    <Window width={500} height={900}>
-      <Window.Content scrollable>
+    <Window width={500} height={900} theme="dragonfall">
+      <Window.Content scrollable className="Shadowrun">
         <Section title="Research Eldritch Knowledge">
           Charges left : {charges}
           {to_know !== null ? (

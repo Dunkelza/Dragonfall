@@ -26,7 +26,7 @@ const STATE_MESSAGES = 'messages';
 const SWIPE_NEEDED = 'SWIPE_NEEDED';
 
 const EMAG_SHUTTLE_NOTICE =
-  'This shuttle is deemed significantly dangerous to the crew, and is only supplied by the Syndicate.';
+  'This shuttle is deemed significantly dangerous to personnel and is only available through black market channels.';
 
 const sortShuttles = sortBy(
   (shuttle) => !shuttle.emagOnly,
@@ -147,7 +147,7 @@ const NoConnectionModal = () => {
         </Flex.Item>
 
         <Flex.Item fontSize="16px">
-          A connection to the station cannot be established.
+          A connection to the arcology cannot be established.
         </Flex.Item>
       </Flex>
     </Dimmer>
@@ -609,7 +609,7 @@ const PageMain = (props) => {
             {sectors.map((sectorName) => (
               <Flex.Item key={sectorName}>
                 <Button
-                  content={`Send a message to station in ${sectorName} sector`}
+                  content={`Send a message to arcology in ${sectorName} sector`}
                   disabled={!importantActionReady}
                   onClick={() => setMessagingSector(sectorName)}
                 />
@@ -619,7 +619,7 @@ const PageMain = (props) => {
             {sectors.length > 2 && (
               <Flex.Item>
                 <Button
-                  content="Send a message to all allied stations"
+                  content="Send a message to all allied arcologies"
                   disabled={!importantActionReady}
                   onClick={() => setMessagingSector('all')}
                 />
@@ -631,7 +631,7 @@ const PageMain = (props) => {
 
       {!!canSendToSectors && sectors.length > 0 && messagingSector && (
         <MessageModal
-          label="Message to send to allied station"
+          label="Message to send to allied arcology"
           notice="Please be aware that this process is very expensive, and abuse will lead to...termination."
           icon="bullhorn"
           buttonText="Send"
@@ -742,8 +742,12 @@ export const CommunicationsConsole = (props) => {
   } = data;
 
   return (
-    <Window width={400} height={650} theme={emagged ? 'syndicate' : undefined}>
-      <Window.Content scrollable>
+    <Window
+      width={400}
+      height={650}
+      theme={emagged ? 'syndicate' : 'dragonfall'}
+    >
+      <Window.Content scrollable className="Shadowrun">
         {!hasConnection && <NoConnectionModal />}
 
         {(canLogOut || !authenticated) && (
