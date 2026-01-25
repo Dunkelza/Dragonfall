@@ -152,6 +152,10 @@
 #define SPECIES_ZOMBIE "zombie"
 #define SPECIES_ZOMBIE_INFECTIOUS "memezombie"
 #define SPECIES_ZOMBIE_KROKODIL "krokodil_zombie"
+// Shadowrun 5e Metatypes
+#define SPECIES_DWARF "dwarf"
+#define SPECIES_ORK "ork"
+#define SPECIES_TROLL "troll"
 
 // Like species IDs, but not specifically attached a species.
 #define BODYPART_ID_ALIEN "alien"

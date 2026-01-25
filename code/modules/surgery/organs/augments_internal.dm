@@ -6,6 +6,8 @@
 	organ_flags = ORGAN_SYNTHETIC
 	// SR5: implants reduce Essence.
 	essence_base_cost = 0.20
+	// SR5: Generic implants cost about 3,000¥.
+	nuyen_base_cost = 3000
 	var/implant_color = "#FFFFFF"
 	var/implant_overlay
 	var/syndicate_implant = FALSE //Makes the implant invisible to health analyzers and medical HUDs.

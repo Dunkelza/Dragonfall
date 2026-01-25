@@ -22,6 +22,18 @@
 #define AUGMENT_SLOT_FLUFF_HEAD		"Minor Head Augment"
 #define AUGMENT_SLOT_FLUFF_CHEST	"Minor Chest Augment"
 
+//Bioware - Biological augmentations
+#define AUGMENT_CATEGORY_BIOWARE	"Bioware"
+#define AUGMENT_SLOT_MUSCLE_TONER	"Muscle Toner"
+#define AUGMENT_SLOT_MUSCLE_AUG		"Muscle Augmentation"
+#define AUGMENT_SLOT_SYNAPTIC		"Synaptic Booster"
+#define AUGMENT_SLOT_CEREBRAL		"Cerebral Booster"
+#define AUGMENT_SLOT_MNEMONIC		"Mnemonic Enhancer"
+#define AUGMENT_SLOT_PLATELET		"Platelet Factories"
+#define AUGMENT_SLOT_BONE_LACING	"Bone Lacing"
+#define AUGMENT_SLOT_PHEROMONES		"Tailored Pheromones"
+#define AUGMENT_SLOT_ARTICULATION	"Enhanced Articulation"
+
 //Implants
 #define AUGMENT_CATEGORY_IMPLANTS "Implants"
 #define AUGMENT_SLOT_IMPLANTS "Code Reasons"

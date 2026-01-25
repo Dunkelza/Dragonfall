@@ -7,6 +7,8 @@
 	var/desc = "This is a test quirk."
 	/// If the quirk is a Boon, Bane, or Neutral
 	var/quirk_genre = QUIRK_GENRE_NEUTRAL
+	/// SR5: Karma cost/value of this quality. Positive = gives karma (negative quality), Negative = costs karma (positive quality).
+	var/karma_value = 0
 	/// Flags related to this quirk.
 	var/quirk_flags = QUIRK_HUMAN_ONLY
 	/// Reference to the mob currently tied to this quirk datum. Quirks are not singletons.

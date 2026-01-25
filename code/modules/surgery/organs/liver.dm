@@ -144,11 +144,14 @@
 	organ_flags = ORGAN_SYNTHETIC
 	// SR5: organ replacement cost.
 	essence_base_cost = 0.20
+	// SR5: Cyberliver costs 5,000¥ at Standard grade.
+	nuyen_base_cost = 5000
 	var/emp_vulnerability = 80 //Chance of permanent effects if emp-ed.
 
 /obj/item/organ/liver/cybernetic/tier2
 	// SR5: upgraded model (higher grade) costs less Essence than the basic.
 	essence_grade_multiplier = 0.8
+	nuyen_grade_multiplier = 2.0
 	name = "cybernetic liver"
 	icon_state = "liver-c-u"
 	desc = "An electronic device designed to mimic the functions of a minervan liver. Handles toxins slightly better than an organic liver."
@@ -158,6 +161,7 @@
 /obj/item/organ/liver/cybernetic/tier3
 	// SR5: further-upgraded model (higher grade again) costs even less Essence.
 	essence_grade_multiplier = 0.7
+	nuyen_grade_multiplier = 4.0
 	name = "upgraded cybernetic liver"
 	icon_state = "liver-c-u2"
 	desc = "An upgraded version of the cybernetic liver, designed to improve further upon organic livers. It is resistant to alcohol poisoning and is very robust at filtering toxins."

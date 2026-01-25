@@ -440,3 +440,51 @@ Key procs
 	spoken_languages = list(
 		/datum/language/flock = list(LANGUAGE_ATOM),
 	)
+
+// =============================================================================
+// SHADOWRUN 5E LANGUAGE HOLDERS
+// =============================================================================
+
+/// Base SR5 language holder - all characters know English by default
+/datum/language_holder/sr5
+	understood_languages = list(/datum/language/sr5/english = list(LANGUAGE_ATOM))
+	spoken_languages = list(/datum/language/sr5/english = list(LANGUAGE_ATOM))
+	selected_language = /datum/language/sr5/english
+
+/// SR5 Elf - knows Sperethiel in addition to English
+/datum/language_holder/sr5/elf
+	understood_languages = list(
+		/datum/language/sr5/english = list(LANGUAGE_ATOM),
+		/datum/language/sr5/sperethiel = list(LANGUAGE_ATOM),
+	)
+	spoken_languages = list(
+		/datum/language/sr5/english = list(LANGUAGE_ATOM),
+		/datum/language/sr5/sperethiel = list(LANGUAGE_ATOM),
+	)
+
+/// SR5 Ork - knows Or'zet in addition to English
+/datum/language_holder/sr5/ork
+	understood_languages = list(
+		/datum/language/sr5/english = list(LANGUAGE_ATOM),
+		/datum/language/sr5/orzet = list(LANGUAGE_ATOM),
+	)
+	spoken_languages = list(
+		/datum/language/sr5/english = list(LANGUAGE_ATOM),
+		/datum/language/sr5/orzet = list(LANGUAGE_ATOM),
+	)
+
+/// SR5 Troll - knows Or'zet in addition to English (related to orks culturally)
+/datum/language_holder/sr5/troll
+	understood_languages = list(
+		/datum/language/sr5/english = list(LANGUAGE_ATOM),
+		/datum/language/sr5/orzet = list(LANGUAGE_ATOM),
+	)
+	spoken_languages = list(
+		/datum/language/sr5/english = list(LANGUAGE_ATOM),
+		/datum/language/sr5/orzet = list(LANGUAGE_ATOM),
+	)
+
+/// SR5 Dwarf - standard English, no special cultural language
+/datum/language_holder/sr5/dwarf
+	understood_languages = list(/datum/language/sr5/english = list(LANGUAGE_ATOM))
+	spoken_languages = list(/datum/language/sr5/english = list(LANGUAGE_ATOM))

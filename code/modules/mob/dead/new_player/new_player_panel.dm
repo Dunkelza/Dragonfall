@@ -629,8 +629,5 @@
 	popup.set_content(jointext(dat, ""))
 	popup.open(FALSE) // 0 is passed to open so that it doesn't use the onclose() proc
 
-#undef LINKIFY_CONSOLE_OPTION
+#undef SR_LINK
 #undef NPP_TAB_MAIN
-#undef NPP_TAB_GAME
-#undef CONSOLE_BACK
-#undef LINKIFY_READY

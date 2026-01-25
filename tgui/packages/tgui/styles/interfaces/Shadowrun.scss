@@ -268,11 +268,19 @@ $sr-font-mono: 'Consolas', 'Monaco', monospace;
   }
 
   .ProgressBar__fill--good {
-    background: linear-gradient(90deg, darken($sr-good, 10%), $sr-good);
+    background: linear-gradient(
+      90deg,
+      color.adjust($sr-good, $lightness: -10%),
+      $sr-good
+    );
   }
 
   .ProgressBar__fill--bad {
-    background: linear-gradient(90deg, darken($sr-bad, 10%), $sr-bad);
+    background: linear-gradient(
+      90deg,
+      color.adjust($sr-bad, $lightness: -10%),
+      $sr-bad
+    );
   }
 }
 

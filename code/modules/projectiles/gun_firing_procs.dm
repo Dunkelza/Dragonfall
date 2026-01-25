@@ -261,6 +261,11 @@
 		bonus_spread += 35
 		base_bonus_spread += 10
 
+	// SR5: Off-hand penalty - using non-dominant hand adds spread
+	if(ishuman(user))
+		var/mob/living/carbon/human/human_user = user
+		bonus_spread += human_user.get_offhand_spread_penalty()
+
 	if(spread)
 		randomized_gun_spread =	rand(0,spread)
 

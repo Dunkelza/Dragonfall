@@ -307,11 +307,14 @@
 	organ_flags = ORGAN_SYNTHETIC
 	// SR5: organ replacement cost.
 	essence_base_cost = 0.20
+	// SR5: Cyberstomach costs 4,000¥ at Standard grade.
+	nuyen_base_cost = 4000
 	var/emp_vulnerability = 80 //Chance of permanent effects if emp-ed.
 
 /obj/item/organ/stomach/cybernetic/tier2
 	// SR5: upgraded model (higher grade) costs less Essence than the basic.
 	essence_grade_multiplier = 0.8
+	nuyen_grade_multiplier = 2.0
 	name = "cybernetic stomach"
 	icon_state = "stomach-c-u"
 	desc = "An electronic device designed to mimic the functions of a minervan stomach. Handles disgusting food a bit better."
@@ -322,6 +325,7 @@
 /obj/item/organ/stomach/cybernetic/tier3
 	// SR5: further-upgraded model (higher grade again) costs even less Essence.
 	essence_grade_multiplier = 0.7
+	nuyen_grade_multiplier = 4.0
 	name = "upgraded cybernetic stomach"
 	icon_state = "stomach-c-u2"
 	desc = "An upgraded version of the cybernetic stomach, designed to improve further upon organic stomachs. Handles disgusting food very well."

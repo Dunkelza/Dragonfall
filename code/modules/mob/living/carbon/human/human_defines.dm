@@ -102,3 +102,6 @@
 	var/list/appearance_mods
 
 	var/list/time_of_death_stats
+
+	/// Which hand is dominant - "right" or "left". Affects accuracy/damage when using the non-dominant hand.
+	var/dominant_hand = "right"

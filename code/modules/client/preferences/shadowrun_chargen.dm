@@ -27,18 +27,42 @@
 	return !!state["saved"]
 
 /// Returns TRUE if non-appearance preferences should be locked.
-/// Only lock during active rounds - job selection is always allowed.
+/// Allow editing in the lobby even during active rounds.
+/// Only lock for players who have already spawned into the round.
 /proc/shadowrun_should_lock_nonappearance_prefs(datum/preferences/preferences)
-	if (!isnull(SSticker) && SSticker.IsRoundInProgress())
-		return TRUE
-	return FALSE // Allow job/quirk selection even after sheet is saved
+	if (isnull(SSticker) || !SSticker.IsRoundInProgress())
+		return FALSE // Not in an active round, always allow editing
+
+	// Check if the player is in the lobby (new_player mob)
+	var/client/C = preferences?.parent
+	if (isnull(C))
+		return TRUE // No client, play it safe and lock
+
+	// If the player's mob is a new_player (lobby), allow editing
+	if (isnewplayer(C.mob))
+		return FALSE
+
+	// Player has spawned into the round, lock their preferences
+	return TRUE
 
 /// Returns TRUE if character creation (stats, metatype, etc.) should be locked.
 /// Lock during active rounds AND after sheet is saved.
+/// Players in the lobby can still edit if they haven't saved their sheet.
 /proc/shadowrun_should_lock_chargen(datum/preferences/preferences)
-	if (!isnull(SSticker) && SSticker.IsRoundInProgress())
-		return TRUE
-	return shadowrun_chargen_is_saved(preferences)
+	if (isnull(SSticker) || !SSticker.IsRoundInProgress())
+		return shadowrun_chargen_is_saved(preferences) // Only lock if saved
+
+	// Check if the player is in the lobby (new_player mob)
+	var/client/C = preferences?.parent
+	if (isnull(C))
+		return TRUE // No client, play it safe and lock
+
+	// If the player's mob is a new_player (lobby), check saved status
+	if (isnewplayer(C.mob))
+		return shadowrun_chargen_is_saved(preferences)
+
+	// Player has spawned into the round, lock their chargen
+	return TRUE
 
 /datum/preference/blob/shadowrun_chargen
 	explanation = "Shadowrun Character Creation"
@@ -64,9 +88,8 @@
 	var/list/current = islist(preferences.value_cache[type]) ? preferences.value_cache[type] : sanitize_state(list())
 	current = sanitize_state(current)
 
-	// During active rounds we still need to allow players in the lobby to set up
-	// or fix their sheet for latejoin. Keep the "saved" lock semantics, but don't
-	// blanket-reject updates.
+	// During active rounds, lock saved sheets to prevent mid-round edits.
+	// Players can still finish chargen and save if they haven't saved yet.
 	if (!isnull(SSticker) && SSticker.IsRoundInProgress())
 		// Always allow a full reset, even mid-round, so players can recover from
 		// an accidental empty save.
@@ -78,18 +101,9 @@
 		// Otherwise, allow edits so the user can finish chargen and save.
 		return sanitized
 
-	var/was_saved = !!current["saved"]
-	if (!was_saved)
-		return sanitized
-
-	// Once saved: do not allow edits.
-	// Only allow unlock by a full reset that also clears the saved flag.
-	if (!!sanitized["saved"])
-		return current
-
-	if (!is_full_reset_state(sanitized))
-		return current
-
+	// Outside of an active round (lobby, etc.), allow ALL changes including
+	// re-saves, resets, and edits. Players should be able to modify their
+	// sheets freely when not in a round.
 	return sanitized
 
 /datum/preference/blob/shadowrun_chargen/is_valid(value)
@@ -214,6 +228,26 @@
 	else
 		target.stats.remove_stat_modifier(/datum/rpg_stat/edge, SHADOWRUN_CHARGEN_SOURCE)
 
+	// Apply augments (cyberware, prosthetics)
+	var/list/augments = state["augments"]
+	if(islist(augments) && length(augments))
+		var/datum/species/S = target.dna?.species
+		for(var/slot in augments)
+			var/aug_path = text2path(augments[slot])
+			var/datum/augment_item/A = GLOB.augment_items[aug_path]
+			if(!A)
+				continue
+			if(!A.can_apply_to_species(S))
+				continue
+			A.apply_to_human(target, S)
+
+	// Apply SR5 languages to the mob's language holder
+	// Rating 3+ = understand, Rating 6 = speak fluently
+	var/list/languages_state = state["languages"]
+	var/native_language = state["native_language"]
+	if(islist(languages_state) || native_language)
+		apply_sr5_languages_to_mob(target, languages_state, native_language)
+
 /datum/preference/blob/shadowrun_chargen/compile_constant_data()
 	var/list/data = list()
 
@@ -228,8 +262,8 @@
 		"skills" = list("A" = 46, "B" = 36, "C" = 28, "D" = 22, "E" = 18),
 		"skill_groups" = list("A" = 10, "B" = 5, "C" = 2, "D" = 0, "E" = 0),
 		"magic" = list("A" = 6, "B" = 4, "C" = 3, "D" = 2, "E" = 0),
-		// NOTE: These values are in Nuyen (¥) and are intentionally modest.
-		"resources" = list("A" = 2000, "B" = 1500, "C" = 1000, "D" = 500, "E" = 200),
+		// SR5 Resources priority values (in Nuyen ¥)
+		"resources" = list("A" = 450000, "B" = 275000, "C" = 140000, "D" = 50000, "E" = 6000),
 		// SR5-style "special attribute" points (we currently spend these on Edge only).
 		"metatype_special" = list("A" = 7, "B" = 4, "C" = 3, "D" = 1, "E" = 0)
 	)
@@ -257,6 +291,33 @@
 	metatype_attribute_bounds["[/datum/species/elf]"] = get_metatype_attribute_bounds(/datum/species/elf)
 	qdel(tmp_elf)
 
+	var/datum/species/tmp_dwarf = new /datum/species/dwarf
+	metatype_choices += list(list(
+		"id" = "[/datum/species/dwarf]",
+		"name" = "Dwarf",
+		"min_priority" = "C"
+	))
+	metatype_attribute_bounds["[/datum/species/dwarf]"] = get_metatype_attribute_bounds(/datum/species/dwarf)
+	qdel(tmp_dwarf)
+
+	var/datum/species/tmp_ork = new /datum/species/ork
+	metatype_choices += list(list(
+		"id" = "[/datum/species/ork]",
+		"name" = "Ork",
+		"min_priority" = "C"
+	))
+	metatype_attribute_bounds["[/datum/species/ork]"] = get_metatype_attribute_bounds(/datum/species/ork)
+	qdel(tmp_ork)
+
+	var/datum/species/tmp_troll = new /datum/species/troll
+	metatype_choices += list(list(
+		"id" = "[/datum/species/troll]",
+		"name" = "Troll",
+		"min_priority" = "B"
+	))
+	metatype_attribute_bounds["[/datum/species/troll]"] = get_metatype_attribute_bounds(/datum/species/troll)
+	qdel(tmp_troll)
+
 	data["metatype_choices"] = metatype_choices
 	data["metatype_attribute_bounds"] = metatype_attribute_bounds
 
@@ -264,6 +325,8 @@
 		list("id" = "mundane", "name" = "Mundane"),
 		list("id" = "mage", "name" = "Mage"),
 		list("id" = "adept", "name" = "Adept"),
+		list("id" = "mystic_adept", "name" = "Mystic Adept"),
+		list("id" = "technomancer", "name" = "Technomancer"),
 	)
 
 	// Special attribute metadata (Edge + Magic).
@@ -352,6 +415,210 @@
 
 	data["skill_groups"] = group_list
 
+	// Knowledge skills metadata.
+	var/list/knowledge_list = list()
+	for (var/ks_path in subtypesof(/datum/rpg_knowledge_skill))
+		var/datum/rpg_knowledge_skill/tmp_ks = new ks_path
+		knowledge_list += list(list(
+			"id" = "[ks_path]",
+			"name" = tmp_ks.name,
+			"desc" = tmp_ks.desc,
+			"category" = tmp_ks.category,
+			"sort" = tmp_ks.ui_sort_order,
+		))
+		qdel(tmp_ks)
+	data["knowledge_skills"] = knowledge_list
+
+	// Language skills metadata.
+	var/list/language_list = list()
+	for (var/lang_path in subtypesof(/datum/rpg_language))
+		var/datum/rpg_language/tmp_lang = new lang_path
+		language_list += list(list(
+			"id" = "[lang_path]",
+			"name" = tmp_lang.name,
+			"desc" = tmp_lang.desc,
+			"family" = tmp_lang.family,
+			"sort" = tmp_lang.ui_sort_order,
+		))
+		qdel(tmp_lang)
+	data["languages"] = language_list
+
+	// Spells metadata (for mages).
+	var/list/spell_list = list()
+	for (var/spell_path in subtypesof(/datum/sr_spell))
+		var/datum/sr_spell/tmp_spell = new spell_path
+		spell_list += list(list(
+			"id" = "[spell_path]",
+			"name" = tmp_spell.name,
+			"desc" = tmp_spell.desc,
+			"category" = tmp_spell.category,
+			"type_tag" = tmp_spell.type_tag,
+			"drain" = tmp_spell.drain,
+			"range" = tmp_spell.range,
+			"duration" = tmp_spell.duration,
+			"is_physical" = tmp_spell.is_physical,
+			"sort" = tmp_spell.ui_sort_order,
+		))
+		qdel(tmp_spell)
+	data["spells"] = spell_list
+
+	// Adept powers metadata (for adepts).
+	var/list/power_list = list()
+	for (var/power_path in subtypesof(/datum/sr_adept_power))
+		var/datum/sr_adept_power/tmp_power = new power_path
+		power_list += list(list(
+			"id" = "[power_path]",
+			"name" = tmp_power.name,
+			"desc" = tmp_power.desc,
+			"pp_cost" = tmp_power.pp_cost,
+			"has_levels" = tmp_power.has_levels,
+			"max_levels" = tmp_power.max_levels,
+			"category" = tmp_power.category,
+			"sort" = tmp_power.ui_sort_order,
+		))
+		qdel(tmp_power)
+	data["adept_powers"] = power_list
+
+	// Magical traditions metadata.
+	var/list/tradition_list = list()
+	for (var/trad_path in subtypesof(/datum/sr_tradition))
+		var/datum/sr_tradition/tmp_trad = new trad_path
+		tradition_list += list(list(
+			"id" = "[trad_path]",
+			"name" = tmp_trad.name,
+			"desc" = tmp_trad.desc,
+			"drain_attribute" = tmp_trad.drain_attribute,
+			"philosophy" = tmp_trad.philosophy,
+			"spirits" = tmp_trad.spirits,
+			"sort" = tmp_trad.ui_sort_order,
+		))
+		qdel(tmp_trad)
+	data["traditions"] = tradition_list
+
+	// Complex forms metadata (for technomancers).
+	var/list/cf_list = list()
+	for (var/cf_path in subtypesof(/datum/sr_complex_form))
+		var/datum/sr_complex_form/tmp_cf = new cf_path
+		cf_list += list(list(
+			"id" = "[cf_path]",
+			"name" = tmp_cf.name,
+			"desc" = tmp_cf.desc,
+			"target" = tmp_cf.target,
+			"duration" = tmp_cf.duration,
+			"fading" = tmp_cf.fading,
+			"category" = tmp_cf.category,
+			"sort" = tmp_cf.ui_sort_order,
+		))
+		qdel(tmp_cf)
+	data["complex_forms"] = cf_list
+
+	// Sprite types metadata (for technomancers).
+	var/list/sprite_list = list()
+	for (var/sprite_path in subtypesof(/datum/sr_sprite))
+		var/datum/sr_sprite/tmp_sprite = new sprite_path
+		sprite_list += list(list(
+			"id" = "[sprite_path]",
+			"name" = tmp_sprite.name,
+			"desc" = tmp_sprite.desc,
+			"specialty" = tmp_sprite.specialty,
+			"powers" = tmp_sprite.powers,
+			"sort" = tmp_sprite.ui_sort_order,
+		))
+		qdel(tmp_sprite)
+	data["sprites"] = sprite_list
+
+	// Contact types metadata.
+	var/list/contact_list = list()
+	for (var/contact_path in subtypesof(/datum/sr_contact))
+		var/datum/sr_contact/tmp_contact = new contact_path
+		contact_list += list(list(
+			"id" = "[contact_path]",
+			"name" = tmp_contact.name,
+			"desc" = tmp_contact.desc,
+			"profession" = tmp_contact.profession,
+			"specialty" = tmp_contact.specialty,
+			"archetype" = tmp_contact.archetype,
+			"sort" = tmp_contact.ui_sort_order,
+		))
+		qdel(tmp_contact)
+	data["contact_types"] = contact_list
+
+	// Augments metadata (cyberware, bioware, prosthetics).
+	var/list/augment_categories = list()
+	augment_categories["bodyparts"] = list(
+		"name" = "Cyberlimbs",
+		"icon" = "hand",
+		"description" = "Replacement limbs with enhanced capabilities. Each cyberlimb costs 1.0 Essence."
+	)
+	augment_categories["organs"] = list(
+		"name" = "Cyberware",
+		"icon" = "microchip",
+		"description" = "Cybernetic organ replacements that enhance body functions."
+	)
+	augment_categories["bioware"] = list(
+		"name" = "Bioware",
+		"icon" = "dna",
+		"description" = "Biological enhancements grown from organic materials. Lower Essence cost than cyberware."
+	)
+	data["augment_categories"] = augment_categories
+
+	// Build augment items list keyed by type path
+	var/list/augments = list()
+	var/list/augments_by_category = list(
+		"bodyparts" = list(),
+		"organs" = list(),
+		"bioware" = list()
+	)
+
+	for (var/aug_path in GLOB.augment_items)
+		var/datum/augment_item/A = GLOB.augment_items[aug_path]
+		if (!A || !A.path)
+			continue
+
+		var/essence_cost = 0
+		var/nuyen_cost = 0
+		var/category_key = null
+
+		// Determine category and get essence/nuyen costs
+		if (A.category == AUGMENT_CATEGORY_BODYPARTS)
+			category_key = "bodyparts"
+			// Get costs from the bodypart path
+			var/obj/item/bodypart/BP = A.path
+			essence_cost = initial(BP.essence_base_cost)
+			nuyen_cost = initial(BP.nuyen_base_cost)
+		else if (A.category == AUGMENT_CATEGORY_ORGANS)
+			category_key = "organs"
+			// Get costs from the organ path
+			var/obj/item/organ/O = A.path
+			essence_cost = initial(O.essence_base_cost)
+			nuyen_cost = initial(O.nuyen_base_cost)
+		else if (A.category == AUGMENT_CATEGORY_BIOWARE)
+			category_key = "bioware"
+			// Get costs from the bioware organ path
+			var/obj/item/organ/O = A.path
+			essence_cost = initial(O.essence_base_cost)
+			nuyen_cost = initial(O.nuyen_base_cost)
+		else
+			continue // Skip implants and other categories for now
+
+		var/aug_id = "[aug_path]"
+		var/list/aug_data = list(
+			"id" = aug_id,
+			"name" = A.name,
+			"description" = A.description || "No description available.",
+			"slot" = A.slot,
+			"category" = category_key,
+			"essence_cost" = essence_cost,
+			"nuyen_cost" = nuyen_cost,
+			"path" = "[A.path]"
+		)
+
+		augments[aug_id] = aug_data
+		augments_by_category[category_key] += list(aug_data)
+
+	data["augments"] = augments
+	data["augments_by_category"] = augments_by_category
+
 	return data
 
 /datum/preference/blob/shadowrun_chargen/proc/get_priority_categories()
@@ -414,6 +681,23 @@
 	output["skills"] = sanitize_skills(skills_in, priorities)
 	output["skill_groups"] = sanitize_skill_groups(skill_groups_in, priorities)
 
+	// Magic system fields
+	output["tradition"] = sanitize_tradition(input["tradition"], output["awakening"])
+	output["selected_spells"] = sanitize_selected_spells(input["selected_spells"], priorities, output["awakening"])
+	output["selected_powers"] = sanitize_selected_powers(input["selected_powers"], priorities, output["awakening"])
+	output["selected_complex_forms"] = sanitize_selected_complex_forms(input["selected_complex_forms"], priorities, output["awakening"])
+
+	// Knowledge system fields
+	output["native_language"] = sanitize_native_language(input["native_language"])
+	output["knowledge_skills"] = sanitize_knowledge_skills(input["knowledge_skills"], output["attributes"])
+	output["languages"] = sanitize_languages(input["languages"], output["attributes"], output["native_language"])
+
+	// Contacts system
+	output["contacts"] = sanitize_contacts(input["contacts"], output["attributes"])
+
+	// Augments system
+	output["augments"] = sanitize_augments(input["augments"], output["metatype_species"])
+
 	return output
 
 /datum/preference/blob/shadowrun_chargen/proc/is_full_reset_state(list/state)
@@ -437,6 +721,31 @@
 		return FALSE
 	if (islist(special) && length(special))
 		return FALSE
+	// Magic system fields
+	if (istext(state["tradition"]) && length(state["tradition"]))
+		return FALSE
+	var/list/spells = state["selected_spells"]
+	var/list/powers = state["selected_powers"]
+	var/list/forms = state["selected_complex_forms"]
+	if (islist(spells) && length(spells))
+		return FALSE
+	if (islist(powers) && length(powers))
+		return FALSE
+	if (islist(forms) && length(forms))
+		return FALSE
+	// Knowledge system fields
+	if (istext(state["native_language"]) && length(state["native_language"]))
+		return FALSE
+	var/list/knowledge = state["knowledge_skills"]
+	var/list/languages = state["languages"]
+	if (islist(knowledge) && length(knowledge))
+		return FALSE
+	if (islist(languages) && length(languages))
+		return FALSE
+	// Contacts
+	var/list/contacts = state["contacts"]
+	if (islist(contacts) && length(contacts))
+		return FALSE
 	return TRUE
 
 /datum/preference/blob/shadowrun_chargen/proc/sanitize_metatype_species(raw_value, list/priorities)
@@ -449,8 +758,15 @@
 	if (!ispath(species_path, /datum/species))
 		species_path = /datum/species/human
 
-	// Only allow Human and Elf for now.
-	if (!(species_path in list(/datum/species/human, /datum/species/elf)))
+	// SR5 Metatypes: Human, Elf, Dwarf, Ork, Troll
+	var/list/allowed_metatypes = list(
+		/datum/species/human,
+		/datum/species/elf,
+		/datum/species/dwarf,
+		/datum/species/ork,
+		/datum/species/troll
+	)
+	if (!(species_path in allowed_metatypes))
 		species_path = /datum/species/human
 
 	var/metatype_letter = priorities["metatype"]
@@ -478,13 +794,20 @@
 	if (!ispath(species_type, /datum/species))
 		return "E"
 
-	if (species_type == /datum/species/human)
-		return "E"
+	// SR5 Core Metatypes
+	switch(species_type)
+		if (/datum/species/human)
+			return "E"  // Human: Priority E minimum
+		if (/datum/species/elf)
+			return "D"  // Elf: Priority D minimum
+		if (/datum/species/dwarf)
+			return "C"  // Dwarf: Priority C minimum
+		if (/datum/species/ork)
+			return "C"  // Ork: Priority C minimum
+		if (/datum/species/troll)
+			return "B"  // Troll: Priority B minimum
 
-	if (species_type == /datum/species/elf)
-		return "D"
-
-	// "Common" metas.
+	// Legacy species mappings for backward compatibility
 	switch(species_type)
 		if (/datum/species/lizard, /datum/species/moth, /datum/species/fly, /datum/species/pod, /datum/species/jelly, /datum/species/teshari)
 			return "D"
@@ -501,14 +824,39 @@
 /datum/preference/blob/shadowrun_chargen/proc/get_metatype_attribute_bounds(species_type)
 	// Returns a mapping of stat_id string -> list(min,max).
 	// Human defaults to 1/6 for all core stats.
+	// SR5 Metatype Attribute Limits from Core Rulebook
 	var/list/bounds = list()
 	for (var/stat_path in get_core_stat_paths())
 		bounds["[stat_path]"] = list(1, 6)
 
-	if (species_type == /datum/species/elf)
-		// SR5 Elf: AGI 2/7, CHA 3/8, others 1/6.
-		bounds["[/datum/rpg_stat/agility]"] = list(2, 7)
-		bounds["[/datum/rpg_stat/charisma]"] = list(3, 8)
+	switch(species_type)
+		if (/datum/species/elf)
+			// SR5 Elf: AGI 2/7, CHA 3/8, others 1/6
+			bounds["[/datum/rpg_stat/agility]"] = list(2, 7)
+			bounds["[/datum/rpg_stat/charisma]"] = list(3, 8)
+
+		if (/datum/species/dwarf)
+			// SR5 Dwarf: BOD 1/7, REA 1/5, STR 1/8, WIL 2/7
+			bounds["[/datum/rpg_stat/body]"] = list(1, 7)
+			bounds["[/datum/rpg_stat/reaction]"] = list(1, 5)
+			bounds["[/datum/rpg_stat/strength]"] = list(1, 8)
+			bounds["[/datum/rpg_stat/willpower]"] = list(2, 7)
+
+		if (/datum/species/ork)
+			// SR5 Ork: BOD 4/9, STR 3/8, LOG 1/5, CHA 1/5
+			bounds["[/datum/rpg_stat/body]"] = list(4, 9)
+			bounds["[/datum/rpg_stat/strength]"] = list(3, 8)
+			bounds["[/datum/rpg_stat/logic]"] = list(1, 5)
+			bounds["[/datum/rpg_stat/charisma]"] = list(1, 5)
+
+		if (/datum/species/troll)
+			// SR5 Troll: BOD 5/10, AGI 1/5, STR 5/10, LOG 1/5, INT 1/5, CHA 1/4
+			bounds["[/datum/rpg_stat/body]"] = list(5, 10)
+			bounds["[/datum/rpg_stat/agility]"] = list(1, 5)
+			bounds["[/datum/rpg_stat/strength]"] = list(5, 10)
+			bounds["[/datum/rpg_stat/logic]"] = list(1, 5)
+			bounds["[/datum/rpg_stat/intuition]"] = list(1, 5)
+			bounds["[/datum/rpg_stat/charisma]"] = list(1, 4)
 
 	return bounds
 
@@ -934,6 +1282,350 @@
 	if (isnull(cached_magic))
 		cached_magic = new
 	return cached_magic
+
+// =============================================================================
+// MAGIC SYSTEM SANITIZERS
+// =============================================================================
+
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_tradition(raw_tradition, awakening)
+	// Mundanes and technomancers don't have magical traditions
+	if (awakening == "mundane" || awakening == "technomancer")
+		return ""
+
+	if (!istext(raw_tradition))
+		return ""
+
+	// Validate against known traditions
+	for (var/trad_path in subtypesof(/datum/sr_tradition))
+		if ("[trad_path]" == raw_tradition)
+			return raw_tradition
+
+	return ""
+
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_selected_spells(list/in_spells, list/priorities, awakening)
+	// Only mages and mystic adepts can learn spells
+	if (awakening != "mage" && awakening != "mystic_adept")
+		return list()
+
+	if (!islist(in_spells))
+		return list()
+
+	var/magic_letter = priorities["magic"]
+	var/magic_rating = get_magic_rating(magic_letter)
+	var/max_spells = magic_rating * 2
+
+	var/list/out = list()
+	var/list/valid_spell_paths = list()
+
+	for (var/spell_path in subtypesof(/datum/sr_spell))
+		valid_spell_paths += "[spell_path]"
+
+	for (var/spell_id in in_spells)
+		if (!istext(spell_id))
+			continue
+		if (!(spell_id in valid_spell_paths))
+			continue
+		if (spell_id in out)
+			continue // No duplicates
+		if (length(out) >= max_spells)
+			break
+		out += spell_id
+
+	return out
+
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_selected_powers(list/in_powers, list/priorities, awakening)
+	// Only adepts and mystic adepts can use adept powers
+	if (awakening != "adept" && awakening != "mystic_adept")
+		return list()
+
+	if (!islist(in_powers))
+		return list()
+
+	var/magic_letter = priorities["magic"]
+	var/max_pp = get_magic_rating(magic_letter)
+
+	var/list/out = list()
+	var/total_pp = 0
+
+	// Build lookup for valid powers
+	var/list/power_data = list()
+	for (var/power_path in subtypesof(/datum/sr_adept_power))
+		var/datum/sr_adept_power/tmp = new power_path
+		power_data["[power_path]"] = list(
+			"pp_cost" = tmp.pp_cost,
+			"has_levels" = tmp.has_levels,
+			"max_levels" = tmp.max_levels
+		)
+		qdel(tmp)
+
+	for (var/power_id in in_powers)
+		if (!istext(power_id))
+			continue
+		if (!(power_id in power_data))
+			continue
+
+		var/list/pdata = power_data[power_id]
+		var/raw_level = in_powers[power_id]
+		if (!isnum(raw_level))
+			continue
+
+		var/max_lvl = pdata["has_levels"] ? pdata["max_levels"] : 1
+		var/level = clamp(round(raw_level), 1, max_lvl)
+		var/cost = pdata["pp_cost"] * level
+
+		if (total_pp + cost > max_pp)
+			continue
+
+		out[power_id] = level
+		total_pp += cost
+
+	return out
+
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_selected_complex_forms(list/in_forms, list/priorities, awakening)
+	// Only technomancers can learn complex forms
+	if (awakening != "technomancer")
+		return list()
+
+	if (!islist(in_forms))
+		return list()
+
+	var/magic_letter = priorities["magic"]
+	var/resonance = get_magic_rating(magic_letter)
+	var/max_forms = resonance * 2
+
+	var/list/out = list()
+	var/list/valid_form_paths = list()
+
+	for (var/form_path in subtypesof(/datum/sr_complex_form))
+		valid_form_paths += "[form_path]"
+
+	for (var/form_id in in_forms)
+		if (!istext(form_id))
+			continue
+		if (!(form_id in valid_form_paths))
+			continue
+		if (form_id in out)
+			continue
+		if (length(out) >= max_forms)
+			break
+		out += form_id
+
+	return out
+
+// =============================================================================
+// KNOWLEDGE SYSTEM SANITIZERS
+// =============================================================================
+
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_native_language(raw_lang)
+	if (!istext(raw_lang))
+		return ""
+
+	for (var/lang_path in subtypesof(/datum/rpg_language))
+		if ("[lang_path]" == raw_lang)
+			return raw_lang
+
+	return ""
+
+/datum/preference/blob/shadowrun_chargen/proc/get_free_knowledge_points(list/attributes)
+	// Free knowledge skill points = (INT + LOG) × 2
+	var/int_key = "[/datum/rpg_stat/intuition]"
+	var/log_key = "[/datum/rpg_stat/logic]"
+
+	var/intuition = 1
+	var/logic = 1
+
+	if (islist(attributes))
+		if (int_key in attributes)
+			intuition = isnum(attributes[int_key]) ? attributes[int_key] : 1
+		if (log_key in attributes)
+			logic = isnum(attributes[log_key]) ? attributes[log_key] : 1
+
+	return (intuition + logic) * 2
+
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_knowledge_skills(list/in_knowledge, list/attributes)
+	if (!islist(in_knowledge))
+		return list()
+
+	var/max_points = get_free_knowledge_points(attributes)
+
+	var/list/out = list()
+	var/total_spent = 0
+
+	var/list/valid_skill_paths = list()
+	for (var/skill_path in subtypesof(/datum/rpg_knowledge_skill))
+		valid_skill_paths += "[skill_path]"
+
+	for (var/skill_id in in_knowledge)
+		if (!istext(skill_id))
+			continue
+		if (!(skill_id in valid_skill_paths))
+			continue
+
+		var/raw_value = in_knowledge[skill_id]
+		if (!isnum(raw_value))
+			continue
+
+		var/desired = clamp(round(raw_value), 0, 6)
+		if (desired <= 0)
+			continue
+
+		if (total_spent + desired > max_points)
+			desired = max_points - total_spent
+			if (desired <= 0)
+				break
+
+		out[skill_id] = desired
+		total_spent += desired
+
+	return out
+
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_languages(list/in_languages, list/attributes, native_language)
+	if (!islist(in_languages))
+		return list()
+
+	// Languages share the knowledge skill point pool
+	var/max_points = get_free_knowledge_points(attributes)
+
+	// Calculate points already spent on knowledge skills
+	// (This is called after knowledge skills are sanitized, so we need to
+	// pass in the already-sanitized knowledge skills to properly track the shared pool)
+	// For now, languages get their own allocation - this is a simplification
+
+	var/list/out = list()
+	var/total_spent = 0
+
+	var/list/valid_lang_paths = list()
+	for (var/lang_path in subtypesof(/datum/rpg_language))
+		valid_lang_paths += "[lang_path]"
+
+	for (var/lang_id in in_languages)
+		if (!istext(lang_id))
+			continue
+		if (!(lang_id in valid_lang_paths))
+			continue
+		// Native language doesn't need rating - it's automatically N
+		if (lang_id == native_language)
+			continue
+
+		var/raw_value = in_languages[lang_id]
+		if (!isnum(raw_value))
+			continue
+
+		var/desired = clamp(round(raw_value), 0, 6)
+		if (desired <= 0)
+			continue
+
+		if (total_spent + desired > max_points)
+			desired = max_points - total_spent
+			if (desired <= 0)
+				break
+
+		out[lang_id] = desired
+		total_spent += desired
+
+	return out
+
+// =============================================================================
+// CONTACTS SYSTEM SANITIZER
+// =============================================================================
+
+/datum/preference/blob/shadowrun_chargen/proc/get_contact_points(list/attributes)
+	// Contact points = CHA × 3
+	var/cha_key = "[/datum/rpg_stat/charisma]"
+	var/charisma = 1
+	if (islist(attributes) && (cha_key in attributes))
+		charisma = isnum(attributes[cha_key]) ? attributes[cha_key] : 1
+	return charisma * 3
+
+/// Sanitize augments, ensuring valid augment paths and essence budget.
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_augments(list/in_augments, metatype_species)
+	if (!islist(in_augments))
+		return list()
+
+	var/datum/species/S = metatype_species
+	if (ispath(S))
+		S = new S()
+
+	var/list/out = list()
+	var/essence_spent = 0
+	var/essence_max = 6.0 // Base essence
+
+	for (var/slot in in_augments)
+		var/aug_path = in_augments[slot]
+		if (!istext(aug_path))
+			continue
+
+		// Find the augment item
+		var/datum/augment_item/A = GLOB.augment_items[text2path(aug_path)]
+		if (!A)
+			continue
+
+		// Check species compatibility
+		if (!A.can_apply_to_species(S))
+			continue
+
+		// Get essence cost
+		var/essence_cost = 0
+		if (A.category == AUGMENT_CATEGORY_BODYPARTS)
+			var/obj/item/bodypart/BP = A.path
+			essence_cost = initial(BP.essence_base_cost)
+		else if (A.category == AUGMENT_CATEGORY_ORGANS)
+			var/obj/item/organ/O = A.path
+			essence_cost = initial(O.essence_base_cost)
+
+		// Check essence budget
+		if (essence_spent + essence_cost > essence_max)
+			continue
+
+		out[slot] = aug_path
+		essence_spent += essence_cost
+
+	return out
+
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_contacts(list/in_contacts, list/attributes)
+	if (!islist(in_contacts))
+		return list()
+
+	var/max_points = get_contact_points(attributes)
+
+	// Build lookup for valid contact types
+	var/list/valid_contact_paths = list()
+	for (var/contact_path in subtypesof(/datum/sr_contact))
+		valid_contact_paths += "[contact_path]"
+
+	var/list/out = list()
+	var/total_cost = 0
+
+	// Contacts are stored as list of objects with type_id, connection, loyalty
+	for (var/list/contact_data in in_contacts)
+		if (!islist(contact_data))
+			continue
+
+		var/type_id = contact_data["type_id"]
+		if (!istext(type_id) || !(type_id in valid_contact_paths))
+			continue
+
+		var/raw_connection = contact_data["connection"]
+		var/raw_loyalty = contact_data["loyalty"]
+		if (!isnum(raw_connection) || !isnum(raw_loyalty))
+			continue
+
+		var/connection = clamp(round(raw_connection), 1, 12)
+		var/loyalty = clamp(round(raw_loyalty), 1, 6)
+		var/cost = connection + loyalty
+
+		if (total_cost + cost > max_points)
+			continue
+
+		out += list(list(
+			"type_id" = type_id,
+			"connection" = connection,
+			"loyalty" = loyalty,
+			"name" = contact_data["name"] // Custom name for the contact
+		))
+		total_cost += cost
+
+	return out
 
 #undef SHADOWRUN_CHARGEN_SOURCE
 

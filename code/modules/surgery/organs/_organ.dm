@@ -66,6 +66,17 @@
 	/// - tier2: 0.8 (alpha-ish)
 	/// - tier3: 0.7 (beta-ish)
 	var/essence_grade_multiplier = 1.0
+	/// SR5: Nuyen cost for chargen purchasing.
+	/// For tiered/graded cyberware, set `nuyen_base_cost` and `nuyen_grade_multiplier` and let `nuyen_cost` be computed.
+	var/nuyen_cost = 0
+	/// SR5: Base Nuyen cost before grade multipliers.
+	var/nuyen_base_cost = 0
+	/// SR5: Grade multiplier applied to `nuyen_base_cost`.
+	/// Mapping we use in this codebase (since organs use tier subtypes, not a separate grade system):
+	/// - tier1/basic: 1.0 (standard)
+	/// - tier2: 2.0 (alpha-ish, higher quality = higher cost)
+	/// - tier3: 4.0 (beta-ish, cutting edge = much higher cost)
+	var/nuyen_grade_multiplier = 1.0
 	/// Traits that are given to the holder of the organ. If you want an effect that changes this, don't add directly to this. Use the add_organ_trait() proc
 	var/list/organ_traits = list()
 
@@ -80,6 +91,9 @@ INITIALIZE_IMMEDIATE(/obj/item/organ)
 	// SR5: compute derived Essence cost (if this organ uses base+grade costing).
 	if(essence_base_cost)
 		essence_cost = round(essence_base_cost * essence_grade_multiplier, 0.01)
+	// SR5: compute derived Nuyen cost (if this organ uses base+grade costing).
+	if(nuyen_base_cost)
+		nuyen_cost = round(nuyen_base_cost * nuyen_grade_multiplier, 1)
 	if(organ_flags & ORGAN_EDIBLE)
 		AddComponent(/datum/component/edible,\
 			initial_reagents = food_reagents,\

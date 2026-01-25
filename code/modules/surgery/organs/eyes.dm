@@ -237,6 +237,8 @@
 	organ_flags = ORGAN_SYNTHETIC
 	// SR5: sensory replacement has a small Essence impact.
 	essence_base_cost = 0.10
+	// SR5: Cybereyes are about 4,000¥ for basic model.
+	nuyen_base_cost = 4000
 
 	///Incase the eyes are removed before the timer expires
 	var/emp_timer

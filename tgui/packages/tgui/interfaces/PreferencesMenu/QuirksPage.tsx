@@ -1,141 +1,295 @@
+import { useEffect } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { useBackend, useLocalState } from '../../backend';
-import { Box, Icon, Stack } from '../../components';
+import {
+  Box,
+  Button,
+  Icon,
+  Input,
+  ProgressBar,
+  Stack,
+  Tabs,
+} from '../../components';
 import { PreferencesMenuData, Quirk } from './data';
 import { ServerPreferencesFetcher } from './ServerPreferencesFetcher';
 
-const getValueClass = (value: number): string => {
-  if (value > 0) {
-    return 'positive';
-  } else if (value < 0) {
-    return 'negative';
-  } else {
-    return 'neutral';
-  }
-};
+// SR5 limits karma gained from negative qualities
+const MAX_KARMA_FROM_NEGATIVES = 25;
 
-const QuirkList = (props: {
-  onClick: (quirkName: string, quirk: Quirk) => void;
-  quirks: [
-    string,
-    Quirk & {
-      failTooltip?: string;
-    },
-  ][];
+// Quality card component with cyberpunk styling
+const QualityCard = (props: {
+  disabled?: boolean;
+  isSelected: boolean;
+  onClick: () => void;
+  quality: Quirk & { failTooltip?: string };
+  qualityKey: string;
 }) => {
-  return (
-    // Stack is not used here for a variety of IE flex bugs
-    <Box className="PreferencesMenu__Quirks__QuirkList">
-      {props.quirks.map(([quirkKey, quirk]) => {
-        const className = 'PreferencesMenu__Quirks__QuirkList__quirk';
+  const { quality, qualityKey, isSelected, onClick, disabled } = props;
+  const isPositive = quality.value > 0;
+  const isNegative = quality.value < 0;
 
-        const child = (
+  const borderColor = isSelected
+    ? isPositive
+      ? '#4caf50'
+      : isNegative
+        ? '#f44336'
+        : '#9b8fc7'
+    : 'rgba(255, 255, 255, 0.1)';
+
+  const valueColor = isPositive ? '#4caf50' : isNegative ? '#f44336' : '#888';
+
+  const card = (
+    <Box
+      style={{
+        padding: '0.75rem',
+        marginBottom: '0.5rem',
+        background: isSelected
+          ? `rgba(${isPositive ? '76, 175, 80' : isNegative ? '244, 67, 54' : '155, 143, 199'}, 0.15)`
+          : 'rgba(0, 0, 0, 0.25)',
+        border: `1px solid ${borderColor}`,
+        borderRadius: '4px',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        opacity: disabled && !isSelected ? '0.5' : '1',
+        transition: 'all 0.2s ease',
+      }}
+      onClick={disabled ? undefined : onClick}
+    >
+      <Stack align="center">
+        {/* Icon */}
+        <Stack.Item>
           <Box
-            className={className}
-            key={quirkKey}
-            onClick={() => {
-              props.onClick(quirkKey, quirk);
+            style={{
+              width: '2.5rem',
+              height: '2.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: 'rgba(0, 0, 0, 0.3)',
+              borderRadius: '4px',
             }}
           >
-            <Stack fill>
-              <Stack.Item
-                align="center"
+            <Icon
+              name={quality.icon || 'question'}
+              size={1.5}
+              color={isSelected ? borderColor : '#888'}
+            />
+          </Box>
+        </Stack.Item>
+
+        {/* Name and Description */}
+        <Stack.Item grow ml={0.75}>
+          <Box style={{ fontSize: '0.95rem', fontWeight: '600' }}>
+            {quality.name}
+          </Box>
+          <Box
+            style={{
+              fontSize: '0.8rem',
+              opacity: '0.7',
+              maxHeight: '2.4em',
+              overflow: 'hidden',
+            }}
+          >
+            {quality.description}
+          </Box>
+        </Stack.Item>
+
+        {/* Karma Value */}
+        <Stack.Item>
+          <Box
+            style={{
+              fontSize: '1.2rem',
+              fontWeight: 'bold',
+              color: valueColor,
+              minWidth: '3rem',
+              textAlign: 'right',
+            }}
+          >
+            {quality.value > 0 ? '-' : '+'}
+            {Math.abs(quality.value)}
+          </Box>
+        </Stack.Item>
+
+        {/* Selection indicator */}
+        <Stack.Item ml={0.5}>
+          <Icon
+            name={isSelected ? 'check-circle' : 'circle'}
+            size={1.2}
+            color={isSelected ? borderColor : 'rgba(255, 255, 255, 0.3)'}
+          />
+        </Stack.Item>
+      </Stack>
+    </Box>
+  );
+
+  if (quality.failTooltip) {
+    return (
+      <Tooltip key={qualityKey} content={quality.failTooltip}>
+        {card}
+      </Tooltip>
+    );
+  }
+
+  return card;
+};
+
+// Karma display panel
+const KarmaPanel = (props: {
+  karmaBalance: number;
+  karmaFromNegatives: number;
+  karmaFromPositives: number;
+  maxNegatives: number;
+}) => {
+  const { karmaBalance, karmaFromPositives, karmaFromNegatives, maxNegatives } =
+    props;
+
+  return (
+    <Box
+      style={{
+        background:
+          'linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(20, 20, 30, 0.5))',
+        border: `2px solid ${karmaBalance >= 0 ? '#9b8fc7' : '#f44336'}`,
+        borderRadius: '4px',
+        padding: '1rem',
+        marginBottom: '1rem',
+      }}
+    >
+      <Stack fill>
+        {/* Karma Balance */}
+        <Stack.Item grow basis={0}>
+          <Stack align="center">
+            <Stack.Item>
+              <Icon name="yin-yang" size={1.8} color="#9b8fc7" />
+            </Stack.Item>
+            <Stack.Item grow ml={0.75}>
+              <Box style={{ fontSize: '1rem', fontWeight: 'bold' }}>
+                Karma Balance
+              </Box>
+              <Box style={{ fontSize: '0.75rem', opacity: '0.7' }}>
+                Available for spending
+              </Box>
+            </Stack.Item>
+            <Stack.Item>
+              <Box
                 style={{
-                  minWidth: '15%',
-                  maxWidth: '15%',
-                  textAlign: 'center',
+                  fontSize: '2rem',
+                  fontWeight: 'bold',
+                  color:
+                    karmaBalance > 0
+                      ? '#4caf50'
+                      : karmaBalance < 0
+                        ? '#f44336'
+                        : '#9b8fc7',
                 }}
               >
-                <Icon color="#333" fontSize={3} name={quirk.icon} />
+                {karmaBalance >= 0 ? '+' : ''}
+                {karmaBalance}
+              </Box>
+            </Stack.Item>
+          </Stack>
+        </Stack.Item>
+
+        {/* Divider */}
+        <Stack.Item>
+          <Box
+            style={{
+              width: '1px',
+              height: '100%',
+              background: 'rgba(255, 255, 255, 0.2)',
+              margin: '0 1rem',
+            }}
+          />
+        </Stack.Item>
+
+        {/* Negative Karma Limit */}
+        <Stack.Item grow basis={0}>
+          <Box style={{ marginBottom: '0.5rem' }}>
+            <Stack align="center">
+              <Stack.Item grow>
+                <Box style={{ fontSize: '0.85rem', opacity: '0.8' }}>
+                  <Icon name="minus-circle" color="#f44336" mr={0.5} />
+                  Karma from Negatives
+                </Box>
               </Stack.Item>
-
-              <Stack.Item
-                align="stretch"
-                ml={0}
-                style={{
-                  borderRight: '1px solid black',
-                }}
-              />
-
-              <Stack.Item
-                grow
-                ml={0}
-                style={{
-                  // Fixes an IE bug for text overflowing in Flex boxes
-                  minWidth: '0%',
-                }}
-              >
-                <Stack vertical fill>
-                  <Stack.Item
-                    className={`${className}--${getValueClass(quirk.value)}`}
-                    style={{
-                      borderBottom: '1px solid black',
-                      padding: '2px',
-                    }}
-                  >
-                    <Stack
-                      fill
-                      style={{
-                        fontSize: '1.2em',
-                      }}
-                    >
-                      <Stack.Item grow basis="content">
-                        <b>{quirk.name}</b>
-                      </Stack.Item>
-
-                      <Stack.Item>
-                        <b>{quirk.value}</b>
-                      </Stack.Item>
-                    </Stack>
-                  </Stack.Item>
-
-                  <Stack.Item
-                    grow
-                    basis="content"
-                    mt={0}
-                    style={{
-                      padding: '3px',
-                    }}
-                  >
-                    {quirk.description}
-                  </Stack.Item>
-                </Stack>
+              <Stack.Item>
+                <Box
+                  style={{
+                    fontWeight: 'bold',
+                    color:
+                      karmaFromNegatives >= maxNegatives
+                        ? '#f44336'
+                        : '#4caf50',
+                  }}
+                >
+                  {karmaFromNegatives} / {maxNegatives}
+                </Box>
               </Stack.Item>
             </Stack>
           </Box>
-        );
+          <ProgressBar
+            value={karmaFromNegatives / maxNegatives}
+            color={
+              karmaFromNegatives >= maxNegatives
+                ? 'bad'
+                : karmaFromNegatives >= maxNegatives * 0.8
+                  ? 'average'
+                  : 'good'
+            }
+          />
+          {karmaFromNegatives > maxNegatives && (
+            <Box
+              style={{
+                fontSize: '0.7rem',
+                color: '#f44336',
+                marginTop: '0.25rem',
+              }}
+            >
+              <Icon name="exclamation-triangle" mr={0.25} />
+              Excess karma not counted!
+            </Box>
+          )}
+        </Stack.Item>
 
-        if (quirk.failTooltip) {
-          return (
-            <Tooltip key={quirkKey} content={quirk.failTooltip}>
-              {child}
-            </Tooltip>
-          );
-        } else {
-          return child;
-        }
-      })}
+        {/* Divider */}
+        <Stack.Item>
+          <Box
+            style={{
+              width: '1px',
+              height: '100%',
+              background: 'rgba(255, 255, 255, 0.2)',
+              margin: '0 1rem',
+            }}
+          />
+        </Stack.Item>
+
+        {/* Positive Karma Spent */}
+        <Stack.Item grow basis={0}>
+          <Stack align="center">
+            <Stack.Item grow>
+              <Box style={{ fontSize: '0.85rem', opacity: '0.8' }}>
+                <Icon name="plus-circle" color="#4caf50" mr={0.5} />
+                Karma Spent on Positives
+              </Box>
+            </Stack.Item>
+            <Stack.Item>
+              <Box
+                style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: '#4caf50',
+                }}
+              >
+                {karmaFromPositives}
+              </Box>
+            </Stack.Item>
+          </Stack>
+        </Stack.Item>
+      </Stack>
     </Box>
   );
 };
 
-const StatDisplay = (props) => {
-  return (
-    <Box
-      backgroundColor="#eee"
-      bold
-      color="black"
-      fontSize="1.2em"
-      px={3}
-      py={0.5}
-    >
-      {props.children}
-    </Box>
-  );
-};
-
-export const QuirksPage = (props) => {
+export const QuirksPage = () => {
   const { act, data } = useBackend<PreferencesMenuData>();
 
   const [selectedQuirks, setSelectedQuirks] = useLocalState(
@@ -143,85 +297,145 @@ export const QuirksPage = (props) => {
     data.selected_quirks,
   );
 
+  // Sync local state with server data when it changes (e.g., on sheet reopen)
+  useEffect(() => {
+    const serverQuirks = data.selected_quirks || [];
+    const localQuirks = selectedQuirks || [];
+
+    // Only sync if the server data differs from local state
+    // This prevents overwriting optimistic updates while allowing
+    // proper sync on sheet open/reopen
+    const serverSet = new Set(serverQuirks);
+    const localSet = new Set(localQuirks);
+
+    const serverHasExtra = serverQuirks.some((q) => !localSet.has(q));
+    const localHasExtra = localQuirks.some((q) => !serverSet.has(q));
+
+    if (serverHasExtra || localHasExtra) {
+      // Server has different data than our local state, sync to server
+      setSelectedQuirks(serverQuirks);
+    }
+  }, [data.selected_quirks]);
+
+  const [filterText, setFilterText] = useLocalState('sr_quality_filter', '');
+  const [activeTab, setActiveTab] = useLocalState<
+    'all' | 'positive' | 'negative'
+  >('sr_quality_tab', 'all');
+
   return (
     <ServerPreferencesFetcher
-      render={(data) => {
-        if (!data) {
-          return <Box>Loading quirks...</Box>;
-        }
-
-        if (!data.quirks) {
+      render={(serverData) => {
+        if (!serverData) {
           return (
-            <Box color="red">
-              Missing `quirks` server data (preferences.json). Check server
-              preference middleware.
+            <Box
+              style={{
+                padding: '2rem',
+                textAlign: 'center',
+                opacity: '0.6',
+              }}
+            >
+              <Icon name="spinner" spin size={2} />
+              <Box mt={1}>Loading qualities...</Box>
             </Box>
           );
         }
 
-        const {
-          max_positive_quirks: maxPositiveQuirks,
-          quirk_blacklist: quirkBlacklist,
-          quirk_info: quirkInfo,
-        } = data.quirks;
+        if (!serverData.quirks) {
+          return (
+            <Box
+              style={{
+                padding: '2rem',
+                textAlign: 'center',
+                color: '#f44336',
+              }}
+            >
+              <Icon name="exclamation-triangle" size={2} />
+              <Box mt={1}>
+                Missing quirks data. Check server preference middleware.
+              </Box>
+            </Box>
+          );
+        }
 
-        const enforceBalance = Boolean((data.quirks as any).enforce_balance);
+        const { quirk_blacklist: quirkBlacklist, quirk_info: quirkInfo } =
+          serverData.quirks;
 
-        const quirks = Object.entries(quirkInfo);
-        quirks.sort(([_, quirkA], [__, quirkB]) => {
-          if (quirkA.value === quirkB.value) {
-            return quirkA.name > quirkB.name ? 1 : -1;
-          } else {
-            return quirkA.value - quirkB.value;
+        // Sort qualities by value (negatives first, then positives)
+        const allQualities = Object.entries(quirkInfo);
+        allQualities.sort(([_, a], [__, b]) => {
+          if (a.value === b.value) {
+            return a.name > b.name ? 1 : -1;
           }
+          return a.value - b.value;
         });
 
-        let balance = 0;
-        let positiveQuirks = 0;
+        // Filter by search and tab
+        const filteredQualities = allQualities.filter(([key, quality]) => {
+          // Search filter
+          if (filterText) {
+            const search = filterText.toLowerCase();
+            if (
+              !quality.name.toLowerCase().includes(search) &&
+              !quality.description.toLowerCase().includes(search)
+            ) {
+              return false;
+            }
+          }
+
+          // Tab filter
+          if (activeTab === 'positive' && quality.value <= 0) return false;
+          if (activeTab === 'negative' && quality.value >= 0) return false;
+
+          return true;
+        });
+
+        // Calculate karma
+        let karmaFromPositives = 0;
+        let karmaFromNegatives = 0;
 
         for (const selectedQuirkName of selectedQuirks) {
           const selectedQuirk = quirkInfo[selectedQuirkName];
-          if (!selectedQuirk) {
-            continue;
-          }
+          if (!selectedQuirk) continue;
 
           if (selectedQuirk.value > 0) {
-            positiveQuirks += 1;
+            karmaFromPositives += selectedQuirk.value;
+          } else if (selectedQuirk.value < 0) {
+            karmaFromNegatives += Math.abs(selectedQuirk.value);
           }
-
-          balance += selectedQuirk.value;
         }
 
+        const effectiveNegatives = Math.min(
+          karmaFromNegatives,
+          MAX_KARMA_FROM_NEGATIVES,
+        );
+        const karmaBalance = effectiveNegatives - karmaFromPositives;
+
+        // Validation functions
         const getReasonToNotAdd = (quirkName: string) => {
           const quirk = quirkInfo[quirkName];
+          if (!quirk) return 'Unknown quality.';
 
-          if (!quirk) {
-            return 'Unknown quirk (server data mismatch).';
-          }
-
-          if (enforceBalance && quirk.value > 0) {
-            if (positiveQuirks >= maxPositiveQuirks) {
-              return "You can't have any more positive quirks!";
-            } else if (balance + quirk.value > 0) {
-              return 'You need a negative quirk to balance this out!';
+          // Check negative karma limit
+          if (quirk.value < 0) {
+            const additional = Math.abs(quirk.value);
+            if (karmaFromNegatives + additional > MAX_KARMA_FROM_NEGATIVES) {
+              return `Exceeds ${MAX_KARMA_FROM_NEGATIVES} karma limit from negatives!`;
             }
           }
 
-          const selectedQuirkNames = selectedQuirks
-            .map((quirkKey) => quirkInfo[quirkKey]?.name)
+          // Check blacklist
+          const selectedNames = selectedQuirks
+            .map((k) => quirkInfo[k]?.name)
             .filter(Boolean);
 
           for (const blacklist of quirkBlacklist) {
-            if (blacklist.indexOf(quirk.name) === -1) {
-              continue;
-            }
-
-            for (const incompatibleQuirk of blacklist) {
+            if (!blacklist.includes(quirk.name)) continue;
+            for (const incompatible of blacklist) {
               if (
-                incompatibleQuirk !== quirk.name &&
-                selectedQuirkNames.indexOf(incompatibleQuirk) !== -1
+                incompatible !== quirk.name &&
+                selectedNames.includes(incompatible)
               ) {
-                return `This is incompatible with ${incompatibleQuirk}!`;
+                return `Incompatible with ${incompatible}`;
               }
             }
           }
@@ -229,122 +443,205 @@ export const QuirksPage = (props) => {
           return undefined;
         };
 
-        const getReasonToNotRemove = (quirkName: string) => {
-          const quirk = quirkInfo[quirkName];
+        const handleToggleQuality = (quirkName: string, quirk: Quirk) => {
+          const isSelected = selectedQuirks.includes(quirkName);
 
-          if (!quirk) {
-            return undefined;
+          if (isSelected) {
+            // Remove
+            setSelectedQuirks(selectedQuirks.filter((q) => q !== quirkName));
+            act('remove_quirk', { quirk: quirk.name });
+          } else {
+            // Add
+            if (getReasonToNotAdd(quirkName)) return;
+            setSelectedQuirks([...selectedQuirks, quirkName]);
+            act('give_quirk', { quirk: quirk.name });
           }
-
-          if (enforceBalance && balance - quirk.value > 0) {
-            return 'You need to remove a positive quirk first!';
-          }
-
-          return undefined;
         };
 
+        const selectedCount = selectedQuirks.length;
+        const positiveCount = selectedQuirks.filter(
+          (k) => quirkInfo[k]?.value > 0,
+        ).length;
+        const negativeCount = selectedQuirks.filter(
+          (k) => quirkInfo[k]?.value < 0,
+        ).length;
+
         return (
-          <Stack align="center" fill>
-            <Stack.Item basis="50%">
-              <Stack vertical fill align="center">
-                <Stack.Item>
-                  <Box fontSize="1.3em">Edge Qualities</Box>
-                </Stack.Item>
+          <Box
+            style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
+          >
+            {/* Karma Panel */}
+            <KarmaPanel
+              karmaBalance={karmaBalance}
+              karmaFromPositives={karmaFromPositives}
+              karmaFromNegatives={karmaFromNegatives}
+              maxNegatives={MAX_KARMA_FROM_NEGATIVES}
+            />
 
-                <Stack.Item>
-                  <StatDisplay>
-                    {positiveQuirks} / {maxPositiveQuirks}
-                  </StatDisplay>
-                </Stack.Item>
-
-                <Stack.Item>
-                  <Box as="b" fontSize="1.6em">
-                    Available Qualities
-                  </Box>
-                </Stack.Item>
-
-                <Stack.Item grow width="100%">
-                  <QuirkList
-                    onClick={(quirkName, quirk) => {
-                      if (getReasonToNotAdd(quirkName) !== undefined) {
-                        return;
+            {/* Controls */}
+            <Stack align="center" mb={0.75}>
+              <Stack.Item grow>
+                <Input
+                  fluid
+                  placeholder="Search qualities..."
+                  value={filterText}
+                  onChange={(_, v) => setFilterText(v)}
+                />
+              </Stack.Item>
+              <Stack.Item ml={0.5}>
+                <Button
+                  icon="times"
+                  disabled={!filterText}
+                  onClick={() => setFilterText('')}
+                />
+              </Stack.Item>
+              <Stack.Item ml={0.5}>
+                <Button
+                  icon="trash"
+                  color="bad"
+                  disabled={selectedCount === 0}
+                  onClick={() => {
+                    for (const quirkName of selectedQuirks) {
+                      const quirk = quirkInfo[quirkName];
+                      if (quirk) {
+                        act('remove_quirk', { quirk: quirk.name });
                       }
+                    }
+                    setSelectedQuirks([]);
+                  }}
+                  tooltip="Remove all qualities"
+                >
+                  Clear All
+                </Button>
+              </Stack.Item>
+            </Stack>
 
-                      setSelectedQuirks(selectedQuirks.concat(quirkName));
+            {/* Tabs */}
+            <Tabs fluid mb={0.5}>
+              <Tabs.Tab
+                selected={activeTab === 'all'}
+                onClick={() => setActiveTab('all')}
+              >
+                <Icon name="list" mr={0.5} />
+                All ({allQualities.length})
+              </Tabs.Tab>
+              <Tabs.Tab
+                selected={activeTab === 'positive'}
+                onClick={() => setActiveTab('positive')}
+              >
+                <Icon name="plus-circle" color="#4caf50" mr={0.5} />
+                Positive ({positiveCount} selected)
+              </Tabs.Tab>
+              <Tabs.Tab
+                selected={activeTab === 'negative'}
+                onClick={() => setActiveTab('negative')}
+              >
+                <Icon name="minus-circle" color="#f44336" mr={0.5} />
+                Negative ({negativeCount} selected)
+              </Tabs.Tab>
+            </Tabs>
 
-                      act('give_quirk', { quirk: quirk.name });
-                    }}
-                    quirks={quirks
-                      .filter(([quirkName, _]) => {
-                        return selectedQuirks.indexOf(quirkName) === -1;
-                      })
-                      .map(([quirkName, quirk]) => {
-                        return [
-                          quirkName,
-                          {
-                            ...quirk,
-                            failTooltip: getReasonToNotAdd(quirkName),
-                          },
-                        ];
-                      })}
-                  />
-                </Stack.Item>
-              </Stack>
-            </Stack.Item>
+            {/* Info Banner */}
+            <Box
+              style={{
+                padding: '0.5rem 0.75rem',
+                background: 'rgba(155, 143, 199, 0.1)',
+                border: '1px solid rgba(155, 143, 199, 0.3)',
+                borderRadius: '4px',
+                marginBottom: '0.75rem',
+                fontSize: '0.8rem',
+              }}
+            >
+              <Icon name="info-circle" color="#9b8fc7" mr={0.5} />
+              <b>Positive qualities</b> cost karma. <b>Negative qualities</b>{' '}
+              give karma (max {MAX_KARMA_FROM_NEGATIVES}). Click to toggle.
+            </Box>
 
-            <Stack.Item>
-              <Icon name="exchange-alt" size={1.5} ml={2} mr={2} />
-            </Stack.Item>
+            {/* Quality List */}
+            <Box
+              style={{
+                flexGrow: '1',
+                overflowY: 'auto',
+                paddingRight: '0.5rem',
+              }}
+            >
+              {filteredQualities.length === 0 ? (
+                <Box
+                  style={{
+                    padding: '2rem',
+                    textAlign: 'center',
+                    opacity: '0.5',
+                    fontStyle: 'italic',
+                  }}
+                >
+                  <Icon name="search" size={2} />
+                  <Box mt={1}>No qualities match your search.</Box>
+                </Box>
+              ) : (
+                filteredQualities.map(([quirkKey, quirk]) => {
+                  const isSelected = selectedQuirks.includes(quirkKey);
+                  const reason = isSelected
+                    ? undefined
+                    : getReasonToNotAdd(quirkKey);
 
-            <Stack.Item basis="50%">
-              <Stack vertical fill align="center">
-                <Stack.Item>
-                  <Box fontSize="1.3em">Karma Balance</Box>
-                </Stack.Item>
+                  return (
+                    <QualityCard
+                      key={quirkKey}
+                      qualityKey={quirkKey}
+                      quality={{ ...quirk, failTooltip: reason }}
+                      isSelected={isSelected}
+                      disabled={!!reason}
+                      onClick={() => handleToggleQuality(quirkKey, quirk)}
+                    />
+                  );
+                })
+              )}
+            </Box>
 
-                <Stack.Item>
-                  <StatDisplay>{balance}</StatDisplay>
-                </Stack.Item>
-
-                <Stack.Item>
-                  <Box as="b" fontSize="1.6em">
-                    Active Qualities
-                  </Box>
-                </Stack.Item>
-
-                <Stack.Item grow width="100%">
-                  <QuirkList
-                    onClick={(quirkName, quirk) => {
-                      if (getReasonToNotRemove(quirkName) !== undefined) {
-                        return;
-                      }
-
-                      setSelectedQuirks(
-                        selectedQuirks.filter(
-                          (otherQuirk) => quirkName !== otherQuirk,
-                        ),
-                      );
-
-                      act('remove_quirk', { quirk: quirk.name });
-                    }}
-                    quirks={quirks
-                      .filter(([quirkName, _]) => {
-                        return selectedQuirks.indexOf(quirkName) !== -1;
-                      })
-                      .map(([quirkName, quirk]) => {
-                        return [
-                          quirkName,
-                          {
-                            ...quirk,
-                            failTooltip: getReasonToNotRemove(quirkName),
-                          },
-                        ];
-                      })}
-                  />
-                </Stack.Item>
-              </Stack>
-            </Stack.Item>
-          </Stack>
+            {/* Selected Summary */}
+            {selectedCount > 0 && (
+              <Box
+                style={{
+                  marginTop: '0.75rem',
+                  padding: '0.75rem',
+                  background: 'rgba(0, 0, 0, 0.3)',
+                  border: '1px solid rgba(155, 143, 199, 0.3)',
+                  borderRadius: '4px',
+                }}
+              >
+                <Box
+                  style={{
+                    fontWeight: 'bold',
+                    marginBottom: '0.5rem',
+                    fontSize: '0.9rem',
+                  }}
+                >
+                  <Icon name="check-double" mr={0.5} />
+                  Selected Qualities ({selectedCount})
+                </Box>
+                <Stack wrap>
+                  {selectedQuirks.map((quirkKey) => {
+                    const quirk = quirkInfo[quirkKey];
+                    if (!quirk) return null;
+                    const isPositive = quirk.value > 0;
+                    return (
+                      <Stack.Item key={quirkKey} mb={0.25} mr={0.25}>
+                        <Button
+                          compact
+                          icon="times"
+                          color={isPositive ? 'green' : 'red'}
+                          onClick={() => handleToggleQuality(quirkKey, quirk)}
+                        >
+                          {quirk.name} ({isPositive ? '-' : '+'}
+                          {Math.abs(quirk.value)})
+                        </Button>
+                      </Stack.Item>
+                    );
+                  })}
+                </Stack>
+              </Box>
+            )}
+          </Box>
         );
       }}
     />

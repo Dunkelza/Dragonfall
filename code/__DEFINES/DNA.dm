@@ -144,6 +144,17 @@
 #define ORGAN_SLOT_VOICE "vocal_cords"
 #define ORGAN_SLOT_ZOMBIE "zombie_infection"
 
+/// SR5 Bioware organ slots
+#define ORGAN_SLOT_MUSCLE_TONER "muscle_toner"
+#define ORGAN_SLOT_MUSCLE_AUG "muscle_augmentation"
+#define ORGAN_SLOT_SYNAPTIC "synaptic_booster"
+#define ORGAN_SLOT_CEREBRAL "cerebral_booster"
+#define ORGAN_SLOT_MNEMONIC "mnemonic_enhancer"
+#define ORGAN_SLOT_PLATELET "platelet_factories"
+#define ORGAN_SLOT_BONE_LACING "bone_lacing"
+#define ORGAN_SLOT_PHEROMONES "tailored_pheromones"
+#define ORGAN_SLOT_ARTICULATION "enhanced_articulation"
+
 /// Organ slot external
 #define ORGAN_SLOT_EXTERNAL_TAIL "tail"
 #define ORGAN_SLOT_EXTERNAL_SPINES "spines"

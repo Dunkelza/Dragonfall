@@ -409,6 +409,8 @@
 	icon_state = "tonguerobot"
 	// SR5: small augmentation.
 	essence_base_cost = 0.10
+	// SR5: Voice modulator costs 2,000¥.
+	nuyen_base_cost = 2000
 
 	tongue_say_verb = "whistles"
 	tongue_ask_verb = "chirps"

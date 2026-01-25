@@ -18,9 +18,8 @@ PROCESSING_SUBSYSTEM_DEF(quirks)
 
 	/// A list of quirks that can not be used with each other.
 	var/list/quirk_blacklist = list(
-		list(/datum/quirk/item_quirk/blindness, /datum/quirk/item_quirk/nearsighted),
-		list(/datum/quirk/no_taste, /datum/quirk/vegetarian, /datum/quirk/deviant_tastes),
-		list(/datum/quirk/alcohol_tolerance, /datum/quirk/light_drinker),
+		list(/datum/quirk/item_quirk/blind, /datum/quirk/item_quirk/nearsighted),
+		list(/datum/quirk/high_pain_tolerance, /datum/quirk/low_pain_tolerance),
 	)
 
 /datum/controller/subsystem/processing/quirks/Initialize(timeofday)

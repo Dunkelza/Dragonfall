@@ -1,5 +1,12 @@
+// =============================================================================
+// Shadowrun 5e Human Metatype
+// =============================================================================
+// Attribute Limits: All 1-6 (baseline)
+// Racial Abilities: None, but gains an extra Edge point at chargen
+// Priority: E (Human only) or D-A (Human with special attribute points)
+
 /datum/species/human
-	name = "\improper Minervan"
+	name = "\improper Human"
 	id = SPECIES_HUMAN
 	default_color = "FFFFFF"
 	species_traits = list(EYECOLOR, HAIR, FACEHAIR, LIPS, BODY_RESIZABLE, HAIRCOLOR, FACEHAIRCOLOR)
@@ -30,11 +37,12 @@
 	human.update_body_parts()
 
 /datum/species/human/get_species_mechanics()
-	return "Minervans possess no unique traits."
+	return "Humans are the baseline metatype with no special abilities, but they start with +1 Edge. All attributes 1-6."
 
 /datum/species/human/get_species_lore()
 	return list(
-		"Minervans. Adaptable, numerous, resiliant, and viral.",
+		"Humans. The most numerous metatype in the Sixth World, adaptable and resilient.",
+		"What they lack in natural advantages, they make up for in versatility and determination.",
 	)
 
 /datum/species/human/get_agony_sound(mob/living/carbon/human)
@@ -72,43 +80,4 @@
 		'sound/voice/human/wounded/female_moan_wounded3.ogg',
 		'sound/voice/human/wounded/female_moan_wounded4.ogg',
 		'sound/voice/human/wounded/female_moan_wounded5.ogg',
-	)
-
-/datum/species/elf
-	name = "\improper Elf"
-	id = SPECIES_ELF
-	default_color = "FFFFFF"
-	species_traits = list(EYECOLOR, HAIR, FACEHAIR, LIPS, BODY_RESIZABLE, HAIRCOLOR, FACEHAIRCOLOR)
-	inherent_traits = list(
-		TRAIT_ADVANCEDTOOLUSER,
-		TRAIT_CAN_STRIP,
-		TRAIT_CAN_USE_FLIGHT_POTION,
-	)
-	mutant_bodyparts = list("wings" = "None")
-	use_skintones = 1
-	skinned_type = /obj/item/stack/sheet/animalhide/human
-	disliked_food = GROSS | RAW | CLOTH
-	liked_food = JUNKFOOD | FRIED
-	changesource_flags = MIRROR_BADMIN | WABBAJACK | MIRROR_MAGIC | MIRROR_PRIDE | ERT_SPAWN | RACE_SWAP | SLIME_EXTRACT
-	job_outfit_type = SPECIES_HUMAN
-
-/datum/species/elf/on_species_gain(mob/living/carbon/C, datum/species/old_species, pref_load)
-	ADD_TRAIT(C, TRAIT_ADVANCED_RACE_THEORY, SPECIES_TRAIT)
-	return ..()
-
-/datum/species/elf/on_species_loss(mob/living/carbon/human/C, datum/species/new_species, pref_load)
-	REMOVE_TRAIT(C, TRAIT_ADVANCED_RACE_THEORY, SPECIES_TRAIT)
-	return ..()
-
-/datum/species/elf/prepare_human_for_preview(mob/living/carbon/human/human)
-	human.hairstyle = "Business Hair"
-	human.hair_color = "#bb9966" // brown
-	human.update_body_parts()
-
-/datum/species/elf/get_species_mechanics()
-	return "Elves are lithe and charismatic, with slightly broader attribute limits."
-
-/datum/species/elf/get_species_lore()
-	return list(
-		"Elves. Graceful, sharp-eyed, and socially adept.",
 	)

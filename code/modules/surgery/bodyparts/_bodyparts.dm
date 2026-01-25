@@ -45,6 +45,11 @@
 	var/essence_cost = 0
 	var/essence_base_cost = 0
 	var/essence_grade_multiplier = 1.0
+	/// SR5: Nuyen cost for chargen purchasing.
+	/// If `nuyen_base_cost` is set, `nuyen_cost` is derived as base×multiplier in Initialize().
+	var/nuyen_cost = 0
+	var/nuyen_base_cost = 0
+	var/nuyen_grade_multiplier = 1.0
 	///Defines when a bodypart should not be changed. Example: BP_BLOCK_CHANGE_SPECIES prevents the limb from being overwritten on species gain
 	var/change_exempt_flags
 
@@ -236,6 +241,8 @@
 
 	if(essence_base_cost)
 		essence_cost = round(essence_base_cost * essence_grade_multiplier, 0.01)
+	if(nuyen_base_cost)
+		nuyen_cost = round(nuyen_base_cost * nuyen_grade_multiplier, 1)
 
 	if(can_be_disabled)
 		RegisterSignal(src, SIGNAL_ADDTRAIT(TRAIT_PARALYSIS), PROC_REF(on_paralysis_trait_gain))

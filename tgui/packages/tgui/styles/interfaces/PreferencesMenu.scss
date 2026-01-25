@@ -1149,7 +1149,7 @@ $sr-gold: #caa53d;
     background: linear-gradient(
       135deg,
       rgba($sr-physical-color, 0.7),
-      rgba(darken($sr-physical-color, 15%), 0.8)
+      rgba(color.adjust($sr-physical-color, $lightness: -15%), 0.8)
     ) !important;
     border-color: rgba($sr-physical-color, 0.5) !important;
     color: #fff !important;
@@ -1157,10 +1157,13 @@ $sr-gold: #caa53d;
     &:hover:not(.Button--disabled) {
       background: linear-gradient(
         135deg,
-        rgba(lighten($sr-physical-color, 10%), 0.8),
+        rgba(color.adjust($sr-physical-color, $lightness: 10%), 0.8),
         rgba($sr-physical-color, 0.8)
       ) !important;
-      border-color: rgba(lighten($sr-physical-color, 20%), 0.6) !important;
+      border-color: rgba(
+        color.adjust($sr-physical-color, $lightness: 20%),
+        0.6
+      ) !important;
       box-shadow: 0 0 12px rgba($sr-physical-color, 0.4) !important;
     }
   }
@@ -1577,6 +1580,410 @@ $sr-gold: #caa53d;
         font-family: 'Jost', sans-serif;
         font-size: 0.75em;
         color: #ff9800;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// SKILLS SECTION - Integrated into main sheet
+// ============================================================================
+.PreferencesMenu__ShadowrunSheet__skillsSection {
+  background: rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba($sr-physical-color, 0.4);
+  padding: 1rem;
+  margin-top: 1rem;
+  animation: sr-fadeIn 0.3s ease;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba($sr-physical-color, 0.3);
+
+    &__title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.03em;
+      color: $sr-physical-color;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    &__points {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.9rem;
+
+      &__item {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.6rem;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 3px;
+
+        &__label {
+          opacity: 0.8;
+          font-size: 0.85rem;
+        }
+
+        &__value {
+          font-weight: 700;
+          color: $sr-physical-color;
+        }
+
+        &--warning &__value {
+          color: #ff9800;
+        }
+
+        &--danger &__value {
+          color: #f44336;
+        }
+      }
+    }
+  }
+
+  &__groups {
+    margin-bottom: 1rem;
+
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0.6rem;
+      background: linear-gradient(
+        135deg,
+        rgba($sr-mental-color, 0.15),
+        transparent
+      );
+      border-left: 3px solid $sr-mental-color;
+      margin-bottom: 0.5rem;
+      font-family: 'Libre Baskerville', serif;
+      font-size: 0.95rem;
+    }
+
+    &__list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.5rem;
+    }
+
+    &__item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.7rem;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 3px solid rgba($sr-mental-color, 0.5);
+      transition: all 0.15s ease;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: rgba($sr-mental-color, 0.4);
+      }
+
+      &__name {
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+
+      &__controls {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+      }
+
+      &__rating {
+        min-width: 2rem;
+        text-align: center;
+        font-weight: 700;
+        font-size: 1rem;
+      }
+    }
+
+    &__members {
+      margin-top: 0.5rem;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.15);
+      border-left: 2px solid rgba($sr-mental-color, 0.3);
+
+      &__skill {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.85rem;
+
+        &__icon {
+          color: #ff9800;
+          font-size: 0.75rem;
+        }
+
+        &__name {
+          opacity: 0.9;
+        }
+
+        &__rating {
+          margin-left: auto;
+          font-weight: 600;
+        }
+      }
+    }
+  }
+
+  &__individual {
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0.6rem;
+      background: linear-gradient(
+        135deg,
+        rgba($sr-physical-color, 0.15),
+        transparent
+      );
+      border-left: 3px solid $sr-physical-color;
+      margin-bottom: 0.5rem;
+      font-family: 'Libre Baskerville', serif;
+      font-size: 0.95rem;
+    }
+
+    &__tabs {
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+      padding: 0.5rem;
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 3px;
+    }
+
+    &__tab {
+      padding: 0.35rem 0.7rem;
+      font-size: 0.85rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      font-family: 'Jost', sans-serif;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      &--active {
+        background: rgba($sr-physical-color, 0.25);
+        border-color: rgba($sr-physical-color, 0.6);
+        color: $sr-physical-color;
+      }
+    }
+
+    &__list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.4rem;
+      max-height: 25rem;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: rgba($sr-physical-color, 0.4);
+        border-radius: 3px;
+
+        &:hover {
+          background: rgba($sr-physical-color, 0.6);
+        }
+      }
+    }
+
+    &__skill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 0.6rem;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 3px solid rgba($sr-physical-color, 0.4);
+      transition: all 0.15s ease;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.3);
+        border-color: rgba($sr-physical-color, 0.3);
+      }
+
+      &--locked {
+        border-left-color: #ff9800;
+        background: rgba(255, 152, 0, 0.08);
+
+        .PreferencesMenu__ShadowrunSheet__skillsSection__individual__skill__name {
+          opacity: 0.7;
+        }
+      }
+
+      &__name {
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+
+        &__lockIcon {
+          color: #ff9800;
+          font-size: 0.75rem;
+        }
+      }
+
+      &__controls {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+      }
+
+      &__rating {
+        min-width: 1.5rem;
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+    }
+  }
+}
+
+// ============================================================================
+// KNOWLEDGE SKILLS SECTION - Enhanced styling
+// ============================================================================
+.PreferencesMenu__ShadowrunSheet__knowledgeSkills {
+  background: rgba(0, 0, 0, 0.25);
+  border: 2px solid rgba($sr-mental-color, 0.4);
+  padding: 1rem;
+  margin-top: 1rem;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba($sr-mental-color, 0.3);
+
+    &__title {
+      font-family: 'Libre Baskerville', serif;
+      font-size: 1.1rem;
+      letter-spacing: 0.03em;
+      color: $sr-mental-color;
+    }
+
+    &__points {
+      font-size: 0.9rem;
+      padding: 0.25rem 0.6rem;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba($sr-mental-color, 0.4);
+      border-radius: 3px;
+
+      &__value {
+        font-weight: 700;
+        color: $sr-mental-color;
+      }
+    }
+  }
+
+  &__category {
+    margin-bottom: 1rem;
+
+    &__header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.5rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-left: 3px solid rgba($sr-mental-color, 0.5);
+      margin-bottom: 0.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+
+      &__hint {
+        margin-left: auto;
+        font-size: 0.8rem;
+        font-weight: 400;
+        opacity: 0.7;
+        font-style: italic;
+      }
+    }
+
+    &__list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 0.4rem;
+      max-height: 12rem;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: rgba($sr-mental-color, 0.4);
+        border-radius: 3px;
+
+        &:hover {
+          background: rgba($sr-mental-color, 0.6);
+        }
+      }
+    }
+
+    &__item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.4rem 0.6rem;
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-left: 2px solid rgba($sr-mental-color, 0.4);
+      transition: all 0.15s ease;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.25);
+      }
+
+      &__name {
+        font-size: 0.9rem;
+      }
+
+      &__controls {
+        display: flex;
+        align-items: center;
+        gap: 0.2rem;
+      }
+
+      &__rating {
+        min-width: 1.5rem;
+        text-align: center;
+        font-weight: 700;
+        font-size: 0.95rem;
       }
     }
   }

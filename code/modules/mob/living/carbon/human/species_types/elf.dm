@@ -1,3 +1,10 @@
+// =============================================================================
+// Shadowrun 5e Elf Metatype
+// =============================================================================
+// Attribute Limits: BOD 1-6, AGI 2-7, REA 1-6, STR 1-6, WIL 1-6, LOG 1-6, INT 1-6, CHA 3-8
+// Racial Abilities: Low-Light Vision
+// Priority: D or higher
+
 /datum/species/elf
 	name = "\improper Elf"
 	id = SPECIES_ELF
@@ -30,9 +37,10 @@
 	human.update_body_parts()
 
 /datum/species/elf/get_species_mechanics()
-	return "Elves are lithe and charismatic, with slightly broader attribute limits."
+	return "Elves are graceful and charismatic with low-light vision. AGI 2-7, CHA 3-8, but otherwise standard attribute limits."
 
 /datum/species/elf/get_species_lore()
 	return list(
-		"Elves. Graceful, sharp-eyed, and socially adept.",
+		"Elves. The first metatype to emerge during the Awakening, known for their grace and charisma.",
+		"Their low-light vision allows them to see in dim conditions with ease.",
 	)

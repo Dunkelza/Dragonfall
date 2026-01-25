@@ -19,13 +19,16 @@
 	return /datum/species/human
 
 /datum/preference/choiced/species/create_random_value(datum/preferences/preferences)
-	// For now, allow testing with Human and Elf.
-	return pick(/datum/species/human, /datum/species/elf)
+	// SR5 Metatypes: Human, Elf, Dwarf, Ork, Troll
+	return pick(/datum/species/human, /datum/species/elf, /datum/species/dwarf, /datum/species/ork, /datum/species/troll)
 
 /datum/preference/choiced/species/init_possible_values()
 	var/list/values = list()
 	values += /datum/species/human
 	values += /datum/species/elf
+	values += /datum/species/dwarf
+	values += /datum/species/ork
+	values += /datum/species/troll
 	return values
 
 /datum/preference/choiced/species/compile_constant_data()

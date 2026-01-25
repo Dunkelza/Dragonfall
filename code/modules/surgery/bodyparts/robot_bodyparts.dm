@@ -18,6 +18,8 @@ TYPEINFO_DEF(/obj/item/bodypart/arm/left/robot)
 	desc = "A skeletal limb wrapped in pseudomuscles, with a low-conductivity case."
 	limb_id = BODYPART_ID_ROBOTIC
 	essence_base_cost = 1.0
+	// SR5: Cyberlimbs cost 15,000¥ at Standard grade.
+	nuyen_base_cost = 15000
 	attack_verb_simple = list("slapped", "punched")
 	inhand_icon_state = "buildpipe"
 	icon = 'icons/mob/augmentation/augments.dmi'
@@ -43,14 +45,17 @@ TYPEINFO_DEF(/obj/item/bodypart/arm/left/robot)
 /obj/item/bodypart/arm/left/robot/tier2
 	name = "alpha-grade cyborg left arm"
 	essence_grade_multiplier = 0.8
+	nuyen_grade_multiplier = 2.0
 
 /obj/item/bodypart/arm/left/robot/tier3
 	name = "beta-grade cyborg left arm"
 	essence_grade_multiplier = 0.7
+	nuyen_grade_multiplier = 4.0
 
 /obj/item/bodypart/arm/left/robot/tier4
 	name = "delta-grade cyborg left arm"
 	essence_grade_multiplier = 0.5
+	nuyen_grade_multiplier = 10.0
 
 TYPEINFO_DEF(/obj/item/bodypart/arm/right/robot)
 	default_armor = list(BLUNT = 5, PUNCTURE = 5, SLASH = 0, LASER = 5, ENERGY = 0, BOMB = 0, BIO = 100, FIRE = 5, ACID = 10)
@@ -64,6 +69,8 @@ TYPEINFO_DEF(/obj/item/bodypart/arm/right/robot)
 	icon = 'icons/mob/augmentation/augments.dmi'
 	limb_id = BODYPART_ID_ROBOTIC
 	essence_base_cost = 1.0
+	// SR5: Cyberlimbs cost 15,000¥ at Standard grade.
+	nuyen_base_cost = 15000
 	flags_1 = CONDUCT_1
 	icon_state = "borg_r_arm"
 	is_dimorphic = FALSE
@@ -85,14 +92,17 @@ TYPEINFO_DEF(/obj/item/bodypart/arm/right/robot)
 /obj/item/bodypart/arm/right/robot/tier2
 	name = "alpha-grade cyborg right arm"
 	essence_grade_multiplier = 0.8
+	nuyen_grade_multiplier = 2.0
 
 /obj/item/bodypart/arm/right/robot/tier3
 	name = "beta-grade cyborg right arm"
 	essence_grade_multiplier = 0.7
+	nuyen_grade_multiplier = 4.0
 
 /obj/item/bodypart/arm/right/robot/tier4
 	name = "delta-grade cyborg right arm"
 	essence_grade_multiplier = 0.5
+	nuyen_grade_multiplier = 10.0
 
 TYPEINFO_DEF(/obj/item/bodypart/leg/left/robot)
 	default_armor = list(BLUNT = 5, PUNCTURE = 5, SLASH = 0, LASER = 5, ENERGY = 0, BOMB = 0, BIO = 100, FIRE = 5, ACID = 10)
@@ -106,6 +116,8 @@ TYPEINFO_DEF(/obj/item/bodypart/leg/left/robot)
 	icon = 'icons/mob/augmentation/augments.dmi'
 	limb_id = BODYPART_ID_ROBOTIC
 	essence_base_cost = 1.0
+	// SR5: Cyberlimbs cost 15,000¥ at Standard grade.
+	nuyen_base_cost = 15000
 	flags_1 = CONDUCT_1
 	icon_state = "borg_l_leg"
 	is_dimorphic = FALSE
@@ -127,14 +139,17 @@ TYPEINFO_DEF(/obj/item/bodypart/leg/left/robot)
 /obj/item/bodypart/leg/left/robot/tier2
 	name = "alpha-grade cyborg left leg"
 	essence_grade_multiplier = 0.8
+	nuyen_grade_multiplier = 2.0
 
 /obj/item/bodypart/leg/left/robot/tier3
 	name = "beta-grade cyborg left leg"
 	essence_grade_multiplier = 0.7
+	nuyen_grade_multiplier = 4.0
 
 /obj/item/bodypart/leg/left/robot/tier4
 	name = "delta-grade cyborg left leg"
 	essence_grade_multiplier = 0.5
+	nuyen_grade_multiplier = 10.0
 
 TYPEINFO_DEF(/obj/item/bodypart/leg/right/robot)
 	default_armor = list(BLUNT = 5, PUNCTURE = 5, SLASH = 0, LASER = 5, ENERGY = 0, BOMB = 0, BIO = 100, FIRE = 5, ACID = 10)
@@ -148,6 +163,8 @@ TYPEINFO_DEF(/obj/item/bodypart/leg/right/robot)
 	icon = 'icons/mob/augmentation/augments.dmi'
 	limb_id = BODYPART_ID_ROBOTIC
 	essence_base_cost = 1.0
+	// SR5: Cyberlimbs cost 15,000¥ at Standard grade.
+	nuyen_base_cost = 15000
 	flags_1 = CONDUCT_1
 	icon_state = "borg_r_leg"
 	is_dimorphic = FALSE
@@ -169,14 +186,17 @@ TYPEINFO_DEF(/obj/item/bodypart/leg/right/robot)
 /obj/item/bodypart/leg/right/robot/tier2
 	name = "alpha-grade cyborg right leg"
 	essence_grade_multiplier = 0.8
+	nuyen_grade_multiplier = 2.0
 
 /obj/item/bodypart/leg/right/robot/tier3
 	name = "beta-grade cyborg right leg"
 	essence_grade_multiplier = 0.7
+	nuyen_grade_multiplier = 4.0
 
 /obj/item/bodypart/leg/right/robot/tier4
 	name = "delta-grade cyborg right leg"
 	essence_grade_multiplier = 0.5
+	nuyen_grade_multiplier = 10.0
 
 TYPEINFO_DEF(/obj/item/bodypart/chest/robot)
 	default_armor = list(BLUNT = 5, PUNCTURE = 5, SLASH = 0, LASER = 5, ENERGY = 0, BOMB = 0, BIO = 100, FIRE = 5, ACID = 10)
@@ -185,6 +205,8 @@ TYPEINFO_DEF(/obj/item/bodypart/chest/robot)
 	name = "cyborg torso"
 	desc = "A heavily reinforced case containing cyborg logic boards, with space for a standard power cell."
 	essence_base_cost = 1.5
+	// SR5: Cybertorso costs 20,000¥ at Standard grade (more complex than limbs).
+	nuyen_base_cost = 20000
 	inhand_icon_state = "buildpipe"
 	icon_static =  'icons/mob/augmentation/augments.dmi'
 	icon = 'icons/mob/augmentation/augments.dmi'
@@ -299,6 +321,8 @@ TYPEINFO_DEF(/obj/item/bodypart/head/robot)
 	name = "cyborg head"
 	desc = "A standard reinforced braincase, with spine-plugged neural socket and sensor gimbals."
 	essence_base_cost = 0.75
+	// SR5: Cyberhead costs 10,000¥ at Standard grade.
+	nuyen_base_cost = 10000
 	inhand_icon_state = "buildpipe"
 	icon_static = 'icons/mob/augmentation/augments.dmi'
 	icon = 'icons/mob/augmentation/augments.dmi'

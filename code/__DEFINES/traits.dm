@@ -367,6 +367,10 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_GAMERGOD "gamer-god"
 #define TRAIT_GIANT "giant"
 #define TRAIT_DWARF "dwarf"
+/// Shadowrun Ork metatype trait
+#define TRAIT_ORK "ork"
+/// Shadowrun Troll metatype trait
+#define TRAIT_TROLL "troll"
 /// makes your footsteps completely silent
 #define TRAIT_SILENT_FOOTSTEPS "silent_footsteps"
 /// hnnnnnnnggggg..... you're pretty good....
@@ -663,6 +667,38 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_SMOKER "smoker"
 /// Gives you the Shifty Eyes quirk, rarely making people who examine you think you examined them back even when you didn't
 #define TRAIT_SHIFTY_EYES "shifty_eyes"
+
+// Shadowrun 5e Positive Quality Traits
+#define TRAIT_AMBIDEXTROUS "ambidextrous"
+#define TRAIT_ANALYTICAL_MIND "analytical_mind"
+#define TRAIT_CATLIKE "catlike"
+#define TRAIT_HIGH_PAIN_TOLERANCE "high_pain_tolerance"
+#define TRAIT_ATHLETE "athlete"
+#define TRAIT_QUICK_HEALER "quick_healer"
+#define TRAIT_TOUGHNESS "toughness"
+#define TRAIT_WILL_TO_LIVE "will_to_live"
+#define TRAIT_BIOCOMPATIBLE "biocompatible"
+#define TRAIT_PERFECT_TIME "perfect_time"
+#define TRAIT_PHOTOGRAPHIC_MEMORY "photographic_memory"
+#define TRAIT_TOXIN_RESISTANT "toxin_resistant"
+#define TRAIT_FIRST_AID "first_aid"
+
+// Shadowrun 5e Negative Quality Traits
+#define TRAIT_BAD_LUCK "bad_luck"
+#define TRAIT_COMBAT_PARALYSIS "combat_paralysis"
+#define TRAIT_DISTINCTIVE "distinctive"
+#define TRAIT_GREMLINS "gremlins"
+#define TRAIT_INCOMPETENT "incompetent"
+#define TRAIT_INSOMNIA "insomnia"
+#define TRAIT_LOW_PAIN_TOLERANCE "low_pain_tolerance"
+#define TRAIT_PREJUDICED "prejudiced"
+#define TRAIT_SIMSENSE_VERTIGO "simsense_vertigo"
+#define TRAIT_SINNER "sinner"
+#define TRAIT_SOCIAL_ANXIETY "social_anxiety"
+#define TRAIT_SPIRIT_BANE "spirit_bane"
+#define TRAIT_UNCOUTH "uncouth"
+#define TRAIT_UNSTEADY_HANDS "unsteady_hands"
+#define TRAIT_WEAK_IMMUNE "weak_immune"
 
 ///Trait for dryable items
 #define TRAIT_DRYABLE "trait_dryable"

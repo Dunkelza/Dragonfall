@@ -28,7 +28,7 @@
 				"description" = initial(quirk_type.desc),
 				"icon" = icon,
 				"name" = quirk_name,
-				"value" = initial(quirk_type.quirk_genre),
+				"value" = initial(quirk_type.karma_value),
 			)
 
 		for (var/list/blacklist as anything in SSquirks.quirk_blacklist)

@@ -3,16 +3,31 @@
 /datum/preference_middleware/species/get_constant_data()
 	var/list/species_data = list()
 
-	// For now, allow testing with Human and Elf only.
-	for (var/species_path in list(/datum/species/human, /datum/species/elf))
+	// SR5 Metatypes: Human, Elf, Dwarf, Ork, Troll
+	var/list/sr5_metatypes = list(
+		/datum/species/human,
+		/datum/species/elf,
+		/datum/species/dwarf,
+		/datum/species/ork,
+		/datum/species/troll
+	)
+
+	for (var/species_path in sr5_metatypes)
 		var/datum/species/species = new species_path
 		var/species_id = initial(species.id)
 
 		var/display_name = initial(species.name)
-		if (species_path == /datum/species/human)
-			display_name = "Human"
-		else if (species_path == /datum/species/elf)
-			display_name = "Elf"
+		switch(species_path)
+			if (/datum/species/human)
+				display_name = "Human"
+			if (/datum/species/elf)
+				display_name = "Elf"
+			if (/datum/species/dwarf)
+				display_name = "Dwarf"
+			if (/datum/species/ork)
+				display_name = "Ork"
+			if (/datum/species/troll)
+				display_name = "Troll"
 
 		var/list/enabled_features = list()
 		var/list/features = species.get_features()

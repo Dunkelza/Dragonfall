@@ -418,12 +418,16 @@
 	organ_flags = ORGAN_SYNTHETIC
 	// SR5: significant but less than full-body conversions.
 	essence_base_cost = 0.30
+	// SR5: Cyberlungs cost 8,000¥ at Standard grade.
+	nuyen_base_cost = 8000
 
 	var/emp_vulnerability = 80 //Chance of permanent effects if emp-ed.
 
 /obj/item/organ/lungs/cybernetic/tier2
 	// SR5: upgraded model (higher grade) costs less Essence than the basic.
 	essence_grade_multiplier = 0.8
+	// SR5: Alpha-grade costs 2x the nuyen.
+	nuyen_grade_multiplier = 2.0
 	name = "cybernetic lungs"
 	desc = "A cybernetic version of the lungs found in traditional humanoid entities. Allows for greater intakes of oxygen than organic lungs, requiring slightly less pressure."
 	icon_state = "lungs-c-u"
@@ -434,6 +438,8 @@
 /obj/item/organ/lungs/cybernetic/tier3
 	// SR5: further-upgraded model (higher grade again) costs even less Essence.
 	essence_grade_multiplier = 0.7
+	// SR5: Beta-grade costs 4x the nuyen.
+	nuyen_grade_multiplier = 4.0
 	name = "upgraded cybernetic lungs"
 	desc = "A more advanced version of the stock cybernetic lungs. Features the ability to filter out lower levels of plasma and carbon dioxide."
 	icon_state = "lungs-c-u2"

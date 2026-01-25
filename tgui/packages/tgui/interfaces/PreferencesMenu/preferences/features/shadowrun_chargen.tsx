@@ -10,6 +10,7 @@ type PriorityLetter = 'A' | 'B' | 'C' | 'D' | 'E';
 
 type SRChargenState = {
   attributes?: Record<string, number>;
+  augments?: Record<string, string>;
   awakening?: string;
   metatype_species?: string;
   priorities?: Record<string, PriorityLetter>;
@@ -28,6 +29,38 @@ type SRChargenConstantData = {
     name: string;
     sort: number;
   }[];
+  augment_categories?: Record<
+    string,
+    {
+      description: string;
+      icon: string;
+      name: string;
+    }
+  >;
+  augments?: Record<
+    string,
+    {
+      category: string;
+      description: string;
+      essence_cost: number;
+      id: string;
+      name: string;
+      path: string;
+      slot: string;
+    }
+  >;
+  augments_by_category?: Record<
+    string,
+    {
+      category: string;
+      description: string;
+      essence_cost: number;
+      id: string;
+      name: string;
+      path: string;
+      slot: string;
+    }[]
+  >;
   awakening_choices?: {
     id: string;
     name: string;

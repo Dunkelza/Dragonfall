@@ -47,6 +47,11 @@
 
 	var/damage = attacking_item.force
 
+	// SR5: Off-hand penalty - using non-dominant hand reduces melee damage
+	if(ishuman(attacker))
+		var/mob/living/carbon/human/human_attacker = attacker
+		damage *= human_attacker.get_offhand_damage_multiplier()
+
 	if(attacker != src)
 		// This doesn't factor in armor, or most damage modifiers (physiology). Your mileage may vary
 		if(check_block(attacking_item, damage, "[attacking_item]", MELEE_ATTACK, attacking_item.armor_penetration, attacking_item.damtype))
