@@ -38,3 +38,21 @@
 #define AUGMENT_CATEGORY_IMPLANTS "Implants"
 #define AUGMENT_SLOT_IMPLANTS "Code Reasons"
 
+//Geneware - Genetic modifications
+#define AUGMENT_CATEGORY_GENEWARE	"Geneware"
+#define AUGMENT_SLOT_GENE_ATTRIBUTE	"Genetic Optimization"
+#define AUGMENT_SLOT_GENE_SENSE		"Sensory Enhancement"
+#define AUGMENT_SLOT_GENE_IMMUNE	"Immune System"
+#define AUGMENT_SLOT_GENE_METABOLIC	"Metabolic Enhancement"
+#define AUGMENT_SLOT_GENE_COSMETIC	"Genetic Cosmetics"
+#define AUGMENT_SLOT_GENE_REGENERATION	"Regeneration"
+
+//Nanoware - Nanite-based augmentations
+#define AUGMENT_CATEGORY_NANOWARE	"Nanoware"
+#define AUGMENT_SLOT_NANO_HIVE		"Nanohive System"
+#define AUGMENT_SLOT_NANO_BLOOD		"Blood Nanites"
+#define AUGMENT_SLOT_NANO_BONE		"Bone Nanites"
+#define AUGMENT_SLOT_NANO_NEURAL	"Neural Nanites"
+#define AUGMENT_SLOT_NANO_SKIN		"Dermal Nanites"
+#define AUGMENT_SLOT_NANO_SOFT		"Soft Nanites"
+

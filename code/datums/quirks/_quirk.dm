@@ -24,6 +24,20 @@
 	/// This references a tgui icon, so it can be FontAwesome or a tgfont (with a tg- prefix).
 	var/icon
 
+	// === SR5 Prerequisites ===
+	/// List of metatype paths that CAN take this quality. Empty = all metatypes allowed.
+	var/list/allowed_metatypes = null
+	/// List of metatype paths that CANNOT take this quality. Empty = no restrictions.
+	var/list/forbidden_metatypes = null
+	/// Required awakening type(s): "mundane", "mage", "adept", "mystic_adept", "technomancer". Empty = no requirement.
+	var/list/required_awakening = null
+	/// Forbidden awakening type(s). Empty = no restriction.
+	var/list/forbidden_awakening = null
+	/// List of other quirk names that must be taken first.
+	var/list/required_quirks = null
+	/// List of quirk names that cannot be taken with this one (mutual exclusion).
+	var/list/incompatible_quirks = null
+
 /datum/quirk/Destroy()
 	if(quirk_holder)
 		remove_from_current_holder()

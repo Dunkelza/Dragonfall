@@ -237,3 +237,100 @@
 	give_item_to_holder(/obj/item/storage/medkit/regular, list(LOCATION_BACKPACK = ITEM_SLOT_BACKPACK, LOCATION_HANDS = ITEM_SLOT_HANDS))
 
 // TRAIT_FIRST_AID is checked in medical item code to boost healing effectiveness
+
+// ============================================================================
+// METATYPE-SPECIFIC QUALITIES
+// ============================================================================
+
+/datum/quirk/thermographic_vision
+	name = "Thermographic Vision"
+	desc = "You can see heat signatures, allowing vision in darkness. Standard for Dwarves, Orks, and Trolls."
+	icon = "eye"
+	quirk_genre = QUIRK_GENRE_BOON
+	karma_value = 0 // Free for applicable metatypes
+	mob_trait = TRAIT_THERMOGRAPHIC
+	allowed_metatypes = list(/datum/species/dwarf, /datum/species/ork, /datum/species/troll)
+	gain_text = "<span class='notice'>The world glows with heat signatures.</span>"
+	lose_text = "<span class='notice'>Your thermal vision fades to normal.</span>"
+	medical_record_text = "Patient has natural thermographic vision capability."
+
+/datum/quirk/low_light_vision
+	name = "Low-Light Vision"
+	desc = "You can see clearly in low-light conditions. Standard for Elves and Dwarves."
+	icon = "moon"
+	quirk_genre = QUIRK_GENRE_BOON
+	karma_value = 0 // Free for applicable metatypes
+	mob_trait = TRAIT_LOW_LIGHT
+	allowed_metatypes = list(/datum/species/elf, /datum/species/dwarf)
+	gain_text = "<span class='notice'>Darkness becomes less of an obstacle.</span>"
+	lose_text = "<span class='notice'>Your enhanced night vision fades.</span>"
+	medical_record_text = "Patient has natural low-light vision capability."
+
+/datum/quirk/dermal_deposits
+	name = "Dermal Deposits"
+	desc = "Your skin has natural bone-like armor deposits. +5% damage reduction. Troll only."
+	icon = "shield"
+	quirk_genre = QUIRK_GENRE_BOON
+	karma_value = 0 // Free for trolls
+	allowed_metatypes = list(/datum/species/troll)
+	gain_text = "<span class='notice'>Your thick hide feels even more protective.</span>"
+	lose_text = "<span class='notice'>Your dermal armor softens.</span>"
+	medical_record_text = "Patient has pronounced dermal bone deposits."
+
+/datum/quirk/dermal_deposits/add()
+	var/mob/living/carbon/human/H = quirk_holder
+	if(!istype(H) || !H.physiology)
+		return
+	H.physiology.damage_resistance += 5 // 5% flat damage reduction
+
+/datum/quirk/dermal_deposits/remove()
+	var/mob/living/carbon/human/H = quirk_holder
+	if(!istype(H) || !H.physiology)
+		return
+	H.physiology.damage_resistance -= 5
+
+/datum/quirk/reach
+	name = "Reach"
+	desc = "Your long arms give you extended melee range. Troll only."
+	icon = "arrows-alt-h"
+	quirk_genre = QUIRK_GENRE_BOON
+	karma_value = 0 // Free for trolls
+	mob_trait = TRAIT_REACH
+	allowed_metatypes = list(/datum/species/troll)
+	gain_text = "<span class='notice'>Your long arms give you an advantage in melee.</span>"
+	lose_text = "<span class='notice'>Your reach returns to normal.</span>"
+	medical_record_text = "Patient has extended limb proportions."
+
+/datum/quirk/toxin_resistance
+	name = "Toxin Resistance (Racial)"
+	desc = "Dwarves have natural resistance to toxins and pathogens. 25% reduction in toxin damage."
+	icon = "flask-vial"
+	quirk_genre = QUIRK_GENRE_BOON
+	karma_value = 0 // Free for dwarves
+	mob_trait = TRAIT_DWARF_TOXIN_RESIST
+	allowed_metatypes = list(/datum/species/dwarf)
+	gain_text = "<span class='notice'>Your dwarven constitution protects you from poisons.</span>"
+	lose_text = "<span class='notice'>Your natural toxin resistance fades.</span>"
+	medical_record_text = "Patient has enhanced toxin resistance (dwarven physiology)."
+
+/datum/quirk/toxin_resistance/add()
+	RegisterSignal(quirk_holder, COMSIG_MOB_APPLY_DAMAGE_MODIFIERS, PROC_REF(dwarf_toxin_resistance))
+
+/datum/quirk/toxin_resistance/remove()
+	UnregisterSignal(quirk_holder, COMSIG_MOB_APPLY_DAMAGE_MODIFIERS)
+
+/datum/quirk/toxin_resistance/proc/dwarf_toxin_resistance(datum/source, list/damage_mods, damage_amount, damagetype, def_zone, sharpness, attack_direction, obj/item/attacking_item)
+	SIGNAL_HANDLER
+	if(damagetype == TOX)
+		damage_mods += 0.75 // 25% toxin damage reduction
+
+/datum/quirk/human_edge
+	name = "Human Adaptability"
+	desc = "Humans have unmatched adaptability. You gain +1 Edge at character creation."
+	icon = "star"
+	quirk_genre = QUIRK_GENRE_BOON
+	karma_value = 0 // Free for humans
+	allowed_metatypes = list(/datum/species/human)
+	gain_text = "<span class='notice'>Your human adaptability shines through.</span>"
+	lose_text = "<span class='notice'>Your exceptional luck fades.</span>"
+	medical_record_text = "Patient demonstrates remarkable human adaptability."

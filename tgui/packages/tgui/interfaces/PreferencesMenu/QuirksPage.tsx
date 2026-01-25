@@ -26,8 +26,9 @@ const QualityCard = (props: {
   qualityKey: string;
 }) => {
   const { quality, qualityKey, isSelected, onClick, disabled } = props;
-  const isPositive = quality.value > 0;
-  const isNegative = quality.value < 0;
+  // Server sends: negative values = positive qualities (cost karma), positive values = negative qualities (give karma)
+  const isPositive = quality.value < 0;
+  const isNegative = quality.value > 0;
 
   const borderColor = isSelected
     ? isPositive
@@ -289,14 +290,27 @@ const KarmaPanel = (props: {
   );
 };
 
-export const QuirksPage = () => {
+// Props for chargen context (metatype and awakening status)
+type QuirksPageProps = {
+  awakening?: string;
+  metatype?: string;
+};
+
+export const QuirksPage = (props: QuirksPageProps = {}) => {
   const { act, data } = useBackend<PreferencesMenuData>();
+
+  // Get chargen context from props or from preferences data
+  const chargenState =
+    (data.character_preferences?.secondary_features?.[
+      'shadowrun_chargen'
+    ] as any) || {};
+  const metatype = props.metatype || chargenState.metatype_species || '';
+  const awakening = props.awakening || chargenState.awakening || 'mundane';
 
   const [selectedQuirks, setSelectedQuirks] = useLocalState(
     `selectedQuirks_${data.active_slot}`,
     data.selected_quirks,
   );
-
   // Sync local state with server data when it changes (e.g., on sheet reopen)
   useEffect(() => {
     const serverQuirks = data.selected_quirks || [];
@@ -360,13 +374,13 @@ export const QuirksPage = () => {
         const { quirk_blacklist: quirkBlacklist, quirk_info: quirkInfo } =
           serverData.quirks;
 
-        // Sort qualities by value (negatives first, then positives)
+        // Sort qualities by value (positive qualities first - they have negative values)
         const allQualities = Object.entries(quirkInfo);
         allQualities.sort(([_, a], [__, b]) => {
           if (a.value === b.value) {
             return a.name > b.name ? 1 : -1;
           }
-          return a.value - b.value;
+          return a.value - b.value; // Ascending: negative values (positive qualities) first
         });
 
         // Filter by search and tab
@@ -382,14 +396,14 @@ export const QuirksPage = () => {
             }
           }
 
-          // Tab filter
-          if (activeTab === 'positive' && quality.value <= 0) return false;
-          if (activeTab === 'negative' && quality.value >= 0) return false;
+          // Tab filter (server sends negative values for positive qualities, positive for negative)
+          if (activeTab === 'positive' && quality.value >= 0) return false;
+          if (activeTab === 'negative' && quality.value <= 0) return false;
 
           return true;
         });
 
-        // Calculate karma
+        // Calculate karma (server: negative value = costs karma, positive value = gives karma)
         let karmaFromPositives = 0;
         let karmaFromNegatives = 0;
 
@@ -397,10 +411,12 @@ export const QuirksPage = () => {
           const selectedQuirk = quirkInfo[selectedQuirkName];
           if (!selectedQuirk) continue;
 
-          if (selectedQuirk.value > 0) {
-            karmaFromPositives += selectedQuirk.value;
-          } else if (selectedQuirk.value < 0) {
-            karmaFromNegatives += Math.abs(selectedQuirk.value);
+          if (selectedQuirk.value < 0) {
+            // Positive qualities cost karma (have negative values)
+            karmaFromPositives += Math.abs(selectedQuirk.value);
+          } else if (selectedQuirk.value > 0) {
+            // Negative qualities give karma (have positive values)
+            karmaFromNegatives += selectedQuirk.value;
           }
         }
 
@@ -412,18 +428,89 @@ export const QuirksPage = () => {
 
         // Validation functions
         const getReasonToNotAdd = (quirkName: string) => {
-          const quirk = quirkInfo[quirkName];
+          const quirk = quirkInfo[quirkName] as any;
           if (!quirk) return 'Unknown quality.';
 
-          // Check negative karma limit
-          if (quirk.value < 0) {
-            const additional = Math.abs(quirk.value);
+          // Check prerequisites (SR5 quality requirements)
+          const prereqs = quirk.prerequisites || {};
+
+          // Check allowed metatypes
+          if (
+            prereqs.allowed_metatypes &&
+            prereqs.allowed_metatypes.length > 0
+          ) {
+            if (!prereqs.allowed_metatypes.includes(metatype)) {
+              return 'Requires a specific metatype.';
+            }
+          }
+
+          // Check forbidden metatypes
+          if (
+            prereqs.forbidden_metatypes &&
+            prereqs.forbidden_metatypes.length > 0
+          ) {
+            if (prereqs.forbidden_metatypes.includes(metatype)) {
+              return 'Not available for your metatype.';
+            }
+          }
+
+          // Check required awakening types
+          if (
+            prereqs.required_awakening &&
+            prereqs.required_awakening.length > 0
+          ) {
+            if (!prereqs.required_awakening.includes(awakening)) {
+              const required = prereqs.required_awakening.join(' or ');
+              return `Requires: ${required}`;
+            }
+          }
+
+          // Check forbidden awakening types
+          if (
+            prereqs.forbidden_awakening &&
+            prereqs.forbidden_awakening.length > 0
+          ) {
+            if (prereqs.forbidden_awakening.includes(awakening)) {
+              return 'Not compatible with your awakening type.';
+            }
+          }
+
+          // Check required quirks (other qualities that must be taken first)
+          if (prereqs.required_quirks && prereqs.required_quirks.length > 0) {
+            const selectedNames = selectedQuirks
+              .map((k) => quirkInfo[k]?.name)
+              .filter(Boolean);
+            for (const requiredQuirk of prereqs.required_quirks) {
+              if (!selectedNames.includes(requiredQuirk)) {
+                return `Requires: ${requiredQuirk}`;
+              }
+            }
+          }
+
+          // Check incompatible quirks (from prerequisite data)
+          if (
+            prereqs.incompatible_quirks &&
+            prereqs.incompatible_quirks.length > 0
+          ) {
+            const selectedNames = selectedQuirks
+              .map((k) => quirkInfo[k]?.name)
+              .filter(Boolean);
+            for (const incompatible of prereqs.incompatible_quirks) {
+              if (selectedNames.includes(incompatible)) {
+                return `Incompatible with ${incompatible}`;
+              }
+            }
+          }
+
+          // Check negative karma limit (positive values are negative qualities)
+          if (quirk.value > 0) {
+            const additional = quirk.value;
             if (karmaFromNegatives + additional > MAX_KARMA_FROM_NEGATIVES) {
               return `Exceeds ${MAX_KARMA_FROM_NEGATIVES} karma limit from negatives!`;
             }
           }
 
-          // Check blacklist
+          // Check blacklist (legacy system)
           const selectedNames = selectedQuirks
             .map((k) => quirkInfo[k]?.name)
             .filter(Boolean);
@@ -623,7 +710,8 @@ export const QuirksPage = () => {
                   {selectedQuirks.map((quirkKey) => {
                     const quirk = quirkInfo[quirkKey];
                     if (!quirk) return null;
-                    const isPositive = quirk.value > 0;
+                    // Server: negative value = positive quality, positive value = negative quality
+                    const isPositive = quirk.value < 0;
                     return (
                       <Stack.Item key={quirkKey} mb={0.25} mr={0.25}>
                         <Button
@@ -632,8 +720,8 @@ export const QuirksPage = () => {
                           color={isPositive ? 'green' : 'red'}
                           onClick={() => handleToggleQuality(quirkKey, quirk)}
                         >
-                          {quirk.name} ({isPositive ? '-' : '+'}
-                          {Math.abs(quirk.value)})
+                          {quirk.name} ({quirk.value < 0 ? '' : '+'}
+                          {quirk.value})
                         </Button>
                       </Stack.Item>
                     );

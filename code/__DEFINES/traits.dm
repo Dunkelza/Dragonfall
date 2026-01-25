@@ -683,6 +683,12 @@ Remember to update _globalvars/traits.dm if you're adding/removing/renaming trai
 #define TRAIT_TOXIN_RESISTANT "toxin_resistant"
 #define TRAIT_FIRST_AID "first_aid"
 
+// Shadowrun 5e Metatype-Specific Traits
+#define TRAIT_THERMOGRAPHIC "thermographic_vision"
+#define TRAIT_LOW_LIGHT "low_light_vision"
+#define TRAIT_REACH "reach"
+#define TRAIT_DWARF_TOXIN_RESIST "dwarf_toxin_resist"
+
 // Shadowrun 5e Negative Quality Traits
 #define TRAIT_BAD_LUCK "bad_luck"
 #define TRAIT_COMBAT_PARALYSIS "combat_paralysis"

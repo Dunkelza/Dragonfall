@@ -197,6 +197,17 @@
 		else
 			target.stats.remove_skill_modifier(skill_path, SHADOWRUN_CHARGEN_SOURCE)
 
+	// Skill specializations: apply selected specializations
+	var/list/skill_specializations = state["skill_specializations"]
+	if (islist(skill_specializations))
+		for (var/skill_key in skill_specializations)
+			var/skill_path = text2path(skill_key)
+			if (!ispath(skill_path, /datum/rpg_skill))
+				continue
+			var/spec_name = skill_specializations[skill_key]
+			if (istext(spec_name))
+				target.stats.set_skill_specialization(skill_path, spec_name)
+
 	// Awakening + Magic from priorities (SR5-ish).
 	// If Magic priority is E, we force mundane.
 	var/magic_letter = priorities["magic"]
@@ -229,11 +240,21 @@
 		target.stats.remove_stat_modifier(/datum/rpg_stat/edge, SHADOWRUN_CHARGEN_SOURCE)
 
 	// Apply augments (cyberware, prosthetics)
+	// Augments are stored as { [augmentId]: { id, grade } }
 	var/list/augments = state["augments"]
 	if(islist(augments) && length(augments))
 		var/datum/species/S = target.dna?.species
-		for(var/slot in augments)
-			var/aug_path = text2path(augments[slot])
+		for(var/aug_id in augments)
+			var/aug_data = augments[aug_id]
+			var/aug_path_text
+			if(istext(aug_data))
+				aug_path_text = aug_data
+			else if(islist(aug_data))
+				aug_path_text = aug_data["id"]
+			else
+				continue
+
+			var/aug_path = text2path(aug_path_text)
 			var/datum/augment_item/A = GLOB.augment_items[aug_path]
 			if(!A)
 				continue
@@ -247,6 +268,58 @@
 	var/native_language = state["native_language"]
 	if(islist(languages_state) || native_language)
 		apply_sr5_languages_to_mob(target, languages_state, native_language)
+
+	// Apply lifestyle tier
+	var/lifestyle = state["lifestyle"]
+	if(istext(lifestyle))
+		target.sr_lifestyle = lifestyle
+
+	// Apply mentor spirit
+	var/mentor_spirit = state["mentor_spirit"]
+	if(istext(mentor_spirit) && length(mentor_spirit))
+		target.sr_mentor_spirit = mentor_spirit
+
+	// Apply character notes
+	var/list/notes = state["character_notes"]
+	if(islist(notes))
+		target.sr_notes_general = notes["general"] || ""
+		target.sr_notes_security = notes["security_record"] || ""
+		target.sr_notes_medical = notes["medical_record"] || ""
+		target.sr_notes_exploitable = notes["exploitable_info"] || ""
+
+	// Apply starting gear
+	var/list/gear_selections = state["gear"]
+	if(islist(gear_selections) && length(gear_selections))
+		spawn_sr_starting_gear(target, gear_selections)
+
+/datum/preference/blob/shadowrun_chargen/proc/spawn_sr_starting_gear(mob/living/carbon/human/target, list/gear_selections)
+	if(!target || !islist(gear_selections))
+		return
+
+	var/list/gear_catalog = get_sr_gear_catalog()
+	for(var/list/gear_entry in gear_selections)
+		var/gear_id = gear_entry["id"]
+		var/quantity = gear_entry["quantity"]
+		if(!istext(gear_id))
+			continue
+		if(!isnum(quantity) || quantity < 1)
+			quantity = 1
+
+		var/datum/sr_gear/G = gear_catalog[gear_id]
+		if(!G)
+			continue
+
+		// Skip if no item path defined (gear with no in-game representation yet)
+		if(!G.item_path || !ispath(G.item_path, /obj/item))
+			continue
+
+		// Spawn the item(s)
+		for(var/i in 1 to quantity)
+			var/obj/item/I = new G.item_path(target.loc)
+			if(I)
+				// Try to equip to inventory, otherwise put in backpack
+				if(!target.equip_to_appropriate_slot(I))
+					target.put_in_hands(I)
 
 /datum/preference/blob/shadowrun_chargen/compile_constant_data()
 	var/list/data = list()
@@ -386,6 +459,7 @@
 			"sort" = tmp_skill.ui_sort_order,
 			"parent_stat_id" = "[parent_stat_path]",
 			"parent_stat_name" = parent_stat_name,
+			"specializations" = tmp_skill.specializations,
 		))
 		qdel(tmp_skill)
 
@@ -495,6 +569,40 @@
 		qdel(tmp_trad)
 	data["traditions"] = tradition_list
 
+	// Mentor spirits metadata (for awakened characters).
+	var/list/mentor_list = list()
+	var/list/mentor_catalog = get_sr_mentor_spirits()
+	for (var/mentor_id in mentor_catalog)
+		var/datum/sr_mentor_spirit/M = mentor_catalog[mentor_id]
+		mentor_list += list(list(
+			"id" = mentor_id,
+			"name" = M.name,
+			"desc" = M.desc,
+			"advantage" = M.advantage,
+			"magician_advantage" = M.magician_advantage,
+			"disadvantage" = M.disadvantage,
+			"icon" = M.icon_name,
+			"common_traditions" = M.common_traditions,
+			"sort" = M.ui_sort_order,
+		))
+	data["mentor_spirits"] = mentor_list
+
+	// Metamagic techniques (for initiated awakened characters).
+	var/list/metamagic_list = list()
+	var/list/metamagic_catalog = get_sr_metamagics()
+	for (var/mm_id in metamagic_catalog)
+		var/datum/sr_metamagic/M = metamagic_catalog[mm_id]
+		metamagic_list += list(list(
+			"id" = mm_id,
+			"name" = M.name,
+			"desc" = M.desc,
+			"effect" = M.effect,
+			"category" = M.category,
+			"available_to" = M.available_to,
+			"sort" = M.ui_sort_order,
+		))
+	data["metamagics"] = metamagic_list
+
 	// Complex forms metadata (for technomancers).
 	var/list/cf_list = list()
 	for (var/cf_path in subtypesof(/datum/sr_complex_form))
@@ -560,6 +668,16 @@
 		"icon" = "dna",
 		"description" = "Biological enhancements grown from organic materials. Lower Essence cost than cyberware."
 	)
+	augment_categories["geneware"] = list(
+		"name" = "Geneware",
+		"icon" = "seedling",
+		"description" = "Genetic modifications that alter DNA. Lowest Essence costs but cannot be graded."
+	)
+	augment_categories["nanoware"] = list(
+		"name" = "Nanoware",
+		"icon" = "microscope",
+		"description" = "Nanite-based augmentations. Most require a Nanohive system to function."
+	)
 	data["augment_categories"] = augment_categories
 
 	// Build augment items list keyed by type path
@@ -567,7 +685,9 @@
 	var/list/augments_by_category = list(
 		"bodyparts" = list(),
 		"organs" = list(),
-		"bioware" = list()
+		"bioware" = list(),
+		"geneware" = list(),
+		"nanoware" = list()
 	)
 
 	for (var/aug_path in GLOB.augment_items)
@@ -598,6 +718,18 @@
 			var/obj/item/organ/O = A.path
 			essence_cost = initial(O.essence_base_cost)
 			nuyen_cost = initial(O.nuyen_base_cost)
+		else if (A.category == AUGMENT_CATEGORY_GENEWARE)
+			category_key = "geneware"
+			// Get costs from the geneware organ path
+			var/obj/item/organ/O = A.path
+			essence_cost = initial(O.essence_base_cost)
+			nuyen_cost = initial(O.nuyen_base_cost)
+		else if (A.category == AUGMENT_CATEGORY_NANOWARE)
+			category_key = "nanoware"
+			// Get costs from the nanoware organ path
+			var/obj/item/organ/O = A.path
+			essence_cost = initial(O.essence_base_cost)
+			nuyen_cost = initial(O.nuyen_base_cost)
 		else
 			continue // Skip implants and other categories for now
 
@@ -610,7 +742,8 @@
 			"category" = category_key,
 			"essence_cost" = essence_cost,
 			"nuyen_cost" = nuyen_cost,
-			"path" = "[A.path]"
+			"path" = "[A.path]",
+			"is_cyberlimb" = (category_key == "bodyparts")
 		)
 
 		augments[aug_id] = aug_data
@@ -618,6 +751,231 @@
 
 	data["augments"] = augments
 	data["augments_by_category"] = augments_by_category
+
+	// Cyberlimb customization costs
+	data["cyberlimb_upgrade_cost"] = 5000  // Cost per +1 to AGI or STR
+	data["cyberlimb_base_stats"] = 3  // Base AGI/STR for cyberlimbs
+	data["cyberlimb_max_upgrade"] = 3  // Maximum upgrade amount per stat
+
+	// Cyberware Suites - pre-built bundles with discount
+	// Each suite contains augment IDs (augment_item type paths as strings) and offers a 10% discount when purchasing the complete bundle
+	// Note: augment IDs are generated at runtime as "[aug_path]" so we use string literals here
+	var/list/cyberware_suites = list()
+	cyberware_suites += list(list(
+		"id" = "street_samurai",
+		"name" = "Street Samurai Basic",
+		"description" = "A classic combat package: muscle augmentation and synaptic booster for combat reflexes. 10% discount on bundle.",
+		"discount" = 0.10,
+		"augments" = list(
+			"/datum/augment_item/bioware/muscle_augmentation",
+			"/datum/augment_item/bioware/synaptic_booster"
+		),
+		"icon" = "user-ninja"
+	))
+	cyberware_suites += list(list(
+		"id" = "face_package",
+		"name" = "Face Package",
+		"description" = "Social enhancement suite: tailored pheromones and enhanced articulation. 10% discount.",
+		"discount" = 0.10,
+		"augments" = list(
+			"/datum/augment_item/bioware/tailored_pheromones",
+			"/datum/augment_item/bioware/enhanced_articulation"
+		),
+		"icon" = "theater-masks"
+	))
+	cyberware_suites += list(list(
+		"id" = "brain_boost",
+		"name" = "Brain Boost Suite",
+		"description" = "Mental enhancement package: cerebral booster and mnemonic enhancer. 10% discount.",
+		"discount" = 0.10,
+		"augments" = list(
+			"/datum/augment_item/bioware/cerebral_booster",
+			"/datum/augment_item/bioware/mnemonic_enhancer"
+		),
+		"icon" = "brain"
+	))
+	cyberware_suites += list(list(
+		"id" = "reflex_suite",
+		"name" = "Reflex Enhancement Suite",
+		"description" = "Speed and reflexes package: synaptic booster and muscle toner. 10% discount.",
+		"discount" = 0.10,
+		"augments" = list(
+			"/datum/augment_item/bioware/synaptic_booster",
+			"/datum/augment_item/bioware/muscle_toner"
+		),
+		"icon" = "bolt"
+	))
+	cyberware_suites += list(list(
+		"id" = "medic_package",
+		"name" = "Combat Medic Package",
+		"description" = "Field medic enhancements: platelet factories and enhanced articulation. 10% discount.",
+		"discount" = 0.10,
+		"augments" = list(
+			"/datum/augment_item/bioware/platelet_factories",
+			"/datum/augment_item/bioware/enhanced_articulation"
+		),
+		"icon" = "medkit"
+	))
+	data["cyberware_suites"] = cyberware_suites
+
+	// Lifestyle choices - SR5 lifestyle tiers
+	var/list/lifestyles = list()
+	lifestyles += list(list(
+		"id" = "street",
+		"name" = "Street",
+		"cost" = 0,
+		"description" = "You're homeless, living on the streets, in abandoned buildings, or wherever you can find shelter. No permanent address, no security.",
+		"sort" = 0
+	))
+	lifestyles += list(list(
+		"id" = "squatter",
+		"name" = "Squatter",
+		"cost" = 500,
+		"description" = "A step above homelessness. You squat in an abandoned building or vehicle, with minimal amenities and no security.",
+		"sort" = 1
+	))
+	lifestyles += list(list(
+		"id" = "low",
+		"name" = "Low",
+		"cost" = 2000,
+		"description" = "A small apartment in a rough neighborhood. Basic amenities, spotty utilities, minimal security. Working class housing.",
+		"sort" = 2
+	))
+	lifestyles += list(list(
+		"id" = "middle",
+		"name" = "Middle",
+		"cost" = 5000,
+		"description" = "A decent apartment or small house in a safer neighborhood. Reliable utilities, some security, respectable address.",
+		"sort" = 3
+	))
+	lifestyles += list(list(
+		"id" = "high",
+		"name" = "High",
+		"cost" = 10000,
+		"description" = "Upscale housing with excellent amenities, private security, and a prestigious address. The good life for shadowrunners.",
+		"sort" = 4
+	))
+	lifestyles += list(list(
+		"id" = "luxury",
+		"name" = "Luxury",
+		"cost" = 100000,
+		"description" = "The finest housing money can buy. Penthouse suites, private estates, 24/7 security, and every amenity imaginable.",
+		"sort" = 5
+	))
+	data["lifestyles"] = lifestyles
+
+	// Starting gear catalog
+	var/list/sr_gear_catalog = get_sr_gear_catalog()
+	var/list/gear_catalog = list()
+	var/list/gear_by_category = list()
+	for(var/gear_id in sr_gear_catalog)
+		var/datum/sr_gear/G = sr_gear_catalog[gear_id]
+		var/list/gear_data = list(
+			"id" = gear_id,
+			"name" = G.name,
+			"desc" = G.desc,
+			"cost" = G.cost,
+			"availability" = G.availability,
+			"legality" = G.legality,
+			"category" = G.category,
+			"subcategory" = G.subcategory,
+			"stackable" = G.stackable,
+			"max_quantity" = G.max_quantity,
+			"sort" = G.ui_sort_order
+		)
+		gear_catalog[gear_id] = gear_data
+		if(!gear_by_category[G.category])
+			gear_by_category[G.category] = list()
+		gear_by_category[G.category] += list(gear_data)
+	data["gear_catalog"] = gear_catalog
+	data["gear_by_category"] = gear_by_category
+
+	// Gear category metadata for UI
+	data["gear_categories"] = list(
+		list("id" = "weapons", "name" = "Weapons", "icon" = "crosshairs", "sort" = 1),
+		list("id" = "armor", "name" = "Armor", "icon" = "shield-alt", "sort" = 2),
+		list("id" = "electronics", "name" = "Electronics", "icon" = "microchip", "sort" = 3),
+		list("id" = "tools", "name" = "Tools & Gear", "icon" = "wrench", "sort" = 4),
+		list("id" = "survival", "name" = "Survival", "icon" = "campground", "sort" = 5),
+		list("id" = "medical", "name" = "Medical", "icon" = "medkit", "sort" = 6)
+	)
+
+	// Drone catalog for riggers
+	var/list/sr_drone_catalog = get_sr_drones()
+	var/list/drone_catalog = list()
+	var/list/drones_by_category = list()
+	for(var/drone_id in sr_drone_catalog)
+		var/datum/sr_drone/D = sr_drone_catalog[drone_id]
+		var/list/drone_data = list(
+			"id" = drone_id,
+			"name" = D.name,
+			"desc" = D.desc,
+			"cost" = D.cost,
+			"availability" = D.availability,
+			"legality" = D.legality,
+			"category" = D.category,
+			"drone_type" = D.drone_type,
+			"body" = D.body,
+			"handling" = D.handling,
+			"speed" = D.speed,
+			"pilot" = D.pilot,
+			"sensor" = D.sensor,
+			"armor" = D.armor,
+			"device_rating" = D.device_rating,
+			"sort" = D.ui_sort_order
+		)
+		drone_catalog[drone_id] = drone_data
+		if(!drones_by_category[D.category])
+			drones_by_category[D.category] = list()
+		drones_by_category[D.category] += list(drone_data)
+	data["drone_catalog"] = drone_catalog
+	data["drones_by_category"] = drones_by_category
+
+	// Drone category metadata for UI
+	data["drone_categories"] = list(
+		list("id" = "micro", "name" = "Micro Drones", "icon" = "bug", "sort" = 1),
+		list("id" = "small", "name" = "Small Drones", "icon" = "helicopter", "sort" = 2),
+		list("id" = "medium", "name" = "Medium Drones", "icon" = "robot", "sort" = 3),
+		list("id" = "large", "name" = "Large Drones", "icon" = "truck", "sort" = 4),
+		list("id" = "anthroform", "name" = "Anthroform", "icon" = "user-robot", "sort" = 5)
+	)
+
+	// Drone modifications catalog
+	var/list/sr_drone_mods = get_sr_drone_mods()
+	var/list/drone_mod_catalog = list()
+	var/list/drone_mods_by_category = list()
+	for(var/mod_id in sr_drone_mods)
+		var/datum/sr_drone_mod/M = sr_drone_mods[mod_id]
+		var/list/mod_data = list(
+			"id" = "[mod_id]",
+			"name" = M.name,
+			"desc" = M.desc,
+			"cost" = M.cost,
+			"availability" = M.availability,
+			"legality" = M.legality,
+			"allowed_categories" = M.allowed_categories,
+			"max_per_drone" = M.max_per_drone,
+			"stat_bonuses" = M.stat_bonuses,
+			"icon" = M.icon,
+			"mod_category" = M.mod_category,
+			"sort" = M.ui_sort_order
+		)
+		drone_mod_catalog["[mod_id]"] = mod_data
+		if(!drone_mods_by_category[M.mod_category])
+			drone_mods_by_category[M.mod_category] = list()
+		drone_mods_by_category[M.mod_category] += list(mod_data)
+	data["drone_mod_catalog"] = drone_mod_catalog
+	data["drone_mods_by_category"] = drone_mods_by_category
+
+	// Drone mod category metadata for UI
+	data["drone_mod_categories"] = list(
+		list("id" = "armor", "name" = "Armor", "icon" = "shield-alt", "sort" = 1),
+		list("id" = "sensor", "name" = "Sensors", "icon" = "satellite-dish", "sort" = 2),
+		list("id" = "mobility", "name" = "Mobility", "icon" = "tachometer-alt", "sort" = 3),
+		list("id" = "software", "name" = "Software", "icon" = "microchip", "sort" = 4),
+		list("id" = "weapon", "name" = "Weapons", "icon" = "crosshairs", "sort" = 5),
+		list("id" = "utility", "name" = "Utility", "icon" = "toolbox", "sort" = 6)
+	)
 
 	return data
 
@@ -675,14 +1033,17 @@
 	var/list/special_in = islist(input["special"]) ? input["special"] : list()
 	var/list/skills_in = islist(input["skills"]) ? input["skills"] : list()
 	var/list/skill_groups_in = islist(input["skill_groups"]) ? input["skill_groups"] : list()
+	var/list/skill_specializations_in = islist(input["skill_specializations"]) ? input["skill_specializations"] : list()
 
 	output["attributes"] = sanitize_attributes(attributes_in, priorities, output["metatype_species"])
 	output["special"] = sanitize_special(special_in, priorities, output["awakening"], output["schema_version"])
 	output["skills"] = sanitize_skills(skills_in, priorities)
 	output["skill_groups"] = sanitize_skill_groups(skill_groups_in, priorities)
+	output["skill_specializations"] = sanitize_skill_specializations(skill_specializations_in, output["skills"], output["skill_groups"])
 
 	// Magic system fields
 	output["tradition"] = sanitize_tradition(input["tradition"], output["awakening"])
+	output["mentor_spirit"] = sanitize_mentor_spirit(input["mentor_spirit"], output["awakening"])
 	output["selected_spells"] = sanitize_selected_spells(input["selected_spells"], priorities, output["awakening"])
 	output["selected_powers"] = sanitize_selected_powers(input["selected_powers"], priorities, output["awakening"])
 	output["selected_complex_forms"] = sanitize_selected_complex_forms(input["selected_complex_forms"], priorities, output["awakening"])
@@ -697,6 +1058,18 @@
 
 	// Augments system
 	output["augments"] = sanitize_augments(input["augments"], output["metatype_species"])
+
+	// Lifestyle selection
+	output["lifestyle"] = sanitize_lifestyle(input["lifestyle"], priorities)
+
+	// Starting gear
+	output["gear"] = sanitize_gear(input["gear"], priorities)
+
+	// Drones
+	output["drones"] = sanitize_drones(input["drones"], priorities)
+
+	// Character notes and records
+	output["character_notes"] = sanitize_character_notes(input["character_notes"])
 
 	return output
 
@@ -1113,6 +1486,52 @@
 
 	return out
 
+/// Sanitize skill specializations. A skill can have one specialization if it has rating >= 1.
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_skill_specializations(list/in_specializations, list/skills, list/skill_groups)
+	var/list/out = list()
+
+	// Build a map of which skills are set via skill groups
+	var/list/group_defs = get_skill_group_definitions()
+	var/list/skill_from_group = list()
+	for (var/group_id in skill_groups)
+		if (!skill_groups[group_id])
+			continue
+		var/list/members = group_defs[group_id]
+		if (!islist(members))
+			continue
+		for (var/skill_path in members)
+			skill_from_group["[skill_path]"] = skill_groups[group_id]
+
+	for (var/in_key in in_specializations)
+		var/normalized_key = normalize_path_key(in_key, /datum/rpg_skill)
+		if (isnull(normalized_key))
+			continue
+
+		// Check that the skill has rating >= 1 (from skills or skill_groups)
+		var/skill_rating = skills[normalized_key] || skill_from_group[normalized_key] || 0
+		if (skill_rating < 1)
+			continue
+
+		var/spec_value = in_specializations[in_key]
+		if (!istext(spec_value) || !length(spec_value))
+			continue
+
+		// Validate the specialization is valid for this skill
+		var/skill_path = text2path(normalized_key)
+		if (!ispath(skill_path, /datum/rpg_skill))
+			continue
+
+		var/datum/rpg_skill/tmp = new skill_path
+		var/list/valid_specs = tmp.specializations
+		qdel(tmp)
+
+		if (!islist(valid_specs) || !(spec_value in valid_specs))
+			continue
+
+		out[normalized_key] = spec_value
+
+	return out
+
 /datum/preference/blob/shadowrun_chargen/proc/get_skill_group_definitions()
 	// A small but useful subset of SR5 skill groups. We keep this intentionally
 	// conservative to avoid incorrect mappings.
@@ -1299,6 +1718,21 @@
 	for (var/trad_path in subtypesof(/datum/sr_tradition))
 		if ("[trad_path]" == raw_tradition)
 			return raw_tradition
+
+	return ""
+
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_mentor_spirit(raw_mentor, awakening)
+	// Only awakened characters (mage, adept, mystic_adept) can have mentor spirits
+	if (awakening == "mundane" || awakening == "technomancer")
+		return ""
+
+	if (!istext(raw_mentor) || !length(raw_mentor))
+		return ""
+
+	// Validate against known mentor spirits
+	var/list/mentor_catalog = get_sr_mentor_spirits()
+	if (mentor_catalog[raw_mentor])
+		return raw_mentor
 
 	return ""
 
@@ -1538,6 +1972,7 @@
 	return charisma * 3
 
 /// Sanitize augments, ensuring valid augment paths and essence budget.
+/// Stores augments keyed by augment path (ID) with { id, grade } format for UI compatibility.
 /datum/preference/blob/shadowrun_chargen/proc/sanitize_augments(list/in_augments, metatype_species)
 	if (!islist(in_augments))
 		return list()
@@ -1550,13 +1985,39 @@
 	var/essence_spent = 0
 	var/essence_max = 6.0 // Base essence
 
-	for (var/slot in in_augments)
-		var/aug_path = in_augments[slot]
-		if (!istext(aug_path))
+	// Grade essence multipliers
+	var/static/list/grade_essence_multipliers = list(
+		"used" = 1.25,
+		"standard" = 1.0,
+		"alphaware" = 0.8,
+		"betaware" = 0.6,
+		"deltaware" = 0.5
+	)
+
+	for (var/aug_id in in_augments)
+		// The UI sends { [augmentId]: { id, grade } } format
+		// augmentId is the type path as text (e.g., "/datum/augment_item/...")
+		var/aug_data = in_augments[aug_id]
+		var/aug_path_text
+		var/grade = "standard"
+
+		// Handle both old format (just a text path) and new format ({ id, grade })
+		if (istext(aug_data))
+			aug_path_text = aug_data
+		else if (islist(aug_data))
+			aug_path_text = aug_data["id"]
+			grade = aug_data["grade"] || "standard"
+			if (!istext(aug_path_text))
+				aug_path_text = aug_id // Fallback to the key itself
+		else
+			continue
+
+		var/aug_path = text2path(aug_path_text)
+		if (!ispath(aug_path))
 			continue
 
 		// Find the augment item
-		var/datum/augment_item/A = GLOB.augment_items[text2path(aug_path)]
+		var/datum/augment_item/A = GLOB.augment_items[aug_path]
 		if (!A)
 			continue
 
@@ -1573,11 +2034,29 @@
 			var/obj/item/organ/O = A.path
 			essence_cost = initial(O.essence_base_cost)
 
+		// Apply grade modifier to essence cost
+		var/grade_multiplier = grade_essence_multipliers[grade] || 1.0
+		essence_cost *= grade_multiplier
+
 		// Check essence budget
 		if (essence_spent + essence_cost > essence_max)
 			continue
 
-		out[slot] = aug_path
+		// Store in UI-compatible format: { [augmentId]: { id, grade, agi_upgrade, str_upgrade } }
+		// For cyberlimbs, include stat upgrades
+		var/list/aug_entry = list("id" = aug_path_text, "grade" = grade)
+		if (A.category == AUGMENT_CATEGORY_BODYPARTS)
+			// Cyberlimbs can have AGI and STR upgrades (0 to +3 each)
+			var/agi_upgrade = 0
+			var/str_upgrade = 0
+			if (islist(aug_data))
+				if (isnum(aug_data["agi_upgrade"]))
+					agi_upgrade = clamp(round(aug_data["agi_upgrade"]), 0, 3)
+				if (isnum(aug_data["str_upgrade"]))
+					str_upgrade = clamp(round(aug_data["str_upgrade"]), 0, 3)
+			aug_entry["agi_upgrade"] = agi_upgrade
+			aug_entry["str_upgrade"] = str_upgrade
+		out[aug_path_text] = aug_entry
 		essence_spent += essence_cost
 
 	return out
@@ -1626,6 +2105,134 @@
 		total_cost += cost
 
 	return out
+
+/// Sanitizes lifestyle selection. Defaults to "low" if not valid.
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_lifestyle(raw_lifestyle, list/priorities)
+	var/list/valid_lifestyles = list("street", "squatter", "low", "middle", "high", "luxury")
+	var/list/lifestyle_costs = list(
+		"street" = 0,
+		"squatter" = 500,
+		"low" = 2000,
+		"middle" = 5000,
+		"high" = 10000,
+		"luxury" = 100000
+	)
+
+	if (!istext(raw_lifestyle) || !(raw_lifestyle in valid_lifestyles))
+		return "low" // Default lifestyle
+
+	// Optionally validate that they can afford it based on Resources priority
+	// For now, allow any lifestyle selection - players need to budget accordingly
+	return raw_lifestyle
+
+/// Sanitizes starting gear selection.
+/// Gear is stored as list of { gear_id, quantity }
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_gear(list/in_gear, list/priorities)
+	if (!islist(in_gear))
+		return list()
+
+	var/list/out = list()
+	var/list/gear_catalog = get_sr_gear_catalog()
+
+	// Validate each gear selection
+	for (var/list/gear_entry in in_gear)
+		if (!islist(gear_entry))
+			continue
+
+		var/gear_id = gear_entry["id"]
+		if (!istext(gear_id))
+			continue
+
+		// Check if gear exists in catalog
+		var/datum/sr_gear/G = gear_catalog[gear_id]
+		if (!G)
+			continue
+
+		var/quantity = gear_entry["quantity"]
+		if (!isnum(quantity) || quantity < 1)
+			quantity = 1
+
+		// Enforce max quantity for stackable items
+		if (G.stackable)
+			quantity = clamp(round(quantity), 1, G.max_quantity)
+		else
+			quantity = 1
+
+		out += list(list("id" = gear_id, "quantity" = quantity))
+
+	return out
+
+/// Sanitizes drone selection.
+/// Drones are stored as a list of drone IDs (strings)
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_drones(list/in_drones, list/priorities)
+	if (!islist(in_drones))
+		return list()
+
+	var/list/out = list()
+	var/list/drone_catalog = get_sr_drones()
+
+	// Validate each drone selection
+	for (var/drone_id in in_drones)
+		if (!istext(drone_id))
+			continue
+
+		// Check if drone exists in catalog
+		var/datum/sr_drone/D = drone_catalog[drone_id]
+		if (!D)
+			continue
+
+		// Prevent duplicates
+		if (drone_id in out)
+			continue
+
+		out += drone_id
+
+	return out
+
+/// Maximum character length for text notes
+#define MAX_NOTE_LENGTH 2000
+
+/// Sanitizes character notes and records.
+/// Notes include: general, security_record, medical_record, exploitable_info
+/datum/preference/blob/shadowrun_chargen/proc/sanitize_character_notes(list/in_notes)
+	if (!islist(in_notes))
+		return list(
+			"general" = "",
+			"security_record" = "",
+			"medical_record" = "",
+			"exploitable_info" = ""
+		)
+
+	var/list/out = list()
+
+	// Sanitize each text field
+	var/general = in_notes["general"]
+	if (istext(general))
+		out["general"] = copytext(general, 1, MAX_NOTE_LENGTH)
+	else
+		out["general"] = ""
+
+	var/security = in_notes["security_record"]
+	if (istext(security))
+		out["security_record"] = copytext(security, 1, MAX_NOTE_LENGTH)
+	else
+		out["security_record"] = ""
+
+	var/medical = in_notes["medical_record"]
+	if (istext(medical))
+		out["medical_record"] = copytext(medical, 1, MAX_NOTE_LENGTH)
+	else
+		out["medical_record"] = ""
+
+	var/exploitable = in_notes["exploitable_info"]
+	if (istext(exploitable))
+		out["exploitable_info"] = copytext(exploitable, 1, MAX_NOTE_LENGTH)
+	else
+		out["exploitable_info"] = ""
+
+	return out
+
+#undef MAX_NOTE_LENGTH
 
 #undef SHADOWRUN_CHARGEN_SOURCE
 

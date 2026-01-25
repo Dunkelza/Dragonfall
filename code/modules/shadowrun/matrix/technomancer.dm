@@ -13,10 +13,22 @@
  */
 
 /datum/rpg_stat/resonance
+	parent_type = /datum/rpg_stat/special
 	name = "Resonance"
 	desc = "The technomancer's connection to the Matrix. Determines Living Persona stats and complex form power."
 	value = 0
 	ui_sort_order = 30
+
+	max_value = 6
+	min_value = 0
+
+/datum/rpg_stat/resonance/get(mob/living/user, list/out_sources)
+	// SR5: Essence loss reduces the maximum attainable Resonance (same as Magic).
+	var/base = initial(value) + values_sum(modifiers)
+	var/cap = max_value
+	if(user?.stats)
+		cap = min(cap, user.stats.get_stat_modifier(/datum/rpg_stat/essence))
+	return clamp(base, min_value, cap)
 
 // =============================================================================
 // COMPLEX FORMS

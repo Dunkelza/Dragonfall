@@ -273,7 +273,7 @@ const JobRow = (props: { className?: string; job: Job; name: string }) => {
       style={{
         // PARIAH EDIT
         marginTop: '0',
-        ...(isEmployerCompatible ? {} : { opacity: 0.5 }),
+        ...(isEmployerCompatible ? {} : { opacity: '0.5' }),
       }}
     >
       <Stack align="center" /* PARIAH EDIT */>

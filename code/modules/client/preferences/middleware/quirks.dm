@@ -24,11 +24,51 @@
 			if (isnull(icon) || !istext(icon) || !length(icon))
 				icon = "question"
 
+			// Build prerequisite data for SR5 quality filtering
+			var/list/prereqs = list()
+
+			// Allowed metatypes (convert paths to strings)
+			var/list/allowed_meta = initial(quirk_type.allowed_metatypes)
+			if (islist(allowed_meta) && length(allowed_meta))
+				var/list/meta_strings = list()
+				for (var/path in allowed_meta)
+					meta_strings += "[path]"
+				prereqs["allowed_metatypes"] = meta_strings
+
+			// Forbidden metatypes
+			var/list/forbidden_meta = initial(quirk_type.forbidden_metatypes)
+			if (islist(forbidden_meta) && length(forbidden_meta))
+				var/list/meta_strings = list()
+				for (var/path in forbidden_meta)
+					meta_strings += "[path]"
+				prereqs["forbidden_metatypes"] = meta_strings
+
+			// Required awakening types
+			var/list/req_awaken = initial(quirk_type.required_awakening)
+			if (islist(req_awaken) && length(req_awaken))
+				prereqs["required_awakening"] = req_awaken
+
+			// Forbidden awakening types
+			var/list/forb_awaken = initial(quirk_type.forbidden_awakening)
+			if (islist(forb_awaken) && length(forb_awaken))
+				prereqs["forbidden_awakening"] = forb_awaken
+
+			// Required quirks (other qualities that must be taken first)
+			var/list/req_quirks = initial(quirk_type.required_quirks)
+			if (islist(req_quirks) && length(req_quirks))
+				prereqs["required_quirks"] = req_quirks
+
+			// Incompatible quirks (mutual exclusions)
+			var/list/incompat = initial(quirk_type.incompatible_quirks)
+			if (islist(incompat) && length(incompat))
+				prereqs["incompatible_quirks"] = incompat
+
 			quirk_info[quirk_name] = list(
 				"description" = initial(quirk_type.desc),
 				"icon" = icon,
 				"name" = quirk_name,
 				"value" = initial(quirk_type.karma_value),
+				"prerequisites" = prereqs,
 			)
 
 		for (var/list/blacklist as anything in SSquirks.quirk_blacklist)

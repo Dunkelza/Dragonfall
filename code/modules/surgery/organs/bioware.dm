@@ -242,10 +242,9 @@
 	. = ..()
 	if(!owner)
 		return
-	// Reduce bleeding faster
-	for(var/datum/wound/wound as anything in owner.all_wounds)
-		if(wound.blood_flow > 0)
-			wound.blood_flow = max(0, wound.blood_flow - bleed_reduction * delta_time)
+	// Reduce bleeding faster - simplified version that restores blood volume
+	if(owner.blood_volume < BLOOD_VOLUME_NORMAL && prob(30 * bleed_reduction))
+		owner.blood_volume = min(owner.blood_volume + bleed_reduction, BLOOD_VOLUME_NORMAL)
 
 // ============================================================================
 // BONE LACING - Enhanced durability

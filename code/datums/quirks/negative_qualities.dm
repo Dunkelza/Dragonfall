@@ -184,6 +184,7 @@
 	icon = "leaf"
 	quirk_genre = QUIRK_GENRE_BANE
 	karma_value = 6 // SR5: 6 karma
+	forbidden_metatypes = list(/datum/species/elf) // Can't be an elf poser if you're an elf
 	gain_text = "<span class='warning'>You feel an inexplicable longing for elvish grace.</span>"
 	lose_text = "<span class='notice'>You come to terms with who you are.</span>"
 	medical_record_text = "Patient exhibits species dysphoria (elvish idealization)."
@@ -196,6 +197,7 @@
 	icon = "fist-raised"
 	quirk_genre = QUIRK_GENRE_BANE
 	karma_value = 6 // SR5: 6 karma
+	forbidden_metatypes = list(/datum/species/ork) // Can't be an ork poser if you're an ork
 	gain_text = "<span class='warning'>You feel an inexplicable longing for orkish strength.</span>"
 	lose_text = "<span class='notice'>You come to terms with who you are.</span>"
 	medical_record_text = "Patient exhibits species dysphoria (orkish idealization)."
@@ -390,6 +392,7 @@
 	quirk_genre = QUIRK_GENRE_BANE
 	karma_value = 7 // SR5: 7 karma
 	mob_trait = TRAIT_SPIRIT_BANE
+	forbidden_awakening = list("technomancer") // Technomancers don't interact with spirits
 	gain_text = "<span class='warning'>You feel a chill from the astral.</span>"
 	lose_text = "<span class='notice'>Spirits no longer seem to despise you.</span>"
 	medical_record_text = "Patient reports negative interactions with spiritual entities."

@@ -373,6 +373,27 @@
 		LAZYREMOVE(S.modifiers, source)
 		S.update_modifiers()
 
+/// Set a skill specialization. Returns TRUE on success, FALSE if invalid.
+/datum/stats/proc/set_skill_specialization(datum/rpg_skill/skill, spec_name)
+	if(!ispath(skill))
+		CRASH("Bad skill: [skill]")
+	var/datum/rpg_skill/S = skills[skill]
+	return S.set_specialization(spec_name)
+
+/// Get the selected specialization for a skill.
+/datum/stats/proc/get_skill_specialization(datum/rpg_skill/skill)
+	if(!ispath(skill))
+		return null
+	var/datum/rpg_skill/S = skills[skill]
+	return S.selected_specialization
+
+/// Get the specialization bonus for a skill given a context. Returns +2 if match, 0 otherwise.
+/datum/stats/proc/get_skill_specialization_bonus(datum/rpg_skill/skill, context)
+	if(!ispath(skill))
+		return 0
+	var/datum/rpg_skill/S = skills[skill]
+	return S.get_specialization_bonus(context)
+
 /datum/stats/proc/cooldown_finished(index)
 	return COOLDOWN_FINISHED(src, stat_cooldowns[index])
 

@@ -45,3 +45,10 @@ export const employer: FeatureChoiced = {
   description: 'Your corporate employer determines which jobs you can take.',
   component: FeatureDropdownInput,
 };
+
+export const dominant_hand: FeatureChoiced = {
+  name: 'Dominant Hand',
+  description:
+    'Your dominant hand. Using your off-hand incurs penalties unless you have the Ambidextrous trait.',
+  component: FeatureDropdownInput,
+};

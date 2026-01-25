@@ -11,37 +11,51 @@
 // COLOR PALETTE
 // =============================================================================
 
-// Core accent colors
+// Core accent colors - enhanced for cyberpunk vibrancy
 $sr-gold: #caa53d; // Primary gold accent (physical/resources)
-$sr-gold-bright: #e8c547;
+$sr-gold-bright: #ffe066;
 $sr-gold-dim: color.scale($sr-gold, $lightness: -20%);
+$sr-gold-glow: rgba(#ffe066, 0.4);
 
 $sr-teal: #03fca1; // Secondary accent (special/magic)
-$sr-purple: #615b7d; // Tertiary accent (mental)
+$sr-teal-bright: #4dffcc;
+$sr-teal-glow: rgba(#03fca1, 0.35);
+
+$sr-purple: #9b59b6; // Tertiary accent (mental) - enhanced
+$sr-purple-bright: #c77dff;
+$sr-purple-glow: rgba(#9b59b6, 0.35);
+
+$sr-cyan: #00d4ff; // Cyberpunk neon cyan
+$sr-cyan-glow: rgba(#00d4ff, 0.35);
+
+$sr-magenta: #ff2d95; // Cyberpunk neon magenta
+$sr-magenta-glow: rgba(#ff2d95, 0.35);
 
 // Corporation colors
-$sr-renraku-red: #cc2222;
-$sr-shiawase-orange: #f1a839;
-$sr-lone-star-blue: #3366aa;
-$sr-docwagon-green: #44aa66;
-$sr-ares-gold: #ccaa33;
+$sr-renraku-red: #ff3333;
+$sr-shiawase-orange: #ff9f1c;
+$sr-lone-star-blue: #4488dd;
+$sr-docwagon-green: #00ff88;
+$sr-ares-gold: #ffd700;
 
-// Status colors
-$sr-good: #06bb6c;
-$sr-bad: #f2545b;
-$sr-caution: #e8c547;
+// Status colors - vibrant neon
+$sr-good: #00ff88;
+$sr-bad: #ff4466;
+$sr-caution: #ffcc00;
 $sr-neutral: #888888;
 
 // Background colors
 $sr-bg-dark: rgba(0, 0, 0, 0.35);
 $sr-bg-darker: rgba(0, 0, 0, 0.5);
-$sr-bg-panel: rgba(20, 20, 25, 0.95);
-$sr-bg-input: rgba(25, 25, 30, 0.95);
+$sr-bg-panel: rgba(8, 12, 15, 0.95);
+$sr-bg-input: rgba(15, 18, 22, 0.95);
+$sr-bg-terminal: rgba(5, 8, 12, 0.98);
 
 // Border colors
 $sr-border-light: rgba(255, 255, 255, 0.15);
 $sr-border-medium: rgba(255, 255, 255, 0.25);
 $sr-border-gold: rgba($sr-gold, 0.5);
+$sr-border-teal: rgba($sr-teal, 0.5);
 
 // =============================================================================
 // TYPOGRAPHY
@@ -371,7 +385,9 @@ $sr-font-mono: 'Consolas', 'Monaco', monospace;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: $sr-gold;
-  text-shadow: 0 0 10px rgba($sr-gold, 0.3);
+  text-shadow:
+    0 0 10px $sr-gold-glow,
+    0 0 20px rgba($sr-gold, 0.2);
 }
 
 .Shadowrun__header__subtitle {
@@ -389,17 +405,408 @@ $sr-font-mono: 'Consolas', 'Monaco', monospace;
 
   &--good {
     color: $sr-good;
+    text-shadow: 0 0 8px rgba($sr-good, 0.5);
   }
 
   &--bad {
     color: $sr-bad;
+    text-shadow: 0 0 8px rgba($sr-bad, 0.5);
   }
 
   &--caution {
     color: $sr-caution;
+    text-shadow: 0 0 8px rgba($sr-caution, 0.5);
   }
 
   &--neutral {
     color: $sr-neutral;
+  }
+}
+
+// =============================================================================
+// CRT / SCANLINE EFFECTS
+// =============================================================================
+
+// Subtle scanline overlay - apply to containers
+.Shadowrun__scanlines {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 100;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.08) 0px,
+      rgba(0, 0, 0, 0.08) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  }
+}
+
+// Heavier scanline effect for CRT terminal look
+.Shadowrun__crt {
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 100;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.15) 0px,
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+  }
+
+  // Subtle screen flicker animation
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 99;
+    background: rgba(0, 255, 100, 0.015);
+    animation: crt-flicker 0.15s infinite;
+  }
+}
+
+@keyframes crt-flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.97;
+  }
+}
+
+// RGB chromatic aberration text effect
+.Shadowrun__glitch {
+  position: relative;
+
+  &::before,
+  &::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  &::before {
+    color: $sr-cyan;
+    animation: glitch-1 2s infinite linear alternate-reverse;
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+  }
+
+  &::after {
+    color: $sr-magenta;
+    animation: glitch-2 3s infinite linear alternate-reverse;
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+  }
+}
+
+@keyframes glitch-1 {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-1px, 1px);
+  }
+  40% {
+    transform: translate(1px, -1px);
+  }
+  60% {
+    transform: translate(-1px, 0);
+  }
+  80% {
+    transform: translate(1px, 0);
+  }
+}
+
+@keyframes glitch-2 {
+  0%,
+  100% {
+    transform: translate(0);
+  }
+  25% {
+    transform: translate(1px, 0);
+  }
+  50% {
+    transform: translate(-1px, 1px);
+  }
+  75% {
+    transform: translate(0, -1px);
+  }
+}
+
+// =============================================================================
+// NEON GLOW EFFECTS
+// =============================================================================
+
+.Shadowrun__neon {
+  &--gold {
+    color: $sr-gold-bright;
+    text-shadow:
+      0 0 5px $sr-gold-glow,
+      0 0 10px $sr-gold-glow,
+      0 0 20px rgba($sr-gold, 0.3);
+  }
+
+  &--teal {
+    color: $sr-teal-bright;
+    text-shadow:
+      0 0 5px $sr-teal-glow,
+      0 0 10px $sr-teal-glow,
+      0 0 20px rgba($sr-teal, 0.3);
+  }
+
+  &--purple {
+    color: $sr-purple-bright;
+    text-shadow:
+      0 0 5px $sr-purple-glow,
+      0 0 10px $sr-purple-glow,
+      0 0 20px rgba($sr-purple, 0.3);
+  }
+
+  &--cyan {
+    color: $sr-cyan;
+    text-shadow:
+      0 0 5px $sr-cyan-glow,
+      0 0 10px $sr-cyan-glow,
+      0 0 20px rgba($sr-cyan, 0.3);
+  }
+
+  &--magenta {
+    color: $sr-magenta;
+    text-shadow:
+      0 0 5px $sr-magenta-glow,
+      0 0 10px $sr-magenta-glow,
+      0 0 20px rgba($sr-magenta, 0.3);
+  }
+
+  &--good {
+    color: $sr-good;
+    text-shadow:
+      0 0 5px rgba($sr-good, 0.5),
+      0 0 10px rgba($sr-good, 0.4);
+  }
+
+  &--bad {
+    color: $sr-bad;
+    text-shadow:
+      0 0 5px rgba($sr-bad, 0.5),
+      0 0 10px rgba($sr-bad, 0.4);
+  }
+}
+
+// Neon box/border glow
+.Shadowrun__neon-box {
+  &--gold {
+    border-color: $sr-gold !important;
+    box-shadow:
+      0 0 5px $sr-gold-glow,
+      0 0 10px rgba($sr-gold, 0.2),
+      inset 0 0 5px rgba($sr-gold, 0.1);
+  }
+
+  &--teal {
+    border-color: $sr-teal !important;
+    box-shadow:
+      0 0 5px $sr-teal-glow,
+      0 0 10px rgba($sr-teal, 0.2),
+      inset 0 0 5px rgba($sr-teal, 0.1);
+  }
+
+  &--purple {
+    border-color: $sr-purple !important;
+    box-shadow:
+      0 0 5px $sr-purple-glow,
+      0 0 10px rgba($sr-purple, 0.2),
+      inset 0 0 5px rgba($sr-purple, 0.1);
+  }
+}
+
+// =============================================================================
+// CYBERPUNK PANEL STYLES
+// =============================================================================
+
+.Shadowrun__panel {
+  background: $sr-bg-panel;
+  border: 1px solid $sr-border-light;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+
+  // Corner accent
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(
+      135deg,
+      transparent 50%,
+      rgba($sr-gold, 0.15) 50%
+    );
+    pointer-events: none;
+  }
+
+  &--teal::before {
+    background: linear-gradient(
+      135deg,
+      transparent 50%,
+      rgba($sr-teal, 0.15) 50%
+    );
+  }
+
+  &--purple::before {
+    background: linear-gradient(
+      135deg,
+      transparent 50%,
+      rgba($sr-purple, 0.15) 50%
+    );
+  }
+}
+
+// Terminal-style panel
+.Shadowrun__terminal {
+  background: $sr-bg-terminal;
+  border: 1px solid rgba($sr-teal, 0.3);
+  border-radius: 2px;
+  padding: 1rem;
+  font-family: $sr-font-mono;
+  font-size: 0.9rem;
+  color: $sr-teal;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.1) 0px,
+      rgba(0, 0, 0, 0.1) 1px,
+      transparent 1px,
+      transparent 2px
+    );
+  }
+
+  // Cursor blink
+  &__cursor {
+    display: inline-block;
+    width: 8px;
+    height: 1em;
+    background: $sr-teal;
+    animation: cursor-blink 1s step-end infinite;
+  }
+}
+
+@keyframes cursor-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+// =============================================================================
+// DATA DISPLAY ELEMENTS
+// =============================================================================
+
+// Stat display with neon accent
+.Shadowrun__stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25em;
+
+  &__value {
+    font-size: 1.5em;
+    font-weight: bold;
+    color: $sr-gold-bright;
+    text-shadow: 0 0 8px $sr-gold-glow;
+  }
+
+  &__label {
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+  }
+
+  &--physical &__value {
+    color: $sr-gold-bright;
+    text-shadow: 0 0 8px $sr-gold-glow;
+  }
+
+  &--mental &__value {
+    color: $sr-purple-bright;
+    text-shadow: 0 0 8px $sr-purple-glow;
+  }
+
+  &--special &__value {
+    color: $sr-teal-bright;
+    text-shadow: 0 0 8px $sr-teal-glow;
+  }
+}
+
+// Animated loading bar
+.Shadowrun__loading {
+  height: 4px;
+  background: $sr-bg-darker;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, $sr-teal, transparent);
+    animation: loading-sweep 1.5s infinite;
+  }
+}
+
+@keyframes loading-sweep {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
   }
 }

@@ -105,3 +105,15 @@
 
 	/// Which hand is dominant - "right" or "left". Affects accuracy/damage when using the non-dominant hand.
 	var/dominant_hand = "right"
+	/// SR5 Lifestyle tier - determines living conditions. One of: street, squatter, low, middle, high, luxury
+	var/sr_lifestyle = "low"
+	/// SR5 Mentor Spirit - provides bonuses and imposes disadvantages. Path string like "/datum/sr_mentor_spirit/bear"
+	var/sr_mentor_spirit = ""
+	/// SR5 Character notes - general backstory/notes
+	var/sr_notes_general = ""
+	/// SR5 Security record - visible to security personnel
+	var/sr_notes_security = ""
+	/// SR5 Medical record - visible to medical personnel
+	var/sr_notes_medical = ""
+	/// SR5 Exploitable info - visible to antagonists (blackmail, weaknesses, etc.)
+	var/sr_notes_exploitable = ""

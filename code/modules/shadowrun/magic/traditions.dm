@@ -154,3 +154,87 @@
 	philosophy = "The universe is structured by divine mathematics. Understand the pattern."
 	spirits = list("Air", "Earth", "Fire", "Man", "Water")
 	ui_sort_order = 230
+
+// =============================================================================
+// ADDITIONAL TRADITIONS
+// =============================================================================
+
+/datum/sr_tradition/wuxing
+	name = "Wuxing"
+	desc = "Chinese tradition based on the five elements and yin-yang balance."
+	drain_attribute = "intuition"
+	philosophy = "All things flow from the interplay of the five elements. Balance is power."
+	spirits = list("Earth", "Fire", "Water", "Air", "Man")
+	ui_sort_order = 240
+
+/datum/sr_tradition/path_of_the_wheel
+	name = "Path of the Wheel"
+	desc = "Romani tradition following the eternal cycle of fate and fortune."
+	drain_attribute = "intuition"
+	philosophy = "Fate turns like a wheel. Read the signs and ride the currents of destiny."
+	spirits = list("Air", "Fire", "Man", "Task")
+	ui_sort_order = 250
+
+/datum/sr_tradition/islamic_alchemy
+	name = "Islamic Alchemy"
+	desc = "Tradition rooted in Sufi mysticism and alchemical transformation."
+	drain_attribute = "logic"
+	philosophy = "Magic is the refinement of the soul. Transform the base into the divine."
+	spirits = list("Air", "Earth", "Fire", "Man", "Water")
+	ui_sort_order = 260
+
+/datum/sr_tradition/zoroastrian
+	name = "Zoroastrian"
+	desc = "Ancient Persian tradition of light against darkness."
+	drain_attribute = "charisma"
+	philosophy = "The eternal battle between Ahura Mazda and Angra Mainyu plays out in all things."
+	spirits = list("Fire", "Air", "Guardian", "Man")
+	ui_sort_order = 270
+
+/datum/sr_tradition/santeria
+	name = "Santeria"
+	desc = "Afro-Cuban tradition blending Yoruba beliefs with Catholic imagery."
+	drain_attribute = "charisma"
+	philosophy = "The Orishas walk among us. Honor them and they share their power."
+	spirits = list("Beast", "Fire", "Man", "Water", "Guardian")
+	ui_sort_order = 280
+
+/datum/sr_tradition/hindu
+	name = "Hindu"
+	desc = "Indian tradition invoking the power of the Vedic deities."
+	drain_attribute = "charisma"
+	philosophy = "All is Brahman. Through devotion and discipline, touch the infinite."
+	spirits = list("Air", "Beast", "Earth", "Fire", "Water", "Man")
+	ui_sort_order = 290
+
+/datum/sr_tradition/necromancy
+	name = "Necromancy"
+	desc = "Dark tradition focused on death magic and communing with the dead."
+	drain_attribute = "charisma"
+	philosophy = "Death is not an ending but a threshold. The dead remember all."
+	spirits = list("Man", "Task", "Guardian")
+	ui_sort_order = 300
+
+/datum/sr_tradition/romani
+	name = "Romani"
+	desc = "Traveling people's tradition of curses, fortune, and freedom."
+	drain_attribute = "intuition"
+	philosophy = "The road provides. Fortune favors those who wander."
+	spirits = list("Air", "Beast", "Fire", "Man")
+	ui_sort_order = 310
+
+/datum/sr_tradition/insect_shaman
+	name = "Insect Shaman"
+	desc = "Dangerous tradition serving the alien insect spirits."
+	drain_attribute = "charisma"
+	philosophy = "The hive is all. Serve the queen and be reborn in perfection."
+	spirits = list("Beast", "Guardian", "Task")
+	ui_sort_order = 999 // Hidden/restricted
+
+/datum/sr_tradition/toxic_shaman
+	name = "Toxic Shaman"
+	desc = "Corrupted tradition drawing power from pollution and decay."
+	drain_attribute = "charisma"
+	philosophy = "Purity is a lie. Embrace the poison and become immune to weakness."
+	spirits = list("Earth", "Fire", "Man", "Water")
+	ui_sort_order = 998 // Hidden/restricted
