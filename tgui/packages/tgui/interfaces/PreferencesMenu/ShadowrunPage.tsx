@@ -556,6 +556,7 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                       validation={validation}
                       onResetAll={onResetAll}
                       onSaveSheet={onSaveSheet}
+                      onNavigateToSection={setTab}
                     />
                   </Stack.Item>
 

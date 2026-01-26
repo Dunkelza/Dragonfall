@@ -13,12 +13,12 @@ import { lazy, memo, ReactNode, Suspense } from 'react';
 import { Box, Icon, Stack } from '../../../components';
 import { QuirksPage } from '../QuirksPage';
 import { AttributeSelector } from './AttributeSelector';
+import { CareerSection } from './CareerSection';
 import {
   CollapsibleSection,
   MetatypeSelectorProps,
   PrioritySelector,
 } from './index';
-import { JobsSection } from './JobsSection';
 import {
   ChargenConstData,
   ChargenState,
@@ -486,8 +486,8 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
 
     case ShadowrunTab.Occupations:
       return (
-        <Box className="PreferencesMenu__ShadowrunSheet__jobsContent">
-          <JobsSection isSaved={isSaved} />
+        <Box className="PreferencesMenu__ShadowrunSheet__careerContent">
+          <CareerSection isSaved={isSaved} />
         </Box>
       );
 

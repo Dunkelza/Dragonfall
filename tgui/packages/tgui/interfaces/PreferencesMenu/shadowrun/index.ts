@@ -109,11 +109,11 @@ export {
 // Selectors
 export { AttributeSelector } from './AttributeSelector';
 export { AugmentsSection } from './AugmentsSection';
+export { CareerSection, type CareerSectionProps } from './CareerSection';
 export { ContactsSelector } from './ContactsSelector';
 export { CoreTabContent, type CoreTabContentProps } from './CoreTabContent';
 export { DroneSection } from './DroneSection';
 export { GearSection } from './GearSection';
-export { JobsSection, type JobsSectionProps } from './JobsSection';
 export { KnowledgeSkillsSelector } from './KnowledgeSkillsSelector';
 export { MagicSelector } from './MagicSelector';
 export {
@@ -121,7 +121,7 @@ export {
   type MetatypeSelectorProps,
 } from './MetatypeSelector';
 export { PrioritySelector } from './PrioritySelector';
-export { SaveResetBar } from './SaveResetBar';
+export { getSectionTab, SaveResetBar } from './SaveResetBar';
 export { SkillsSection } from './SkillsSection';
 export { SpecialSelector } from './SpecialSelector';
 

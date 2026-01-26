@@ -16,6 +16,36 @@ import {
 import { calculateBumpedValue } from './hooks';
 import { AttributeMeta, ChargenConstData, ChargenState } from './types';
 
+// === ACCENT COLORS ===
+// Primary accent (purple gradient for overall container)
+const ACCENT_PURPLE = '#9b59b6';
+const ACCENT_PURPLE_DIM = 'rgba(155, 89, 182, 0.15)';
+const ACCENT_PURPLE_BORDER = 'rgba(155, 89, 182, 0.4)';
+
+// Edge: Gold theme
+const EDGE_COLOR = '#ffd700';
+const EDGE_COLOR_DIM = 'rgba(255, 215, 0, 0.15)';
+
+// Magic: Purple theme
+const MAGIC_COLOR = '#ba55d3';
+const MAGIC_COLOR_DIM = 'rgba(186, 85, 211, 0.15)';
+
+// Resonance: Cyan theme
+const RESONANCE_COLOR = '#00bcd4';
+const RESONANCE_COLOR_DIM = 'rgba(0, 188, 212, 0.15)';
+
+// Essence: Teal
+const ESSENCE_COLOR = '#26c6da';
+const ESSENCE_COLOR_DIM = 'rgba(38, 198, 218, 0.15)';
+
+// Karma: Gold
+const KARMA_COLOR = '#ffc107';
+const KARMA_COLOR_DIM = 'rgba(255, 193, 7, 0.15)';
+
+// Status colors
+const SUCCESS_GREEN = '#4caf50';
+const WARNING_YELLOW = '#ffeb3b';
+
 type SpecialSelectorProps = {
   act: (action: string, payload?: Record<string, unknown>) => void;
   chargenConstData: ChargenConstData | null;
@@ -120,306 +150,472 @@ export const SpecialSelector = memo((props: SpecialSelectorProps) => {
     magicBonus < (magicMeta?.max ?? 6) - magicBase &&
     remainingPoints > 0;
 
+  // Determine magic attribute color based on awakening type
+  const isTechno = checkTechnomancer(awakening);
+  const magicAttrColor = isTechno ? RESONANCE_COLOR : MAGIC_COLOR;
+  const magicAttrColorDim = isTechno ? RESONANCE_COLOR_DIM : MAGIC_COLOR_DIM;
+  const magicAttrName = isTechno ? 'Resonance' : 'Magic';
+  const magicAttrIcon = isTechno ? 'wifi' : 'hat-wizard';
+
   return (
     <Box
       style={{
-        background: 'rgba(0, 0, 0, 0.25)',
-        border: '2px solid rgba(186, 85, 211, 0.4)',
-        padding: '0.5rem',
-        marginTop: '0.5rem',
+        background: `linear-gradient(135deg, ${ACCENT_PURPLE_DIM}, rgba(0, 0, 0, 0.4))`,
+        borderRadius: '8px',
+        border: `1px solid ${ACCENT_PURPLE_BORDER}`,
+        padding: '0.75rem',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
+      {/* Decorative corner accent */}
+      <Box
+        style={{
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          width: '60px',
+          height: '60px',
+          background: `linear-gradient(135deg, transparent 50%, ${ACCENT_PURPLE_DIM} 50%)`,
+          opacity: '0.5',
+        }}
+      />
+
+      {/* Header */}
       <Stack
         align="center"
         style={{
-          borderBottom: '1px solid rgba(186, 85, 211, 0.3)',
-          paddingBottom: '0.3rem',
-          marginBottom: '0.4rem',
+          borderBottom: `1px solid ${ACCENT_PURPLE_BORDER}`,
+          paddingBottom: '0.5rem',
+          marginBottom: '0.5rem',
         }}
       >
         <Stack.Item grow>
-          <Box bold style={{ color: '#ba55d3', fontSize: '0.9rem' }}>
-            <Icon name="star" mr={0.5} />
-            Special
+          <Box
+            style={{
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              color: ACCENT_PURPLE,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            <Icon name="star" />
+            Special Attributes
           </Box>
         </Stack.Item>
         <Stack.Item>
           <Box
             style={{
+              padding: '0.2rem 0.5rem',
+              background:
+                remainingPoints > 0
+                  ? 'rgba(255, 235, 59, 0.2)'
+                  : 'rgba(76, 175, 80, 0.2)',
+              borderRadius: '4px',
               fontSize: '0.75rem',
-              color: remainingPoints > 0 ? '#ffeb3b' : '#4caf50',
+              fontWeight: 'bold',
+              color: remainingPoints > 0 ? WARNING_YELLOW : SUCCESS_GREEN,
             }}
           >
-            {remainingPoints}/{totalPoints}
+            <Icon name="coins" mr={0.5} />
+            {remainingPoints}/{totalPoints} pts
           </Box>
         </Stack.Item>
       </Stack>
 
-      {/* Edge */}
-      <Stack
-        align="center"
+      {/* Edge Card */}
+      <Box
         style={{
-          padding: '0.15rem 0',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+          background: EDGE_COLOR_DIM,
+          borderRadius: '6px',
+          padding: '0.5rem 0.75rem',
+          marginBottom: '0.5rem',
+          borderLeft: `3px solid ${EDGE_COLOR}`,
         }}
       >
-        <Stack.Item grow>
-          <Tooltip
-            content="Edge represents luck and fate. Spend Edge points during play to push your limits, reroll failures, or survive deadly situations. Higher Edge means more chances to defy the odds."
-            position="right"
-          >
-            <Box
-              style={{
-                fontSize: '0.75rem',
-                cursor: 'help',
-                borderBottom: '1px dotted rgba(255,255,255,0.2)',
-              }}
-            >
-              Edge (Base: {edgeBase})
-            </Box>
-          </Tooltip>
-        </Stack.Item>
-        <Stack.Item>
-          {isSaved ? (
-            <Box
-              bold
-              style={{
-                color: edgeBonus > 0 ? '#ba55d3' : '#888',
-                fontSize: '0.85rem',
-                minWidth: '1.5rem',
-                textAlign: 'center',
-              }}
-            >
-              {edgeTotal}
-            </Box>
-          ) : (
-            <Stack align="center">
-              <Stack.Item>
-                <Button
-                  icon="minus"
-                  compact
-                  disabled={!canDecreaseEdge}
-                  onClick={() => handleBumpSpecial(edgeId, -1)}
-                  style={{
-                    minWidth: '1.2rem',
-                    padding: '0.1rem',
-                    fontSize: '0.7rem',
-                  }}
-                />
-              </Stack.Item>
-              <Stack.Item>
-                <Tooltip
-                  content={`Range: ${edgeBase} - ${edgeMeta?.max ?? 6}`}
-                  position="top"
-                >
-                  <Box
-                    bold
-                    style={{
-                      color: edgeBonus > 0 ? '#ba55d3' : '#888',
-                      fontSize: '0.85rem',
-                      minWidth: '1.5rem',
-                      textAlign: 'center',
-                      cursor: 'help',
-                    }}
-                  >
-                    {edgeTotal}
-                  </Box>
-                </Tooltip>
-              </Stack.Item>
-              <Stack.Item>
-                <Button
-                  icon="plus"
-                  compact
-                  disabled={!canIncreaseEdge}
-                  onClick={() => handleBumpSpecial(edgeId, 1)}
-                  style={{
-                    minWidth: '1.2rem',
-                    padding: '0.1rem',
-                    fontSize: '0.7rem',
-                  }}
-                />
-              </Stack.Item>
-            </Stack>
-          )}
-        </Stack.Item>
-      </Stack>
-
-      {/* Magic/Resonance (only if awakened) */}
-      {isAwakened && (
-        <Stack
-          align="center"
-          style={{
-            padding: '0.15rem 0',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
-          }}
-        >
+        <Stack align="center" justify="space-between">
           <Stack.Item grow>
             <Tooltip
-              content={
-                checkTechnomancer(awakening)
-                  ? `Resonance determines your connection to the Matrix and ability to compile sprites and use complex forms. Higher Resonance means stronger technomancer abilities. Base: ${magicBase}`
-                  : `Magic rating determines your mystical power for casting spells, summoning spirits, or using adept powers. Also affects your ability to resist drain. Base: ${magicBase}`
-              }
+              content="Edge represents luck and fate. Spend Edge points during play to push your limits, reroll failures, or survive deadly situations. Higher Edge means more chances to defy the odds."
               position="right"
             >
               <Box
                 style={{
-                  fontSize: '0.75rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
                   cursor: 'help',
-                  borderBottom: '1px dotted rgba(255,255,255,0.2)',
                 }}
               >
-                {checkTechnomancer(awakening) ? 'Resonance' : 'Magic'} (Base:{' '}
-                {magicBase})
+                <Icon
+                  name="bolt"
+                  style={{ color: EDGE_COLOR, fontSize: '1.1rem' }}
+                />
+                <Box>
+                  <Box
+                    style={{
+                      fontSize: '0.65rem',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                    }}
+                  >
+                    Edge
+                  </Box>
+                  <Box
+                    style={{
+                      fontSize: '0.75rem',
+                      color: 'rgba(255, 255, 255, 0.7)',
+                    }}
+                  >
+                    Base: {edgeBase}
+                  </Box>
+                </Box>
               </Box>
             </Tooltip>
           </Stack.Item>
           <Stack.Item>
             {isSaved ? (
               <Box
-                bold
                 style={{
-                  color: magicBonus > 0 ? '#ba55d3' : '#888',
-                  fontSize: '0.85rem',
-                  minWidth: '1.5rem',
-                  textAlign: 'center',
+                  fontSize: '1.2rem',
+                  fontWeight: 'bold',
+                  color: EDGE_COLOR,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
                 }}
               >
-                {magicTotal}
+                <Icon name="lock" style={{ fontSize: '0.7rem' }} />
+                {edgeTotal}
               </Box>
             ) : (
-              <Stack align="center">
-                <Stack.Item>
+              <Box
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                }}
+              >
+                <Button
+                  icon="minus"
+                  compact
+                  disabled={!canDecreaseEdge}
+                  onClick={() => handleBumpSpecial(edgeId, -1)}
+                  style={{ padding: '0.15rem 0.3rem' }}
+                />
+                <Tooltip
+                  content={`Range: ${edgeBase} - ${edgeMeta?.max ?? 6}`}
+                  position="top"
+                >
+                  <Box
+                    style={{
+                      minWidth: '2rem',
+                      textAlign: 'center',
+                      fontSize: '1.2rem',
+                      fontWeight: 'bold',
+                      color: edgeBonus > 0 ? EDGE_COLOR : '#666',
+                      cursor: 'help',
+                    }}
+                  >
+                    {edgeTotal}
+                  </Box>
+                </Tooltip>
+                <Button
+                  icon="plus"
+                  compact
+                  disabled={!canIncreaseEdge}
+                  onClick={() => handleBumpSpecial(edgeId, 1)}
+                  style={{ padding: '0.15rem 0.3rem' }}
+                />
+              </Box>
+            )}
+          </Stack.Item>
+        </Stack>
+      </Box>
+
+      {/* Magic/Resonance Card (only if awakened) */}
+      {isAwakened && (
+        <Box
+          style={{
+            background: magicAttrColorDim,
+            borderRadius: '6px',
+            padding: '0.5rem 0.75rem',
+            marginBottom: '0.5rem',
+            borderLeft: `3px solid ${magicAttrColor}`,
+          }}
+        >
+          <Stack align="center" justify="space-between">
+            <Stack.Item grow>
+              <Tooltip
+                content={
+                  isTechno
+                    ? `Resonance determines your connection to the Matrix and ability to compile sprites and use complex forms. Higher Resonance means stronger technomancer abilities. Base: ${magicBase}`
+                    : `Magic rating determines your mystical power for casting spells, summoning spirits, or using adept powers. Also affects your ability to resist drain. Base: ${magicBase}`
+                }
+                position="right"
+              >
+                <Box
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    cursor: 'help',
+                  }}
+                >
+                  <Icon
+                    name={magicAttrIcon}
+                    style={{ color: magicAttrColor, fontSize: '1.1rem' }}
+                  />
+                  <Box>
+                    <Box
+                      style={{
+                        fontSize: '0.65rem',
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.05em',
+                      }}
+                    >
+                      {magicAttrName}
+                    </Box>
+                    <Box
+                      style={{
+                        fontSize: '0.75rem',
+                        color: 'rgba(255, 255, 255, 0.7)',
+                      }}
+                    >
+                      Base: {magicBase}
+                    </Box>
+                  </Box>
+                </Box>
+              </Tooltip>
+            </Stack.Item>
+            <Stack.Item>
+              {isSaved ? (
+                <Box
+                  style={{
+                    fontSize: '1.2rem',
+                    fontWeight: 'bold',
+                    color: magicAttrColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                  }}
+                >
+                  <Icon name="lock" style={{ fontSize: '0.7rem' }} />
+                  {magicTotal}
+                </Box>
+              ) : (
+                <Box
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.25rem',
+                  }}
+                >
                   <Button
                     icon="minus"
                     compact
                     disabled={!canDecreaseMagic}
                     onClick={() => handleBumpSpecial(magicId, -1)}
-                    style={{
-                      minWidth: '1.2rem',
-                      padding: '0.1rem',
-                      fontSize: '0.7rem',
-                    }}
+                    style={{ padding: '0.15rem 0.3rem' }}
                   />
-                </Stack.Item>
-                <Stack.Item>
                   <Tooltip
                     content={`Range: ${magicBase} - ${magicMeta?.max ?? 6}`}
                     position="top"
                   >
                     <Box
-                      bold
                       style={{
-                        color: magicBonus > 0 ? '#ba55d3' : '#888',
-                        fontSize: '0.85rem',
-                        minWidth: '1.5rem',
+                        minWidth: '2rem',
                         textAlign: 'center',
+                        fontSize: '1.2rem',
+                        fontWeight: 'bold',
+                        color: magicBonus > 0 ? magicAttrColor : '#666',
                         cursor: 'help',
                       }}
                     >
                       {magicTotal}
                     </Box>
                   </Tooltip>
-                </Stack.Item>
-                <Stack.Item>
                   <Button
                     icon="plus"
                     compact
                     disabled={!canIncreaseMagic}
                     onClick={() => handleBumpSpecial(magicId, 1)}
-                    style={{
-                      minWidth: '1.2rem',
-                      padding: '0.1rem',
-                      fontSize: '0.7rem',
-                    }}
+                    style={{ padding: '0.15rem 0.3rem' }}
                   />
-                </Stack.Item>
-              </Stack>
-            )}
-          </Stack.Item>
-        </Stack>
+                </Box>
+              )}
+            </Stack.Item>
+          </Stack>
+        </Box>
       )}
 
-      {/* Essence (read-only, starts at 6, reduced by cyberware) */}
-      <Stack mt={0.5} align="center" justify="space-between">
-        <Stack.Item>
-          <Tooltip
-            content="Essence: reduced by cyberware/bioware"
-            position="right"
-          >
-            <Box
-              bold
-              style={{
-                fontSize: '0.8rem',
-                color: '#00bcd4',
-                cursor: 'help',
-              }}
-            >
-              Essence
-            </Box>
-          </Tooltip>
-        </Stack.Item>
-        <Stack.Item>
-          <Box
-            bold
-            style={{
-              color: '#00bcd4',
-              fontSize: '0.85rem',
-              minWidth: '1.5rem',
-              textAlign: 'center',
-            }}
-          >
-            6.00
-          </Box>
-        </Stack.Item>
-      </Stack>
-
-      {/* Karma */}
-      <Stack mt={0.5} align="center" justify="space-between">
-        <Stack.Item>
-          <Tooltip
-            content="Karma: earned from Qualities (negative quirks give karma, positive quirks cost karma)"
-            position="right"
-          >
-            <Box
-              bold
-              style={{
-                fontSize: '0.8rem',
-                color: '#ffd700',
-                cursor: 'help',
-              }}
-            >
-              Karma
-            </Box>
-          </Tooltip>
-        </Stack.Item>
-        <Stack.Item>
-          <Box
-            bold
-            style={{
-              color: karmaBalance >= 0 ? '#4caf50' : '#f44336',
-              fontSize: '0.85rem',
-              minWidth: '1.5rem',
-              textAlign: 'center',
-            }}
-          >
-            {karmaBalance >= 0 ? `+${karmaBalance}` : karmaBalance}
-          </Box>
-        </Stack.Item>
-      </Stack>
-
-      {/* Status */}
+      {/* Essence Card (read-only) */}
       <Box
-        mt={0.3}
         style={{
-          fontSize: '0.7rem',
-          color: 'rgba(255, 255, 255, 0.5)',
+          background: ESSENCE_COLOR_DIM,
+          borderRadius: '6px',
+          padding: '0.5rem 0.75rem',
+          marginBottom: '0.5rem',
+          borderLeft: `3px solid ${ESSENCE_COLOR}`,
+        }}
+      >
+        <Stack align="center" justify="space-between">
+          <Stack.Item>
+            <Tooltip
+              content="Essence represents your soul and humanity. Starts at 6.00 and is reduced by cyberware and bioware implants. Essence cannot be restored once lost."
+              position="right"
+            >
+              <Box
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'help',
+                }}
+              >
+                <Icon
+                  name="heart"
+                  style={{ color: ESSENCE_COLOR, fontSize: '1.1rem' }}
+                />
+                <Box>
+                  <Box
+                    style={{
+                      fontSize: '0.65rem',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                    }}
+                  >
+                    Essence
+                  </Box>
+                  <Box
+                    style={{
+                      fontSize: '0.7rem',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      fontStyle: 'italic',
+                    }}
+                  >
+                    Reduced by augments
+                  </Box>
+                </Box>
+              </Box>
+            </Tooltip>
+          </Stack.Item>
+          <Stack.Item>
+            <Box
+              style={{
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
+                color: ESSENCE_COLOR,
+              }}
+            >
+              6.00
+            </Box>
+          </Stack.Item>
+        </Stack>
+      </Box>
+
+      {/* Karma Card */}
+      <Box
+        style={{
+          background: KARMA_COLOR_DIM,
+          borderRadius: '6px',
+          padding: '0.5rem 0.75rem',
+          borderLeft: `3px solid ${KARMA_COLOR}`,
+        }}
+      >
+        <Stack align="center" justify="space-between">
+          <Stack.Item>
+            <Tooltip
+              content="Karma: earned from Qualities. Negative quirks give karma, positive quirks cost karma. Your balance must be zero or positive to save."
+              position="right"
+            >
+              <Box
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'help',
+                }}
+              >
+                <Icon
+                  name="yin-yang"
+                  style={{ color: KARMA_COLOR, fontSize: '1.1rem' }}
+                />
+                <Box>
+                  <Box
+                    style={{
+                      fontSize: '0.65rem',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                    }}
+                  >
+                    Karma Balance
+                  </Box>
+                  <Box
+                    style={{
+                      fontSize: '0.7rem',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      fontStyle: 'italic',
+                    }}
+                  >
+                    From Qualities
+                  </Box>
+                </Box>
+              </Box>
+            </Tooltip>
+          </Stack.Item>
+          <Stack.Item>
+            <Box
+              style={{
+                fontSize: '1.2rem',
+                fontWeight: 'bold',
+                color: karmaBalance >= 0 ? SUCCESS_GREEN : '#f44336',
+              }}
+            >
+              {karmaBalance >= 0 ? `+${karmaBalance}` : karmaBalance}
+            </Box>
+          </Stack.Item>
+        </Stack>
+      </Box>
+
+      {/* Awakening Status Badge */}
+      <Box
+        style={{
+          marginTop: '0.5rem',
           textAlign: 'center',
         }}
       >
-        {isAwakened
-          ? `${awakening.charAt(0).toUpperCase() + awakening.slice(1)}`
-          : 'Mundane'}
+        <Box
+          as="span"
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+            padding: '0.25rem 0.75rem',
+            background: isAwakened
+              ? magicAttrColorDim
+              : 'rgba(128, 128, 128, 0.2)',
+            borderRadius: '12px',
+            fontSize: '0.75rem',
+            fontWeight: 'bold',
+            color: isAwakened ? magicAttrColor : 'rgba(255, 255, 255, 0.5)',
+            border: `1px solid ${isAwakened ? magicAttrColor : 'rgba(128, 128, 128, 0.3)'}`,
+          }}
+        >
+          <Icon
+            name={isAwakened ? (isTechno ? 'wifi' : 'magic') : 'user'}
+            style={{ fontSize: '0.7rem' }}
+          />
+          {isAwakened
+            ? awakening.charAt(0).toUpperCase() + awakening.slice(1)
+            : 'Mundane'}
+        </Box>
       </Box>
     </Box>
   );

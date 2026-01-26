@@ -18,6 +18,26 @@ import {
   DroneModMeta,
 } from './types';
 
+// === ACCENT COLORS ===
+const ACCENT_BLUE = '#4fc3f7';
+const ACCENT_BLUE_DIM = 'rgba(79, 195, 247, 0.15)';
+const ACCENT_BLUE_BORDER = 'rgba(79, 195, 247, 0.4)';
+const NUYEN_GOLD = '#ffd700';
+const SUCCESS_GREEN = '#4caf50';
+const DANGER_RED = '#ff6b6b';
+const RESTRICTED_ORANGE = '#ffb74d';
+const FORBIDDEN_RED = '#dc3545';
+
+// Category icons
+const CATEGORY_ICONS: Record<string, string> = {
+  small: 'helicopter',
+  medium: 'plane',
+  large: 'shuttle-space',
+  vehicle: 'car',
+  anthro: 'robot',
+  default: 'robot',
+};
+
 // DRONE SECTION
 // ============================================================================
 
@@ -232,18 +252,27 @@ export const DroneSection = memo((props: DroneSectionProps) => {
       as="span"
       style={{
         display: 'inline-block',
-        padding: '0.15rem 0.35rem',
-        marginRight: '0.25rem',
-        background: 'rgba(0, 0, 0, 0.4)',
-        borderRadius: '3px',
+        padding: '0.2rem 0.4rem',
+        marginRight: '0.3rem',
+        marginBottom: '0.2rem',
+        background: 'rgba(0, 0, 0, 0.5)',
+        borderRadius: '4px',
         fontSize: '0.75rem',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
       }}
     >
-      <span style={{ color: 'rgba(255,255,255,0.6)' }}>{label}:</span>{' '}
+      <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem' }}>
+        {label}
+      </span>{' '}
       <span style={{ fontWeight: 'bold', color: color || '#fff' }}>
         {val + (bonus || 0)}
         {bonus !== undefined && bonus !== 0 && (
-          <span style={{ color: bonus > 0 ? '#4caf50' : '#ff6b6b' }}>
+          <span
+            style={{
+              color: bonus > 0 ? SUCCESS_GREEN : DANGER_RED,
+              fontSize: '0.7rem',
+            }}
+          >
             {' '}
             ({bonus > 0 ? '+' : ''}
             {bonus})
@@ -253,51 +282,214 @@ export const DroneSection = memo((props: DroneSectionProps) => {
     </Box>
   );
 
+  // Get category icon
+  const getCategoryIcon = (categoryId: string) => {
+    return CATEGORY_ICONS[categoryId] || CATEGORY_ICONS.default;
+  };
+
   return (
-    <Box style={{ marginTop: '1rem' }}>
-      {/* Header */}
+    <Box
+      style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: `linear-gradient(135deg, ${ACCENT_BLUE_DIM}, rgba(0, 0, 0, 0.4))`,
+        borderRadius: '8px',
+        border: `1px solid ${ACCENT_BLUE_BORDER}`,
+        padding: '1rem',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Decorative corner accent */}
       <Box
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '0.5rem',
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          width: '80px',
+          height: '80px',
+          background: `linear-gradient(135deg, transparent 50%, ${ACCENT_BLUE_DIM} 50%)`,
+          opacity: '0.5',
+        }}
+      />
+
+      {/* Header */}
+      <Box style={{ marginBottom: '1rem' }}>
+        <Stack align="center" justify="space-between">
+          <Stack.Item>
+            <Box
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: 'bold',
+                color: ACCENT_BLUE,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Icon name="robot" />
+              Drone Bay
+              {selectedDroneCount > 0 && (
+                <Box
+                  as="span"
+                  style={{
+                    fontSize: '0.8rem',
+                    padding: '0.2rem 0.5rem',
+                    background: ACCENT_BLUE_DIM,
+                    border: `1px solid ${ACCENT_BLUE_BORDER}`,
+                    borderRadius: '10px',
+                    marginLeft: '0.5rem',
+                  }}
+                >
+                  {selectedDroneCount} drone
+                  {selectedDroneCount !== 1 ? 's' : ''}
+                </Box>
+              )}
+            </Box>
+          </Stack.Item>
+        </Stack>
+      </Box>
+
+      {/* Nuyen Display Card */}
+      <Box
+        style={{
+          background: 'rgba(0, 0, 0, 0.3)',
+          borderRadius: '6px',
+          padding: '0.75rem 1rem',
+          marginBottom: '1rem',
+          borderLeft: `3px solid ${NUYEN_GOLD}`,
         }}
       >
-        <Box style={{ fontWeight: 'bold', fontSize: '1rem' }}>
-          <Icon name="robot" mr={0.5} />
-          Drones
-        </Box>
-        <Box style={{ color: '#ffd700', fontWeight: 'bold' }}>
-          ¥{totalDroneCost.toLocaleString()} spent on drones
-        </Box>
+        <Stack align="center" justify="space-between">
+          <Stack.Item>
+            <Box
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Icon
+                name="yen-sign"
+                style={{
+                  color: NUYEN_GOLD,
+                  fontSize: '1.2rem',
+                }}
+              />
+              <Box>
+                <Box
+                  style={{
+                    fontSize: '0.75rem',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  Nuyen Remaining
+                </Box>
+                <Box
+                  style={{
+                    fontSize: '1.4rem',
+                    fontWeight: 'bold',
+                    color: nuyenRemaining < 0 ? DANGER_RED : NUYEN_GOLD,
+                  }}
+                >
+                  ¥{nuyenRemaining.toLocaleString()}
+                </Box>
+              </Box>
+            </Box>
+          </Stack.Item>
+          <Stack.Item>
+            <Box
+              style={{
+                textAlign: 'right',
+              }}
+            >
+              <Box
+                style={{
+                  fontSize: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Drone Fleet Cost
+              </Box>
+              <Box
+                style={{
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  color: ACCENT_BLUE,
+                }}
+              >
+                ¥{totalDroneCost.toLocaleString()}
+              </Box>
+            </Box>
+          </Stack.Item>
+        </Stack>
       </Box>
 
       {/* Category Tabs */}
-      <Tabs fluid mb={0.5}>
-        {droneCategories
-          .sort(
-            (a: DroneCategoryMeta, b: DroneCategoryMeta) =>
-              (a.sort || 0) - (b.sort || 0),
-          )
-          .map((cat: DroneCategoryMeta) => (
-            <Tabs.Tab
-              key={cat.id}
-              selected={selectedCategory === cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-            >
-              {cat.name}
-            </Tabs.Tab>
-          ))}
-      </Tabs>
+      <Box style={{ marginBottom: '0.75rem' }}>
+        <Tabs fluid>
+          {droneCategories
+            .sort(
+              (a: DroneCategoryMeta, b: DroneCategoryMeta) =>
+                (a.sort || 0) - (b.sort || 0),
+            )
+            .map((cat: DroneCategoryMeta) => {
+              const isActive = selectedCategory === cat.id;
+              const selectedInCategory = Object.keys(selectedDrones).filter(
+                (droneId) => {
+                  const drone = droneCatalog[droneId];
+                  return drone?.category === cat.id;
+                },
+              ).length;
+
+              return (
+                <Tabs.Tab
+                  key={cat.id}
+                  selected={isActive}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  style={{
+                    ...(isActive && {
+                      background: ACCENT_BLUE_DIM,
+                      borderBottom: `2px solid ${ACCENT_BLUE}`,
+                      boxShadow: `0 2px 8px ${ACCENT_BLUE_DIM}`,
+                    }),
+                  }}
+                >
+                  <Icon name={getCategoryIcon(cat.id)} mr={0.5} />
+                  {cat.name}
+                  {selectedInCategory > 0 && (
+                    <Box
+                      as="span"
+                      style={{
+                        marginLeft: '0.25rem',
+                        padding: '0.1rem 0.35rem',
+                        background: SUCCESS_GREEN,
+                        borderRadius: '8px',
+                        fontSize: '0.7rem',
+                        fontWeight: 'bold',
+                      }}
+                    >
+                      {selectedInCategory}
+                    </Box>
+                  )}
+                </Tabs.Tab>
+              );
+            })}
+        </Tabs>
+      </Box>
 
       {/* Drone List */}
       <Box
         style={{
-          maxHeight: '350px',
-          overflowY: 'auto',
+          flexGrow: '1',
+          overflow: 'auto',
           background: 'rgba(0, 0, 0, 0.2)',
-          borderRadius: '4px',
+          borderRadius: '6px',
           padding: '0.5rem',
         }}
       >
@@ -322,24 +514,31 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                 padding: '0.75rem',
                 marginBottom: '0.5rem',
                 background: isSelected
-                  ? 'rgba(155, 143, 199, 0.2)'
-                  : 'rgba(0, 0, 0, 0.3)',
-                border: isSelected
-                  ? '1px solid rgba(155, 143, 199, 0.5)'
-                  : '1px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '4px',
+                  ? 'rgba(79, 195, 247, 0.1)'
+                  : 'rgba(0, 0, 0, 0.25)',
+                borderRadius: '6px',
+                borderLeft: `3px solid ${isSelected ? ACCENT_BLUE : 'transparent'}`,
                 opacity: !canAfford && !isSelected ? '0.5' : '1',
+                transition: 'all 0.2s ease',
               }}
             >
               <Stack justify="space-between" align="flex-start">
                 <Stack.Item grow>
+                  {/* Drone Name and Legality */}
                   <Box
                     style={{
                       fontWeight: 'bold',
-                      color: isSelected ? '#9b8fc7' : '#fff',
-                      marginBottom: '0.25rem',
+                      color: isSelected ? ACCENT_BLUE : '#fff',
+                      marginBottom: '0.35rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
                     }}
                   >
+                    <Icon
+                      name={getCategoryIcon(drone.category)}
+                      style={{ opacity: '0.7' }}
+                    />
                     <Tooltip
                       content={
                         drone.desc ||
@@ -353,30 +552,66 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                       <Box
                         as="span"
                         style={{
-                          marginLeft: '0.5rem',
-                          padding: '0.1rem 0.3rem',
+                          padding: '0.1rem 0.4rem',
                           background:
                             drone.legality === 'F'
-                              ? 'rgba(255, 0, 0, 0.3)'
-                              : 'rgba(255, 165, 0, 0.3)',
+                              ? 'rgba(220, 53, 69, 0.3)'
+                              : 'rgba(255, 140, 0, 0.3)',
+                          border: `1px solid ${drone.legality === 'F' ? FORBIDDEN_RED : RESTRICTED_ORANGE}`,
                           borderRadius: '3px',
                           fontSize: '0.7rem',
-                          color: drone.legality === 'F' ? '#ff6b6b' : '#ffb74d',
+                          color:
+                            drone.legality === 'F'
+                              ? FORBIDDEN_RED
+                              : RESTRICTED_ORANGE,
                         }}
                       >
+                        <Icon
+                          name={
+                            drone.legality === 'F'
+                              ? 'ban'
+                              : 'exclamation-triangle'
+                          }
+                          mr={0.25}
+                        />
                         {drone.legality === 'F' ? 'Forbidden' : 'Restricted'}
                       </Box>
                     )}
+                    {isSelected && (
+                      <Box
+                        as="span"
+                        style={{
+                          padding: '0.1rem 0.4rem',
+                          background: 'rgba(76, 175, 80, 0.2)',
+                          border: `1px solid ${SUCCESS_GREEN}`,
+                          borderRadius: '3px',
+                          fontSize: '0.7rem',
+                          color: SUCCESS_GREEN,
+                        }}
+                      >
+                        <Icon name="check" mr={0.25} />
+                        Owned
+                      </Box>
+                    )}
                   </Box>
-                  <Box
-                    style={{
-                      fontSize: '0.8rem',
-                      color: 'rgba(255, 255, 255, 0.7)',
-                      marginBottom: '0.5rem',
-                    }}
-                  >
-                    {drone.desc}
-                  </Box>
+
+                  {/* Description */}
+                  {drone.desc && (
+                    <Box
+                      style={{
+                        fontSize: '0.8rem',
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        marginBottom: '0.5rem',
+                        lineHeight: '1.3',
+                      }}
+                    >
+                      {drone.desc.length > 100
+                        ? `${drone.desc.substring(0, 100)}...`
+                        : drone.desc}
+                    </Box>
+                  )}
+
+                  {/* Stats Row 1 */}
                   <Box style={{ marginBottom: '0.25rem' }}>
                     <StatPill
                       label="BOD"
@@ -403,6 +638,8 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                       color="#ffb74d"
                     />
                   </Box>
+
+                  {/* Stats Row 2 */}
                   <Box>
                     <StatPill
                       label="Pilot"
@@ -422,54 +659,61 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                       color="#fff176"
                     />
                   </Box>
-                  {/* Show mods count badge if drone has mods */}
+
+                  {/* Mods installed badge */}
                   {isSelected && droneModCount > 0 && (
                     <Box
                       style={{
-                        marginTop: '0.25rem',
-                        fontSize: '0.75rem',
-                        color: '#4caf50',
+                        marginTop: '0.5rem',
+                        fontSize: '0.8rem',
+                        color: SUCCESS_GREEN,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
                       }}
                     >
-                      <Icon name="cog" mr={0.25} />
+                      <Icon name="cog" />
                       {droneModCount} mod{droneModCount !== 1 ? 's' : ''}{' '}
                       installed
                     </Box>
                   )}
                 </Stack.Item>
+
+                {/* Price and Actions */}
                 <Stack.Item>
-                  <Box
-                    style={{
-                      textAlign: 'right',
-                      marginBottom: '0.5rem',
-                    }}
-                  >
+                  <Box style={{ textAlign: 'right', marginBottom: '0.5rem' }}>
                     <Box
                       style={{
                         fontWeight: 'bold',
-                        color: canAfford || isSelected ? '#ffd700' : '#ff6b6b',
+                        fontSize: '1.1rem',
+                        color:
+                          canAfford || isSelected ? NUYEN_GOLD : DANGER_RED,
                       }}
                     >
                       ¥{drone.cost.toLocaleString()}
                       {isSelected && modCost > 0 && (
                         <Box
                           as="span"
-                          style={{ color: '#4caf50', fontSize: '0.8rem' }}
+                          style={{
+                            color: SUCCESS_GREEN,
+                            fontSize: '0.85rem',
+                            marginLeft: '0.25rem',
+                          }}
                         >
-                          {' '}
                           +¥{modCost.toLocaleString()}
                         </Box>
                       )}
                     </Box>
                     <Box
                       style={{
-                        fontSize: '0.7rem',
+                        fontSize: '0.75rem',
                         color: 'rgba(255,255,255,0.5)',
                       }}
                     >
                       Avail: {drone.availability}
                     </Box>
                   </Box>
+
                   <Stack vertical>
                     {isSelected ? (
                       <>
@@ -477,9 +721,12 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                           <Button
                             fluid
                             icon="cog"
-                            color="transparent"
                             disabled={isSaved}
                             onClick={() => setCustomizingDroneId(drone.id)}
+                            style={{
+                              background: ACCENT_BLUE_DIM,
+                              border: `1px solid ${ACCENT_BLUE_BORDER}`,
+                            }}
                           >
                             Customize
                           </Button>
@@ -515,33 +762,70 @@ export const DroneSection = memo((props: DroneSectionProps) => {
             </Box>
           );
         })}
+
+        {/* Empty State */}
         {categoryDrones.length === 0 && (
           <Box
             style={{
               textAlign: 'center',
-              color: 'rgba(255, 255, 255, 0.5)',
-              padding: '2rem',
+              color: 'rgba(255, 255, 255, 0.4)',
+              padding: '3rem',
             }}
           >
-            No drones in this category.
+            <Icon
+              name="robot"
+              size={2}
+              style={{
+                marginBottom: '1rem',
+                opacity: '0.5',
+              }}
+            />
+            <Box>No drones in this category.</Box>
           </Box>
         )}
       </Box>
 
-      {/* Selected drones summary */}
+      {/* Selected Drones Summary */}
       {selectedDroneCount > 0 && (
         <Box
           style={{
-            marginTop: '0.5rem',
-            padding: '0.5rem',
+            marginTop: '0.75rem',
             background: 'rgba(0, 0, 0, 0.3)',
-            borderRadius: '4px',
+            borderRadius: '6px',
+            padding: '0.75rem',
+            borderLeft: `3px solid ${ACCENT_BLUE}`,
           }}
         >
-          <Box style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>
-            <Icon name="helicopter" mr={0.5} />
-            Selected Drones ({selectedDroneCount})
+          <Box
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '0.5rem',
+            }}
+          >
+            <Box
+              style={{
+                fontWeight: 'bold',
+                color: ACCENT_BLUE,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Icon name="helicopter" />
+              Drone Fleet
+            </Box>
+            <Box
+              style={{
+                fontSize: '0.9rem',
+                color: 'rgba(255, 255, 255, 0.6)',
+              }}
+            >
+              {selectedDroneCount} drone{selectedDroneCount !== 1 ? 's' : ''}
+            </Box>
           </Box>
+
           <Stack wrap="wrap">
             {Object.keys(selectedDrones).map((droneId: string) => {
               const drone = droneCatalog[droneId];
@@ -554,27 +838,39 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                     style={{
                       display: 'inline-flex',
                       alignItems: 'center',
-                      padding: '0.25rem 0.5rem',
-                      margin: '0.1rem',
-                      background: 'rgba(155, 143, 199, 0.2)',
-                      border: '1px solid rgba(155, 143, 199, 0.4)',
+                      padding: '0.3rem 0.6rem',
+                      margin: '0.15rem',
+                      background: 'rgba(79, 195, 247, 0.15)',
+                      border: `1px solid ${ACCENT_BLUE_BORDER}`,
                       borderRadius: '4px',
                       fontSize: '0.85rem',
                     }}
                   >
+                    <Icon
+                      name={getCategoryIcon(drone.category)}
+                      mr={0.5}
+                      style={{ opacity: '0.7' }}
+                    />
                     {drone.name}
                     {modCount > 0 && (
                       <Box
                         as="span"
-                        ml={0.25}
-                        style={{ color: '#4caf50', fontSize: '0.75rem' }}
+                        ml={0.5}
+                        style={{
+                          color: SUCCESS_GREEN,
+                          fontSize: '0.75rem',
+                          background: 'rgba(76, 175, 80, 0.2)',
+                          padding: '0.1rem 0.3rem',
+                          borderRadius: '3px',
+                        }}
                       >
-                        ({modCount})
+                        <Icon name="cog" mr={0.25} />
+                        {modCount}
                       </Box>
                     )}
                     <Button
                       icon="cog"
-                      ml={0.25}
+                      ml={0.5}
                       compact
                       color="transparent"
                       disabled={isSaved}
@@ -605,7 +901,7 @@ export const DroneSection = memo((props: DroneSectionProps) => {
             left: '0',
             right: '0',
             bottom: '0',
-            background: 'rgba(0, 0, 0, 0.8)',
+            background: 'rgba(0, 0, 0, 0.85)',
             zIndex: '1000',
             display: 'flex',
             alignItems: 'center',
@@ -616,14 +912,15 @@ export const DroneSection = memo((props: DroneSectionProps) => {
         >
           <Box
             style={{
-              background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
-              border: '2px solid rgba(155, 143, 199, 0.5)',
-              borderRadius: '8px',
+              background: `linear-gradient(135deg, rgba(79, 195, 247, 0.1), rgba(0, 0, 0, 0.6))`,
+              border: `2px solid ${ACCENT_BLUE_BORDER}`,
+              borderRadius: '12px',
               padding: '1.5rem',
-              maxWidth: '700px',
+              maxWidth: '750px',
               width: '100%',
-              maxHeight: '80vh',
+              maxHeight: '85vh',
               overflowY: 'auto',
+              boxShadow: `0 0 30px ${ACCENT_BLUE_DIM}`,
             }}
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
@@ -642,12 +939,15 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                     <Stack.Item>
                       <Box
                         style={{
-                          fontSize: '1.3rem',
+                          fontSize: '1.4rem',
                           fontWeight: 'bold',
-                          color: '#9b8fc7',
+                          color: ACCENT_BLUE,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
                         }}
                       >
-                        <Icon name="cog" mr={0.5} />
+                        <Icon name="cog" />
                         Customize: {drone.name}
                       </Box>
                     </Stack.Item>
@@ -656,6 +956,9 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                         icon="times"
                         color="transparent"
                         onClick={() => setCustomizingDroneId(null)}
+                        style={{
+                          fontSize: '1.2rem',
+                        }}
                       />
                     </Stack.Item>
                   </Stack>
@@ -664,12 +967,23 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                   <Box
                     style={{
                       background: 'rgba(0, 0, 0, 0.3)',
-                      padding: '0.75rem',
-                      borderRadius: '4px',
+                      padding: '1rem',
+                      borderRadius: '6px',
                       marginBottom: '1rem',
+                      borderLeft: `3px solid ${ACCENT_BLUE}`,
                     }}
                   >
-                    <Box style={{ fontWeight: 'bold', marginBottom: '0.5rem' }}>
+                    <Box
+                      style={{
+                        fontWeight: 'bold',
+                        marginBottom: '0.75rem',
+                        color: ACCENT_BLUE,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                      }}
+                    >
+                      <Icon name="chart-bar" />
                       Current Stats
                     </Box>
                     <Box>
@@ -717,41 +1031,70 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                     <Box
                       style={{
                         background: 'rgba(76, 175, 80, 0.1)',
-                        border: '1px solid rgba(76, 175, 80, 0.3)',
-                        padding: '0.75rem',
-                        borderRadius: '4px',
+                        border: `1px solid rgba(76, 175, 80, 0.3)`,
+                        borderLeft: `3px solid ${SUCCESS_GREEN}`,
+                        padding: '0.75rem 1rem',
+                        borderRadius: '6px',
                         marginBottom: '1rem',
                       }}
                     >
                       <Box
                         style={{
                           fontWeight: 'bold',
-                          marginBottom: '0.5rem',
-                          color: '#4caf50',
+                          marginBottom: '0.75rem',
+                          color: SUCCESS_GREEN,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
                         }}
                       >
-                        <Icon name="check-circle" mr={0.5} />
+                        <Icon name="check-circle" />
                         Installed Mods ({installedMods.length})
                       </Box>
                       {installedMods.map((modId: string) => {
                         const mod = droneModCatalog[modId];
                         if (!mod) return null;
                         return (
-                          <Stack key={modId} align="center" mb={0.25}>
-                            <Stack.Item grow>
-                              <Box style={{ fontSize: '0.9rem' }}>
-                                <Icon name={mod.icon} mr={0.5} />
-                                {mod.name}
-                              </Box>
-                            </Stack.Item>
-                            <Stack.Item>
+                          <Box
+                            key={modId}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              padding: '0.4rem 0.5rem',
+                              marginBottom: '0.25rem',
+                              background: 'rgba(0, 0, 0, 0.2)',
+                              borderRadius: '4px',
+                            }}
+                          >
+                            <Box
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                              }}
+                            >
+                              <Icon
+                                name={mod.icon}
+                                style={{ color: SUCCESS_GREEN }}
+                              />
+                              <span>{mod.name}</span>
+                            </Box>
+                            <Box
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.5rem',
+                              }}
+                            >
                               <Box
-                                style={{ color: '#ffd700', fontSize: '0.8rem' }}
+                                style={{
+                                  color: NUYEN_GOLD,
+                                  fontSize: '0.85rem',
+                                }}
                               >
                                 ¥{(mod.cost || 0).toLocaleString()}
                               </Box>
-                            </Stack.Item>
-                            <Stack.Item>
                               <Button
                                 icon="times"
                                 compact
@@ -761,39 +1104,50 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                                   handleRemoveMod(customizingDroneId, modId)
                                 }
                               />
-                            </Stack.Item>
-                          </Stack>
+                            </Box>
+                          </Box>
                         );
                       })}
                     </Box>
                   )}
 
                   {/* Mod Category Tabs */}
-                  <Tabs fluid mb={0.5}>
-                    {droneModCategories
-                      .sort(
-                        (a: DroneCategoryMeta, b: DroneCategoryMeta) =>
-                          (a.sort || 0) - (b.sort || 0),
-                      )
-                      .map((cat: DroneCategoryMeta) => (
-                        <Tabs.Tab
-                          key={cat.id}
-                          selected={selectedModCategory === cat.id}
-                          onClick={() => setSelectedModCategory(cat.id)}
-                        >
-                          {cat.name}
-                        </Tabs.Tab>
-                      ))}
-                  </Tabs>
+                  <Box style={{ marginBottom: '0.75rem' }}>
+                    <Tabs fluid>
+                      {droneModCategories
+                        .sort(
+                          (a: DroneCategoryMeta, b: DroneCategoryMeta) =>
+                            (a.sort || 0) - (b.sort || 0),
+                        )
+                        .map((cat: DroneCategoryMeta) => {
+                          const isActive = selectedModCategory === cat.id;
+                          return (
+                            <Tabs.Tab
+                              key={cat.id}
+                              selected={isActive}
+                              onClick={() => setSelectedModCategory(cat.id)}
+                              style={{
+                                ...(isActive && {
+                                  background: ACCENT_BLUE_DIM,
+                                  borderBottom: `2px solid ${ACCENT_BLUE}`,
+                                }),
+                              }}
+                            >
+                              {cat.name}
+                            </Tabs.Tab>
+                          );
+                        })}
+                    </Tabs>
+                  </Box>
 
                   {/* Available Mods */}
                   <Box
                     style={{
-                      maxHeight: '250px',
+                      maxHeight: '280px',
                       overflowY: 'auto',
                       background: 'rgba(0, 0, 0, 0.2)',
                       padding: '0.5rem',
-                      borderRadius: '4px',
+                      borderRadius: '6px',
                     }}
                   >
                     {(droneModsByCategory[selectedModCategory] || [])
@@ -812,20 +1166,19 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                           <Box
                             key={mod.id}
                             style={{
-                              padding: '0.5rem',
+                              padding: '0.6rem 0.75rem',
                               marginBottom: '0.5rem',
                               background: isInstalled
-                                ? 'rgba(76, 175, 80, 0.15)'
-                                : 'rgba(0, 0, 0, 0.3)',
-                              border: isInstalled
-                                ? '1px solid rgba(76, 175, 80, 0.5)'
-                                : '1px solid rgba(255, 255, 255, 0.1)',
-                              borderRadius: '4px',
+                                ? 'rgba(76, 175, 80, 0.1)'
+                                : 'rgba(0, 0, 0, 0.25)',
+                              borderRadius: '6px',
+                              borderLeft: `3px solid ${isInstalled ? SUCCESS_GREEN : 'transparent'}`,
                               opacity: !isAllowedForDrone
                                 ? '0.4'
                                 : !canAffordMod && !isInstalled
                                   ? '0.6'
                                   : '1',
+                              transition: 'all 0.2s ease',
                             }}
                           >
                             <Stack align="center">
@@ -833,7 +1186,9 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                                 <Icon
                                   name={mod.icon}
                                   size={1.2}
-                                  color={isInstalled ? '#4caf50' : '#9b8fc7'}
+                                  color={
+                                    isInstalled ? SUCCESS_GREEN : ACCENT_BLUE
+                                  }
                                 />
                               </Stack.Item>
                               <Stack.Item grow>
@@ -841,25 +1196,37 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                                   style={{
                                     fontWeight: 'bold',
                                     fontSize: '0.9rem',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.5rem',
+                                    flexWrap: 'wrap',
                                   }}
                                 >
-                                  {mod.name}
+                                  <span
+                                    style={{
+                                      color: isInstalled
+                                        ? SUCCESS_GREEN
+                                        : 'rgba(255, 255, 255, 0.9)',
+                                    }}
+                                  >
+                                    {mod.name}
+                                  </span>
                                   {mod.legality && (
                                     <Box
                                       as="span"
-                                      ml={0.5}
                                       style={{
                                         fontSize: '0.65rem',
-                                        padding: '0.1rem 0.25rem',
+                                        padding: '0.1rem 0.3rem',
                                         background:
                                           mod.legality === 'F'
-                                            ? 'rgba(255, 0, 0, 0.3)'
-                                            : 'rgba(255, 165, 0, 0.3)',
-                                        borderRadius: '2px',
+                                            ? 'rgba(220, 53, 69, 0.3)'
+                                            : 'rgba(255, 140, 0, 0.3)',
+                                        border: `1px solid ${mod.legality === 'F' ? FORBIDDEN_RED : RESTRICTED_ORANGE}`,
+                                        borderRadius: '3px',
                                         color:
                                           mod.legality === 'F'
-                                            ? '#ff6b6b'
-                                            : '#ffb74d',
+                                            ? FORBIDDEN_RED
+                                            : RESTRICTED_ORANGE,
                                       }}
                                     >
                                       {mod.legality}
@@ -868,10 +1235,9 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                                   {!isAllowedForDrone && (
                                     <Box
                                       as="span"
-                                      ml={0.5}
                                       style={{
                                         fontSize: '0.7rem',
-                                        color: '#ff6b6b',
+                                        color: DANGER_RED,
                                       }}
                                     >
                                       (Incompatible)
@@ -881,7 +1247,8 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                                 <Box
                                   style={{
                                     fontSize: '0.75rem',
-                                    opacity: '0.7',
+                                    color: 'rgba(255, 255, 255, 0.5)',
+                                    marginTop: '0.2rem',
                                   }}
                                 >
                                   {mod.desc}
@@ -891,7 +1258,10 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                                     <Box
                                       style={{
                                         fontSize: '0.7rem',
-                                        marginTop: '0.25rem',
+                                        marginTop: '0.35rem',
+                                        display: 'flex',
+                                        flexWrap: 'wrap',
+                                        gap: '0.5rem',
                                       }}
                                     >
                                       {Object.entries(mod.stat_bonuses).map(
@@ -899,12 +1269,17 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                                           <Box
                                             key={stat}
                                             as="span"
-                                            mr={0.5}
                                             style={{
+                                              padding: '0.1rem 0.3rem',
+                                              background:
+                                                bonus > 0
+                                                  ? 'rgba(76, 175, 80, 0.2)'
+                                                  : 'rgba(255, 107, 107, 0.2)',
+                                              borderRadius: '3px',
                                               color:
                                                 bonus > 0
-                                                  ? '#4caf50'
-                                                  : '#ff6b6b',
+                                                  ? SUCCESS_GREEN
+                                                  : DANGER_RED,
                                             }}
                                           >
                                             {stat.toUpperCase()}:{' '}
@@ -920,7 +1295,7 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                                 <Box style={{ textAlign: 'right' }}>
                                   <Box
                                     style={{
-                                      color: '#ffd700',
+                                      color: NUYEN_GOLD,
                                       fontWeight: 'bold',
                                     }}
                                   >
@@ -929,7 +1304,7 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                                   <Box
                                     style={{
                                       fontSize: '0.7rem',
-                                      opacity: '0.6',
+                                      color: 'rgba(255, 255, 255, 0.5)',
                                     }}
                                   >
                                     Avail: {mod.availability}
@@ -975,11 +1350,21 @@ export const DroneSection = memo((props: DroneSectionProps) => {
                   </Box>
 
                   {/* Close Button */}
-                  <Box style={{ marginTop: '1rem', textAlign: 'center' }}>
+                  <Box
+                    style={{
+                      marginTop: '1.25rem',
+                      textAlign: 'center',
+                    }}
+                  >
                     <Button
                       icon="check"
-                      color="good"
                       onClick={() => setCustomizingDroneId(null)}
+                      style={{
+                        padding: '0.5rem 2rem',
+                        background: `linear-gradient(135deg, ${ACCENT_BLUE}, #3d9fd1)`,
+                        border: 'none',
+                        fontWeight: 'bold',
+                      }}
                     >
                       Done
                     </Button>

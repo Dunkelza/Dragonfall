@@ -18,6 +18,15 @@ import {
   ContactTypeMeta,
 } from './types';
 
+// === ACCENT COLORS ===
+const ACCENT_YELLOW = '#f1c40f';
+const ACCENT_YELLOW_DIM = 'rgba(241, 196, 15, 0.15)';
+const ACCENT_YELLOW_BORDER = 'rgba(241, 196, 15, 0.4)';
+const SUCCESS_GREEN = '#4caf50';
+const DANGER_RED = '#ff6b6b';
+const CONNECTION_COLOR = '#4fc3f7';
+const LOYALTY_COLOR = '#e91e63';
+
 type ContactsSelectorProps = {
   act: (action: string, payload?: Record<string, unknown>) => void;
   chargenConstData: ChargenConstData | null;
@@ -84,6 +93,26 @@ export const ContactsSelector = memo((props: ContactsSelectorProps) => {
     'sr_contact_arch',
     'fixer',
   );
+
+  // Points remaining
+  const pointsRemaining = maxContactPoints - spentPoints;
+
+  // Get archetype icon
+  const getArchetypeIcon = (arch: string) => {
+    const icons: Record<string, string> = {
+      fixer: 'handshake',
+      street: 'road',
+      corporate: 'building',
+      underworld: 'skull',
+      government: 'landmark',
+      academic: 'graduation-cap',
+      medical: 'user-md',
+      military: 'crosshairs',
+      media: 'newspaper',
+      default: 'user',
+    };
+    return icons[arch] || icons.default;
+  };
 
   const handleAddContact = (typeId: string) => {
     if (isSaved) return;
@@ -168,18 +197,70 @@ export const ContactsSelector = memo((props: ContactsSelectorProps) => {
   };
 
   return (
-    <Box className="PreferencesMenu__ShadowrunSheet__contactsSelector">
+    <Box
+      style={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        background: `linear-gradient(135deg, ${ACCENT_YELLOW_DIM}, rgba(0, 0, 0, 0.4))`,
+        borderRadius: '8px',
+        border: `1px solid ${ACCENT_YELLOW_BORDER}`,
+        padding: '1rem',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Decorative corner accent */}
+      <Box
+        style={{
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          width: '80px',
+          height: '80px',
+          background: `linear-gradient(135deg, transparent 50%, ${ACCENT_YELLOW_DIM} 50%)`,
+          opacity: '0.5',
+        }}
+      />
+
+      {/* Header */}
       {!embedded && (
-        <Box className="PreferencesMenu__ShadowrunSheet__sidebarSection__header">
-          <Icon
-            name="users"
-            className="PreferencesMenu__ShadowrunSheet__sidebarSection__header__icon"
-          />
-          <Box className="PreferencesMenu__ShadowrunSheet__sidebarSection__header__title">
-            Contacts ({spentPoints}/{maxContactPoints})
-          </Box>
+        <Box style={{ marginBottom: '1rem' }}>
+          <Stack align="center" justify="space-between">
+            <Stack.Item>
+              <Box
+                style={{
+                  fontSize: '1.3rem',
+                  fontWeight: 'bold',
+                  color: ACCENT_YELLOW,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                <Icon name="users" />
+                Contacts Network
+                {contacts.length > 0 && (
+                  <Box
+                    as="span"
+                    style={{
+                      fontSize: '0.8rem',
+                      padding: '0.2rem 0.5rem',
+                      background: ACCENT_YELLOW_DIM,
+                      border: `1px solid ${ACCENT_YELLOW_BORDER}`,
+                      borderRadius: '10px',
+                      marginLeft: '0.5rem',
+                    }}
+                  >
+                    {contacts.length} contact{contacts.length !== 1 ? 's' : ''}
+                  </Box>
+                )}
+              </Box>
+            </Stack.Item>
+          </Stack>
         </Box>
       )}
+
       {embedded && (
         <CollapsibleSection
           title={`Contacts (${spentPoints}/${maxContactPoints} points)`}
@@ -191,23 +272,147 @@ export const ContactsSelector = memo((props: ContactsSelectorProps) => {
         </CollapsibleSection>
       )}
 
+      {/* Points Display Card */}
+      <Box
+        style={{
+          background: 'rgba(0, 0, 0, 0.3)',
+          borderRadius: '6px',
+          padding: '0.75rem 1rem',
+          marginBottom: '1rem',
+          borderLeft: `3px solid ${pointsRemaining <= 0 ? DANGER_RED : ACCENT_YELLOW}`,
+        }}
+      >
+        <Stack align="center" justify="space-between">
+          <Stack.Item>
+            <Box
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+              }}
+            >
+              <Icon
+                name="star"
+                style={{
+                  color: ACCENT_YELLOW,
+                  fontSize: '1.2rem',
+                }}
+              />
+              <Box>
+                <Box
+                  style={{
+                    fontSize: '0.75rem',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}
+                >
+                  Contact Points
+                </Box>
+                <Box
+                  style={{
+                    fontSize: '1.4rem',
+                    fontWeight: 'bold',
+                    color: pointsRemaining <= 0 ? DANGER_RED : ACCENT_YELLOW,
+                  }}
+                >
+                  {pointsRemaining} / {maxContactPoints}
+                </Box>
+              </Box>
+            </Box>
+          </Stack.Item>
+          <Stack.Item>
+            <Box style={{ textAlign: 'right' }}>
+              <Box
+                style={{
+                  fontSize: '0.75rem',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                }}
+              >
+                Based on CHA × 3
+              </Box>
+              <Box
+                style={{
+                  fontSize: '0.9rem',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                }}
+              >
+                CHA: {charisma}
+              </Box>
+            </Box>
+          </Stack.Item>
+        </Stack>
+        {/* Progress bar */}
+        <Box
+          style={{
+            marginTop: '0.5rem',
+            height: '4px',
+            background: 'rgba(0, 0, 0, 0.4)',
+            borderRadius: '2px',
+            overflow: 'hidden',
+          }}
+        >
+          <Box
+            style={{
+              width: `${Math.min(100, (spentPoints / maxContactPoints) * 100)}%`,
+              height: '100%',
+              background:
+                pointsRemaining <= 0
+                  ? `linear-gradient(90deg, ${DANGER_RED}, #ff8888)`
+                  : `linear-gradient(90deg, ${ACCENT_YELLOW}, #f39c12)`,
+              borderRadius: '2px',
+              transition: 'width 0.3s ease',
+            }}
+          />
+        </Box>
+      </Box>
+
       {/* Current Contacts */}
       {contacts.length > 0 && (
-        <Box mt={0.5}>
+        <Box
+          style={{
+            flexGrow: '1',
+            overflow: 'auto',
+            background: 'rgba(0, 0, 0, 0.2)',
+            borderRadius: '6px',
+            padding: '0.5rem',
+            marginBottom: '0.75rem',
+          }}
+        >
+          <Box
+            style={{
+              fontWeight: 'bold',
+              color: ACCENT_YELLOW,
+              marginBottom: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+            }}
+          >
+            <Icon name="address-book" />
+            Your Contacts
+          </Box>
           {contacts.map((contact: Contact, index: number) => {
             const contactType = contactTypes.find(
               (ct: ContactTypeMeta) => ct.id === contact.type_id,
             );
+            const contactCost =
+              (contact.connection || 1) + (contact.loyalty || 1);
+
             return (
               <Box
                 key={index}
-                className="PreferencesMenu__ShadowrunSheet__contactItem"
                 style={{
-                  marginBottom: '0.25rem',
+                  padding: '0.75rem',
+                  marginBottom: '0.5rem',
+                  background: 'rgba(0, 0, 0, 0.25)',
+                  borderRadius: '6px',
+                  borderLeft: `3px solid ${ACCENT_YELLOW}`,
                   opacity: isSaved ? '0.6' : '1',
                 }}
               >
                 <Stack vertical>
+                  {/* Name and Remove */}
                   <Stack.Item>
                     <Stack align="center">
                       <Stack.Item grow>
@@ -215,151 +420,181 @@ export const ContactsSelector = memo((props: ContactsSelectorProps) => {
                           placeholder="Contact name"
                           value={contact.name || ''}
                           disabled={isSaved}
-                          width="100%"
+                          fluid
                           onChange={(_, v) =>
                             handleUpdateContact(index, 'name', v)
                           }
+                          style={{
+                            background: 'rgba(0, 0, 0, 0.3)',
+                            border: `1px solid ${ACCENT_YELLOW_BORDER}`,
+                            borderRadius: '4px',
+                          }}
                         />
                       </Stack.Item>
-                      <Stack.Item>
+                      <Stack.Item ml={0.5}>
+                        <Box
+                          style={{
+                            fontSize: '0.75rem',
+                            padding: '0.2rem 0.4rem',
+                            background: 'rgba(255, 255, 255, 0.1)',
+                            borderRadius: '3px',
+                            color: ACCENT_YELLOW,
+                          }}
+                        >
+                          {contactCost} pts
+                        </Box>
+                      </Stack.Item>
+                      <Stack.Item ml={0.25}>
                         <Button
                           icon="times"
                           color="bad"
                           compact
                           disabled={isSaved}
                           onClick={() => handleRemoveContact(index)}
-                          style={{ minWidth: '1.2rem', fontSize: '0.6rem' }}
                         />
                       </Stack.Item>
                     </Stack>
                   </Stack.Item>
+
+                  {/* Type/Profession */}
                   <Stack.Item>
                     <Box
                       style={{
-                        fontSize: '0.65rem',
-                        color: 'rgba(255,255,255,0.5)',
+                        fontSize: '0.75rem',
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        marginTop: '0.25rem',
                       }}
                     >
+                      <Icon name="briefcase" mr={0.5} />
                       {contactType?.profession || 'Contact'}
                     </Box>
                   </Stack.Item>
+
+                  {/* Connection and Loyalty Controls */}
                   <Stack.Item>
-                    <Stack align="center">
-                      <Stack.Item>
-                        <Tooltip content="Connection: How useful/powerful (1-12)">
-                          <Box
-                            as="span"
-                            style={{
-                              fontSize: '0.7rem',
-                              cursor: 'help',
-                            }}
-                          >
-                            C:
-                          </Box>
-                        </Tooltip>
-                      </Stack.Item>
-                      <Stack.Item>
-                        <Button
-                          icon="minus"
-                          compact
-                          disabled={isSaved || contact.connection <= 1}
-                          onClick={() =>
-                            handleUpdateContact(index, 'connection', -1)
-                          }
-                          style={{
-                            minWidth: '1rem',
-                            padding: '0.1rem',
-                            fontSize: '0.6rem',
-                          }}
-                        />
-                      </Stack.Item>
+                    <Stack align="center" mt={0.5}>
+                      {/* Connection */}
                       <Stack.Item>
                         <Box
                           style={{
-                            minWidth: '1rem',
-                            textAlign: 'center',
-                            fontSize: '0.75rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            background: 'rgba(0, 0, 0, 0.3)',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '4px',
+                            border: `1px solid rgba(79, 195, 247, 0.3)`,
                           }}
                         >
-                          {contact.connection || 1}
-                        </Box>
-                      </Stack.Item>
-                      <Stack.Item>
-                        <Button
-                          icon="plus"
-                          compact
-                          disabled={
-                            isSaved ||
-                            contact.connection >= 12 ||
-                            spentPoints >= maxContactPoints
-                          }
-                          onClick={() =>
-                            handleUpdateContact(index, 'connection', 1)
-                          }
-                          style={{
-                            minWidth: '1rem',
-                            padding: '0.1rem',
-                            fontSize: '0.6rem',
-                          }}
-                        />
-                      </Stack.Item>
-                      <Stack.Item ml={1}>
-                        <Tooltip content="Loyalty: How much they like you (1-6)">
+                          <Tooltip content="Connection: How useful/powerful (1-12)">
+                            <Box
+                              as="span"
+                              style={{
+                                fontSize: '0.75rem',
+                                color: CONNECTION_COLOR,
+                                cursor: 'help',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              <Icon name="network-wired" mr={0.25} />
+                              CON
+                            </Box>
+                          </Tooltip>
+                          <Button
+                            icon="minus"
+                            compact
+                            disabled={isSaved || contact.connection <= 1}
+                            onClick={() =>
+                              handleUpdateContact(index, 'connection', -1)
+                            }
+                            style={{ padding: '0.15rem 0.25rem' }}
+                          />
                           <Box
-                            as="span"
                             style={{
-                              fontSize: '0.7rem',
-                              cursor: 'help',
+                              minWidth: '1.5rem',
+                              textAlign: 'center',
+                              fontWeight: 'bold',
+                              color: CONNECTION_COLOR,
                             }}
                           >
-                            L:
+                            {contact.connection || 1}
                           </Box>
-                        </Tooltip>
-                      </Stack.Item>
-                      <Stack.Item>
-                        <Button
-                          icon="minus"
-                          compact
-                          disabled={isSaved || contact.loyalty <= 1}
-                          onClick={() =>
-                            handleUpdateContact(index, 'loyalty', -1)
-                          }
-                          style={{
-                            minWidth: '1rem',
-                            padding: '0.1rem',
-                            fontSize: '0.6rem',
-                          }}
-                        />
-                      </Stack.Item>
-                      <Stack.Item>
-                        <Box
-                          style={{
-                            minWidth: '1rem',
-                            textAlign: 'center',
-                            fontSize: '0.75rem',
-                          }}
-                        >
-                          {contact.loyalty || 1}
+                          <Button
+                            icon="plus"
+                            compact
+                            disabled={
+                              isSaved ||
+                              contact.connection >= 12 ||
+                              spentPoints >= maxContactPoints
+                            }
+                            onClick={() =>
+                              handleUpdateContact(index, 'connection', 1)
+                            }
+                            style={{ padding: '0.15rem 0.25rem' }}
+                          />
                         </Box>
                       </Stack.Item>
-                      <Stack.Item>
-                        <Button
-                          icon="plus"
-                          compact
-                          disabled={
-                            isSaved ||
-                            contact.loyalty >= 6 ||
-                            spentPoints >= maxContactPoints
-                          }
-                          onClick={() =>
-                            handleUpdateContact(index, 'loyalty', 1)
-                          }
+
+                      {/* Loyalty */}
+                      <Stack.Item ml={0.5}>
+                        <Box
                           style={{
-                            minWidth: '1rem',
-                            padding: '0.1rem',
-                            fontSize: '0.6rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem',
+                            background: 'rgba(0, 0, 0, 0.3)',
+                            padding: '0.25rem 0.5rem',
+                            borderRadius: '4px',
+                            border: `1px solid rgba(233, 30, 99, 0.3)`,
                           }}
-                        />
+                        >
+                          <Tooltip content="Loyalty: How much they like you (1-6)">
+                            <Box
+                              as="span"
+                              style={{
+                                fontSize: '0.75rem',
+                                color: LOYALTY_COLOR,
+                                cursor: 'help',
+                                fontWeight: 'bold',
+                              }}
+                            >
+                              <Icon name="heart" mr={0.25} />
+                              LOY
+                            </Box>
+                          </Tooltip>
+                          <Button
+                            icon="minus"
+                            compact
+                            disabled={isSaved || contact.loyalty <= 1}
+                            onClick={() =>
+                              handleUpdateContact(index, 'loyalty', -1)
+                            }
+                            style={{ padding: '0.15rem 0.25rem' }}
+                          />
+                          <Box
+                            style={{
+                              minWidth: '1.5rem',
+                              textAlign: 'center',
+                              fontWeight: 'bold',
+                              color: LOYALTY_COLOR,
+                            }}
+                          >
+                            {contact.loyalty || 1}
+                          </Box>
+                          <Button
+                            icon="plus"
+                            compact
+                            disabled={
+                              isSaved ||
+                              contact.loyalty >= 6 ||
+                              spentPoints >= maxContactPoints
+                            }
+                            onClick={() =>
+                              handleUpdateContact(index, 'loyalty', 1)
+                            }
+                            style={{ padding: '0.15rem 0.25rem' }}
+                          />
+                        </Box>
                       </Stack.Item>
                     </Stack>
                   </Stack.Item>
@@ -371,69 +606,126 @@ export const ContactsSelector = memo((props: ContactsSelectorProps) => {
       )}
 
       {/* Add New Contact */}
-      <CollapsibleSection
-        title="Add Contact"
-        icon="user-plus"
-        stateKey="sr_add_contact"
-        defaultOpen={contacts.length === 0}
+      <Box
+        style={{
+          background: 'rgba(0, 0, 0, 0.3)',
+          borderRadius: '6px',
+          padding: '0.75rem',
+          borderLeft: `3px solid ${SUCCESS_GREEN}`,
+        }}
       >
-        <Tabs fluid>
-          {Object.keys(typesByArchetype).map((arch) => (
-            <Tabs.Tab
-              key={arch}
-              selected={selectedArchetype === arch}
-              onClick={() => setSelectedArchetype(arch)}
-            >
-              {arch.charAt(0).toUpperCase() + arch.slice(1)}
-            </Tabs.Tab>
-          ))}
-        </Tabs>
         <Box
           style={{
-            maxHeight: '8rem',
+            fontWeight: 'bold',
+            color: SUCCESS_GREEN,
+            marginBottom: '0.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
+          <Icon name="user-plus" />
+          Add Contact
+          <Box
+            as="span"
+            style={{
+              fontSize: '0.75rem',
+              color: 'rgba(255, 255, 255, 0.5)',
+              fontWeight: 'normal',
+            }}
+          >
+            (2 points each)
+          </Box>
+        </Box>
+
+        {/* Archetype Tabs */}
+        <Box style={{ marginBottom: '0.5rem' }}>
+          <Tabs fluid>
+            {Object.keys(typesByArchetype).map((arch) => {
+              const isActive = selectedArchetype === arch;
+              return (
+                <Tabs.Tab
+                  key={arch}
+                  selected={isActive}
+                  onClick={() => setSelectedArchetype(arch)}
+                  style={{
+                    ...(isActive && {
+                      background: ACCENT_YELLOW_DIM,
+                      borderBottom: `2px solid ${ACCENT_YELLOW}`,
+                    }),
+                  }}
+                >
+                  <Icon name={getArchetypeIcon(arch)} mr={0.5} />
+                  {arch.charAt(0).toUpperCase() + arch.slice(1)}
+                </Tabs.Tab>
+              );
+            })}
+          </Tabs>
+        </Box>
+
+        {/* Contact Types Grid */}
+        <Box
+          style={{
+            maxHeight: '150px',
             overflowY: 'auto',
-            marginTop: '0.25rem',
+            background: 'rgba(0, 0, 0, 0.2)',
+            borderRadius: '4px',
+            padding: '0.5rem',
           }}
         >
           {(typesByArchetype[selectedArchetype] || []).map(
-            (ct: ContactTypeMeta) => (
-              <Tooltip key={ct.id} content={ct.specialty} position="right">
-                <Box
-                  className="PreferencesMenu__ShadowrunSheet__contactTypeItem"
-                  onClick={() => handleAddContact(ct.id)}
-                  style={{
-                    cursor:
-                      isSaved || spentPoints + 2 > maxContactPoints
-                        ? 'not-allowed'
-                        : 'pointer',
-                    opacity:
-                      isSaved || spentPoints + 2 > maxContactPoints
-                        ? '0.5'
-                        : '1',
-                  }}
-                >
-                  <Stack align="center">
-                    <Stack.Item grow>
-                      <Box style={{ fontSize: '0.75rem' }}>{ct.name}</Box>
-                      <Box
-                        style={{
-                          fontSize: '0.65rem',
-                          color: 'rgba(255,255,255,0.5)',
-                        }}
-                      >
-                        {ct.profession}
-                      </Box>
-                    </Stack.Item>
-                    <Stack.Item>
-                      <Icon name="plus" size={0.8} />
-                    </Stack.Item>
-                  </Stack>
-                </Box>
-              </Tooltip>
-            ),
+            (ct: ContactTypeMeta) => {
+              const canAdd = !isSaved && spentPoints + 2 <= maxContactPoints;
+              return (
+                <Tooltip key={ct.id} content={ct.specialty} position="right">
+                  <Box
+                    onClick={() => canAdd && handleAddContact(ct.id)}
+                    style={{
+                      padding: '0.5rem 0.75rem',
+                      marginBottom: '0.35rem',
+                      background: 'rgba(0, 0, 0, 0.25)',
+                      borderRadius: '4px',
+                      borderLeft: `3px solid transparent`,
+                      cursor: canAdd ? 'pointer' : 'not-allowed',
+                      opacity: canAdd ? '1' : '0.5',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <Stack align="center">
+                      <Stack.Item grow>
+                        <Box
+                          style={{ fontSize: '0.85rem', fontWeight: 'bold' }}
+                        >
+                          {ct.name}
+                        </Box>
+                        <Box
+                          style={{
+                            fontSize: '0.75rem',
+                            color: 'rgba(255, 255, 255, 0.5)',
+                          }}
+                        >
+                          {ct.profession}
+                        </Box>
+                      </Stack.Item>
+                      <Stack.Item>
+                        <Icon
+                          name="plus-circle"
+                          size={1.1}
+                          style={{
+                            color: canAdd
+                              ? SUCCESS_GREEN
+                              : 'rgba(255,255,255,0.3)',
+                          }}
+                        />
+                      </Stack.Item>
+                    </Stack>
+                  </Box>
+                </Tooltip>
+              );
+            },
           )}
         </Box>
-      </CollapsibleSection>
+      </Box>
     </Box>
   );
 });

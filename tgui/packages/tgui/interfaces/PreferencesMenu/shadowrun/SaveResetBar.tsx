@@ -4,11 +4,15 @@
  * Displays save/reset buttons, undo/redo controls, and validation summary for chargen.
  */
 
+import { Tooltip } from 'tgui-core/components';
+
 import { Box, Button, Icon, Stack } from '../../../components';
+import { ShadowrunTab } from './TabContentRouter';
 
 type ValidationIssue = {
   message: string;
-  severity: 'error' | 'warning';
+  section: string;
+  severity: 'error' | 'warning' | 'info';
 };
 
 type Validation = {
@@ -27,8 +31,42 @@ type UndoRedoState = {
   nextRedoLabel?: string;
 };
 
+/**
+ * Maps validation section names to the appropriate tab.
+ * Used for click-to-navigate on validation errors.
+ */
+export function getSectionTab(section: string): ShadowrunTab | null {
+  switch (section) {
+    case 'attributes':
+    case 'skills':
+    case 'special':
+    case 'priorities':
+      return ShadowrunTab.Build;
+    case 'magic':
+      return ShadowrunTab.Magic;
+    case 'augments':
+      return ShadowrunTab.Augments;
+    case 'gear':
+      return ShadowrunTab.Gear;
+    case 'drones':
+      return ShadowrunTab.Drones;
+    case 'contacts':
+    case 'knowledge':
+      return ShadowrunTab.Connections;
+    case 'qualities':
+      return ShadowrunTab.Qualities;
+    case 'metatype':
+    case 'nuyen':
+      return ShadowrunTab.Build;
+    default:
+      return null;
+  }
+}
+
 type SaveResetBarProps = {
   isSaved: boolean;
+  /** Called when user clicks on a validation error to navigate to that section */
+  onNavigateToSection?: (tab: ShadowrunTab) => void;
   onRedo?: () => void;
   onResetAll: () => void;
   onSaveSheet: () => void;
@@ -45,8 +83,18 @@ export const SaveResetBar = (props: SaveResetBarProps) => {
     onSaveSheet,
     onUndo,
     onRedo,
+    onNavigateToSection,
     undoRedo,
   } = props;
+
+  // Handle clicking on a validation issue to navigate
+  const handleIssueClick = (issue: ValidationIssue) => {
+    if (!onNavigateToSection) return;
+    const tab = getSectionTab(issue.section);
+    if (tab) {
+      onNavigateToSection(tab);
+    }
+  };
 
   // Build tooltip content for undo/redo
   const undoTooltip = undoRedo?.canUndo
@@ -197,18 +245,67 @@ export const SaveResetBar = (props: SaveResetBarProps) => {
             {validation.errorCount > 0
               ? `${validation.errorCount} Error(s)`
               : `${validation.warningCount} Warning(s)`}
+            {onNavigateToSection && (
+              <Box
+                as="span"
+                style={{
+                  fontSize: '0.7rem',
+                  opacity: '0.6',
+                  marginLeft: '0.5rem',
+                  fontWeight: 'normal',
+                }}
+              >
+                (click to navigate)
+              </Box>
+            )}
           </Box>
-          {validation.issues.slice(0, 4).map((issue, idx) => (
-            <Box
-              key={idx}
-              style={{
-                color: issue.severity === 'error' ? '#ff6b6b' : '#ffb74d',
-                paddingLeft: '1rem',
-              }}
-            >
-              • {issue.message}
-            </Box>
-          ))}
+          {validation.issues.slice(0, 4).map((issue, idx) => {
+            const targetTab = getSectionTab(issue.section);
+            const isClickable = onNavigateToSection && targetTab;
+
+            return (
+              <Tooltip
+                key={idx}
+                content={
+                  isClickable
+                    ? `Click to go to ${issue.section} section`
+                    : undefined
+                }
+              >
+                <Box
+                  style={{
+                    color: issue.severity === 'error' ? '#ff6b6b' : '#ffb74d',
+                    paddingLeft: '1rem',
+                    cursor: isClickable ? 'pointer' : 'default',
+                    transition: 'background 0.15s ease',
+                    borderRadius: '2px',
+                    padding: '0.15rem 0.25rem 0.15rem 1rem',
+                    marginLeft: '-0.25rem',
+                  }}
+                  onClick={
+                    isClickable ? () => handleIssueClick(issue) : undefined
+                  }
+                  className={
+                    isClickable
+                      ? 'PreferencesMenu__ShadowrunSheet__validationIssue--clickable'
+                      : undefined
+                  }
+                >
+                  • {issue.message}
+                  {isClickable && (
+                    <Icon
+                      name="arrow-right"
+                      size="0.8"
+                      style={{
+                        marginLeft: '0.5rem',
+                        opacity: '0.5',
+                      }}
+                    />
+                  )}
+                </Box>
+              </Tooltip>
+            );
+          })}
           {validation.issues.length > 4 && (
             <Box
               style={{

@@ -852,3 +852,13 @@ $sr-font-mono: 'Consolas', 'Monaco', monospace;
     left: 100%;
   }
 }
+// Clickable validation issue in SaveResetBar
+.PreferencesMenu__ShadowrunSheet__validationIssue--clickable {
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  &:active {
+    background: rgba(255, 255, 255, 0.15);
+  }
+}

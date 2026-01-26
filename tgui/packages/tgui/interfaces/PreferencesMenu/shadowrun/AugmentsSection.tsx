@@ -2,6 +2,14 @@
  * AugmentsSection Component
  *
  * Handles augmentation (cyberware, bioware, etc.) selection for Shadowrun character generation.
+ *
+ * Visual overhaul with:
+ * - Red/chrome accent theme for augmentations
+ * - Essence bar with gradient fill
+ * - Category tabs with glow effects
+ * - Augment cards with grade-colored borders
+ * - Cyberlimb stat customization
+ * - Mod installation modal
  */
 
 import { memo } from 'react';
@@ -27,6 +35,26 @@ import {
   ChargenState,
   CyberwareSuiteMeta,
 } from './types';
+
+// ============================================================================
+// ACCENT COLORS
+// ============================================================================
+
+const AUGMENT_ACCENT = '#ff6b6b'; // Red - main augment accent
+const AUGMENT_ACCENT_DIM = 'rgba(255, 107, 107, 0.3)';
+const ESSENCE_COLOR = '#9b8fc7'; // Purple for essence
+const NUYEN_COLOR = '#ffd700'; // Gold for nuyen
+const CYBERWARE_COLOR = '#4fc3f7'; // Cyan for cyberware
+const BIOWARE_COLOR = '#4caf50'; // Green for bioware
+const CYBERLIMB_COLOR = '#ff9800'; // Orange for cyberlimbs
+
+// Category color mapping
+const CATEGORY_COLORS: Record<string, { color: string; icon: string }> = {
+  cyberware: { color: CYBERWARE_COLOR, icon: 'microchip' },
+  bioware: { color: BIOWARE_COLOR, icon: 'dna' },
+  bodyparts: { color: CYBERLIMB_COLOR, icon: 'hand' },
+  suites: { color: '#4caf50', icon: 'box-open' },
+};
 
 // ============================================================================
 // AUGMENTS SECTION
@@ -474,194 +502,296 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
     });
   };
 
+  // Calculate essence percentage for progress bar
+  const essencePercent = (essenceRemaining / essenceBase) * 100;
+  const nuyenPercent =
+    totalNuyen > 0 ? (nuyenRemaining / totalNuyen) * 100 : 100;
+
+  // Get category color
+  const getCategoryColor = (catId: string) =>
+    CATEGORY_COLORS[catId]?.color || AUGMENT_ACCENT;
+
   return (
-    <Box className="PreferencesMenu__ShadowrunSheet__augmentsSection">
+    <Box
+      style={{
+        background: `linear-gradient(135deg, ${AUGMENT_ACCENT_DIM}, rgba(0, 0, 0, 0.4))`,
+        border: `1px solid ${AUGMENT_ACCENT_DIM}`,
+        borderRadius: '8px',
+        padding: '1rem',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Decorative corner accent */}
+      <Box
+        style={{
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          width: '80px',
+          height: '80px',
+          background: `linear-gradient(135deg, transparent 50%, ${AUGMENT_ACCENT_DIM} 50%)`,
+          opacity: '0.5',
+        }}
+      />
+
+      {/* Header */}
+      <Box
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          marginBottom: '1rem',
+          paddingBottom: '0.5rem',
+          borderBottom: `2px solid ${AUGMENT_ACCENT}`,
+        }}
+      >
+        <Icon name="microchip" size={1.3} color={AUGMENT_ACCENT} />
+        <Box style={{ marginLeft: '0.5rem' }}>
+          <Box style={{ fontSize: '1rem', fontWeight: 'bold' }}>
+            Augmentations
+          </Box>
+          <Box
+            style={{ fontSize: '0.75rem', color: 'rgba(255, 255, 255, 0.6)' }}
+          >
+            Cyberware, Bioware & Cyberlimbs
+          </Box>
+        </Box>
+
+        {/* Augment Count Badge */}
+        <Box
+          style={{
+            marginLeft: 'auto',
+            padding: '0.35rem 0.75rem',
+            background: 'rgba(0, 0, 0, 0.4)',
+            border: `1px solid ${selectedCount > 0 ? AUGMENT_ACCENT : 'rgba(255, 255, 255, 0.2)'}`,
+            borderRadius: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+          }}
+        >
+          <Icon
+            name="cog"
+            color={
+              selectedCount > 0 ? AUGMENT_ACCENT : 'rgba(255, 255, 255, 0.4)'
+            }
+            size={0.9}
+          />
+          <Box
+            style={{
+              fontSize: '0.9rem',
+              fontWeight: 'bold',
+              color:
+                selectedCount > 0 ? AUGMENT_ACCENT : 'rgba(255, 255, 255, 0.4)',
+            }}
+          >
+            {selectedCount}
+          </Box>
+        </Box>
+      </Box>
+
       {/* Essence and Nuyen Display */}
       <Stack fill mb={1}>
         {/* Essence Display */}
         <Stack.Item grow basis={0}>
           <Box
             style={{
-              background:
-                'linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(20, 20, 30, 0.5))',
-              border: `2px solid ${essenceRemaining < 1 ? '#ff6b6b' : essenceRemaining < 3 ? '#ff9800' : '#9b8fc7'}`,
+              background: 'rgba(0, 0, 0, 0.3)',
+              border: `1px solid ${essenceRemaining < 1 ? '#ff6b6b' : essenceRemaining < 3 ? '#ff9800' : ESSENCE_COLOR}`,
+              borderLeft: `3px solid ${ESSENCE_COLOR}`,
               borderRadius: '4px',
-              padding: '1rem',
+              padding: '0.75rem',
               height: '100%',
             }}
           >
-            <Stack align="center">
+            <Stack align="center" mb={0.5}>
               <Stack.Item>
                 <Icon
                   name="heart"
-                  size={1.8}
+                  size={1.3}
                   color={
                     essenceRemaining < 1
                       ? '#ff6b6b'
                       : essenceRemaining < 3
                         ? '#ff9800'
-                        : '#9b8fc7'
+                        : ESSENCE_COLOR
                   }
                 />
               </Stack.Item>
               <Stack.Item grow>
-                <Box style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>
+                <Box style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
                   Essence
-                </Box>
-                <Box style={{ fontSize: '0.8rem', opacity: '0.7' }}>
-                  Augmentations reduce Essence permanently.
                 </Box>
               </Stack.Item>
               <Stack.Item>
-                <Stack vertical align="center">
-                  <Stack.Item>
-                    <Box
-                      style={{
-                        fontSize: '2.2rem',
-                        fontWeight: 'bold',
-                        lineHeight: '1',
-                        color:
-                          essenceRemaining < 1
-                            ? '#ff6b6b'
-                            : essenceRemaining < 3
-                              ? '#ff9800'
-                              : '#9b8fc7',
-                      }}
-                    >
-                      {essenceRemaining.toFixed(2)}
-                    </Box>
-                  </Stack.Item>
-                  <Stack.Item>
-                    <Box style={{ fontSize: '0.7rem', opacity: '0.5' }}>
-                      of {essenceBase.toFixed(1)} ESS
-                    </Box>
-                  </Stack.Item>
-                </Stack>
+                <Box
+                  style={{
+                    fontSize: '1.3rem',
+                    fontWeight: 'bold',
+                    color:
+                      essenceRemaining < 1
+                        ? '#ff6b6b'
+                        : essenceRemaining < 3
+                          ? '#ff9800'
+                          : ESSENCE_COLOR,
+                  }}
+                >
+                  {essenceRemaining.toFixed(2)}
+                  <Box
+                    as="span"
+                    style={{
+                      fontSize: '0.7rem',
+                      opacity: '0.6',
+                      marginLeft: '0.25rem',
+                    }}
+                  >
+                    / {essenceBase.toFixed(1)}
+                  </Box>
+                </Box>
               </Stack.Item>
             </Stack>
+            {/* Essence Progress Bar */}
+            <Box
+              style={{
+                height: '6px',
+                background: 'rgba(0, 0, 0, 0.4)',
+                borderRadius: '3px',
+                overflow: 'hidden',
+              }}
+            >
+              <Box
+                style={{
+                  height: '100%',
+                  width: `${Math.max(0, Math.min(essencePercent, 100))}%`,
+                  background:
+                    essenceRemaining < 1
+                      ? 'linear-gradient(90deg, #ff6b6b, #ff4444)'
+                      : essenceRemaining < 3
+                        ? 'linear-gradient(90deg, #ff9800, #ff6b00)'
+                        : `linear-gradient(90deg, ${ESSENCE_COLOR}, #7b6fa7)`,
+                  transition: 'width 0.3s ease',
+                }}
+              />
+            </Box>
           </Box>
         </Stack.Item>
 
         {/* Nuyen Display */}
-        <Stack.Item grow basis={0} ml={1}>
+        <Stack.Item grow basis={0} ml={0.5}>
           <Box
             style={{
-              background:
-                'linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(20, 20, 30, 0.5))',
-              border: `2px solid ${nuyenRemaining < 1000 ? '#ff6b6b' : nuyenRemaining < totalNuyen * 0.25 ? '#ff9800' : '#ffd700'}`,
+              background: 'rgba(0, 0, 0, 0.3)',
+              border: `1px solid ${nuyenRemaining < 1000 ? '#ff6b6b' : nuyenRemaining < totalNuyen * 0.25 ? '#ff9800' : NUYEN_COLOR}`,
+              borderLeft: `3px solid ${NUYEN_COLOR}`,
               borderRadius: '4px',
-              padding: '1rem',
+              padding: '0.75rem',
               height: '100%',
             }}
           >
-            <Stack align="center">
+            <Stack align="center" mb={0.5}>
               <Stack.Item>
                 <Icon
                   name="yen-sign"
-                  size={1.8}
+                  size={1.3}
                   color={
                     nuyenRemaining < 1000
                       ? '#ff6b6b'
                       : nuyenRemaining < totalNuyen * 0.25
                         ? '#ff9800'
-                        : '#ffd700'
+                        : NUYEN_COLOR
                   }
                 />
               </Stack.Item>
               <Stack.Item grow>
-                <Box style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>
+                <Box style={{ fontSize: '0.9rem', fontWeight: 'bold' }}>
                   Nuyen
-                </Box>
-                <Box style={{ fontSize: '0.8rem', opacity: '0.7' }}>
-                  Resources remaining for purchases.
                 </Box>
               </Stack.Item>
               <Stack.Item>
-                <Stack vertical align="center">
-                  <Stack.Item>
-                    <Box
-                      style={{
-                        fontSize: '1.6rem',
-                        fontWeight: 'bold',
-                        lineHeight: '1',
-                        color:
-                          nuyenRemaining < 1000
-                            ? '#ff6b6b'
-                            : nuyenRemaining < totalNuyen * 0.25
-                              ? '#ff9800'
-                              : '#ffd700',
-                      }}
-                    >
-                      {formatNuyen(nuyenRemaining)}
-                    </Box>
-                  </Stack.Item>
-                  <Stack.Item>
-                    <Box style={{ fontSize: '0.7rem', opacity: '0.5' }}>
-                      of {formatNuyen(totalNuyen)}
-                    </Box>
-                  </Stack.Item>
-                </Stack>
+                <Box
+                  style={{
+                    fontSize: '1.1rem',
+                    fontWeight: 'bold',
+                    color:
+                      nuyenRemaining < 1000
+                        ? '#ff6b6b'
+                        : nuyenRemaining < totalNuyen * 0.25
+                          ? '#ff9800'
+                          : NUYEN_COLOR,
+                  }}
+                >
+                  {formatNuyen(nuyenRemaining)}
+                </Box>
               </Stack.Item>
             </Stack>
-          </Box>
-        </Stack.Item>
-
-        {/* Selected Count */}
-        <Stack.Item ml={1}>
-          <Box
-            style={{
-              background:
-                'linear-gradient(135deg, rgba(0, 0, 0, 0.4), rgba(20, 20, 30, 0.5))',
-              border: '2px solid rgba(155, 143, 199, 0.5)',
-              borderRadius: '4px',
-              padding: '1rem',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <Box style={{ textAlign: 'center' }}>
-              <Box style={{ fontSize: '2rem', fontWeight: 'bold' }}>
-                {selectedCount}
-              </Box>
-              <Box style={{ fontSize: '0.7rem', opacity: '0.6' }}>Augments</Box>
+            {/* Nuyen Progress Bar */}
+            <Box
+              style={{
+                height: '6px',
+                background: 'rgba(0, 0, 0, 0.4)',
+                borderRadius: '3px',
+                overflow: 'hidden',
+              }}
+            >
+              <Box
+                style={{
+                  height: '100%',
+                  width: `${Math.max(0, Math.min(nuyenPercent, 100))}%`,
+                  background:
+                    nuyenRemaining < 1000
+                      ? 'linear-gradient(90deg, #ff6b6b, #ff4444)'
+                      : nuyenRemaining < totalNuyen * 0.25
+                        ? 'linear-gradient(90deg, #ff9800, #ff6b00)'
+                        : `linear-gradient(90deg, ${NUYEN_COLOR}, #b8860b)`,
+                  transition: 'width 0.3s ease',
+                }}
+              />
             </Box>
           </Box>
         </Stack.Item>
       </Stack>
 
       {/* Controls Row */}
-      <Stack align="center" mb={0.5}>
-        <Stack.Item grow>
-          <Input
-            fluid
-            placeholder="Search augments..."
-            value={filterText}
-            onChange={(_, v) => setFilterText(v)}
-          />
-        </Stack.Item>
-        <Stack.Item ml={0.5}>
-          <Button
-            icon="times"
-            disabled={!filterText}
-            onClick={() => setFilterText('')}
-          >
-            Clear
-          </Button>
-        </Stack.Item>
-        <Stack.Item ml={0.5}>
-          <Button
-            icon="trash"
-            color="bad"
-            disabled={isSaved || selectedCount === 0}
-            onClick={handleClearAll}
-            tooltip="Remove all selected augments"
-          >
-            Clear All
-          </Button>
-        </Stack.Item>
-      </Stack>
+      <Box
+        style={{
+          background: 'rgba(0, 0, 0, 0.2)',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
+          borderRadius: '4px',
+          padding: '0.5rem',
+          marginBottom: '0.75rem',
+        }}
+      >
+        <Stack align="center">
+          <Stack.Item grow>
+            <Input
+              fluid
+              placeholder="Search augments..."
+              value={filterText}
+              onChange={(_, v) => setFilterText(v)}
+            />
+          </Stack.Item>
+          <Stack.Item ml={0.5}>
+            <Button
+              icon="times"
+              disabled={!filterText}
+              onClick={() => setFilterText('')}
+            >
+              Clear
+            </Button>
+          </Stack.Item>
+          <Stack.Item ml={0.5}>
+            <Button
+              icon="trash"
+              color="bad"
+              disabled={isSaved || selectedCount === 0}
+              onClick={handleClearAll}
+              tooltip="Remove all selected augments"
+            >
+              Clear All
+            </Button>
+          </Stack.Item>
+        </Stack>
+      </Box>
 
       {/* Category Tabs */}
       <Tabs fluid>
@@ -673,12 +803,18 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
             const catCount = catAugments.filter(
               (aug: AugmentMeta) => selectedAugments[aug.id],
             ).length;
+            const catColor = getCategoryColor(catId);
             return (
               <Tabs.Tab
                 key={catId}
                 icon={catData.icon}
                 selected={activeCategory === catId}
                 onClick={() => setActiveCategory(catId)}
+                style={
+                  activeCategory === catId
+                    ? { boxShadow: `0 0 8px ${catColor}` }
+                    : {}
+                }
               >
                 {catData.name}
                 {catCount > 0 && (
@@ -686,7 +822,7 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
                     as="span"
                     ml={0.5}
                     style={{
-                      background: 'rgba(155, 143, 199, 0.4)',
+                      background: `rgba(${catColor === CYBERWARE_COLOR ? '79,195,247' : catColor === BIOWARE_COLOR ? '76,175,80' : '255,152,0'}, 0.4)`,
                       padding: '0 0.4rem',
                       borderRadius: '8px',
                       fontSize: '0.75rem',
@@ -705,6 +841,11 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
             icon="box-open"
             selected={activeCategory === 'suites'}
             onClick={() => setActiveCategory('suites')}
+            style={
+              activeCategory === 'suites'
+                ? { boxShadow: '0 0 8px #4caf50' }
+                : {}
+            }
           >
             Suites
             <Box
@@ -718,7 +859,7 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
                 color: '#4caf50',
               }}
             >
-              {(cyberwareSuites.length * 10).toFixed(0)}% OFF
+              SAVE
             </Box>
           </Tabs.Tab>
         )}
@@ -727,17 +868,22 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
       {/* Category Description */}
       <Box
         style={{
-          fontSize: '0.85rem',
-          fontStyle: 'italic',
-          opacity: '0.7',
+          fontSize: '0.8rem',
+          background: 'rgba(0, 0, 0, 0.2)',
           marginTop: '0.5rem',
           marginBottom: '0.75rem',
-          paddingLeft: '0.5rem',
-          borderLeft: `3px solid ${activeCategory === 'suites' ? 'rgba(76, 175, 80, 0.5)' : 'rgba(155, 143, 199, 0.5)'}`,
+          padding: '0.5rem 0.75rem',
+          borderRadius: '4px',
+          borderLeft: `3px solid ${getCategoryColor(activeCategory)}`,
         }}
       >
+        <Icon
+          name={CATEGORY_COLORS[activeCategory]?.icon || 'cog'}
+          color={getCategoryColor(activeCategory)}
+          mr={0.5}
+        />
         {activeCategory === 'suites'
-          ? 'Pre-built augmentation packages with a 10% discount. Perfect for quick character builds!'
+          ? 'Pre-built augmentation packages with discounts. Perfect for quick character builds!'
           : augmentCategories[activeCategory]?.description ||
             'Select augmentations for this category.'}
       </Box>
@@ -965,24 +1111,44 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
           style={{
             display: 'flex',
             flexWrap: 'wrap',
-            gap: '0.5rem',
+            gap: '0.35rem',
             marginBottom: '0.75rem',
-            fontSize: '0.75rem',
+            padding: '0.5rem',
+            background: 'rgba(0, 0, 0, 0.2)',
+            borderRadius: '4px',
           }}
         >
+          <Box
+            style={{
+              fontSize: '0.75rem',
+              color: 'rgba(255, 255, 255, 0.6)',
+              marginRight: '0.5rem',
+              alignSelf: 'center',
+            }}
+          >
+            <Icon name="layer-group" mr={0.25} />
+            Grades:
+          </Box>
           {Object.entries(AUGMENT_GRADES).map(([gradeId, gradeData]) => (
             <Tooltip key={gradeId} content={gradeData.description}>
               <Box
                 style={{
-                  padding: '0.2rem 0.5rem',
-                  background: 'rgba(0, 0, 0, 0.3)',
+                  padding: '0.15rem 0.4rem',
+                  background: `rgba(${gradeData.color === '#888' ? '136,136,136' : gradeData.color === '#fff' ? '255,255,255' : gradeData.color === '#4fc3f7' ? '79,195,247' : gradeData.color === '#4caf50' ? '76,175,80' : '233,30,99'}, 0.15)`,
                   border: `1px solid ${gradeData.color}`,
                   borderRadius: '3px',
                   color: gradeData.color,
+                  fontSize: '0.7rem',
+                  cursor: 'help',
                 }}
               >
-                {gradeData.name} (
-                {(gradeData.essenceMultiplier * 100).toFixed(0)}% ESS)
+                {gradeData.name}
+                <Box
+                  as="span"
+                  style={{ opacity: '0.7', marginLeft: '0.25rem' }}
+                >
+                  {(gradeData.essenceMultiplier * 100).toFixed(0)}%
+                </Box>
               </Box>
             </Tooltip>
           ))}
@@ -1038,6 +1204,11 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
                 nuyenRemaining >= effectiveNuyen || isSelected;
               const canAfford = canAffordEssence && canAffordNuyen;
 
+              // Determine card accent color based on category and grade
+              const cardAccent = isSelected
+                ? gradeData.color
+                : getCategoryColor(activeCategory);
+
               return (
                 <Box
                   key={augment.id}
@@ -1045,13 +1216,13 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
                     padding: '0.75rem',
                     marginBottom: '0.5rem',
                     background: isSelected
-                      ? 'rgba(155, 143, 199, 0.2)'
+                      ? `rgba(${gradeData.color === '#888' ? '136,136,136' : gradeData.color === '#fff' ? '255,255,255' : gradeData.color === '#4fc3f7' ? '79,195,247' : gradeData.color === '#4caf50' ? '76,175,80' : '233,30,99'}, 0.1)`
                       : 'rgba(0, 0, 0, 0.3)',
-                    border: isSelected
-                      ? '1px solid rgba(155, 143, 199, 0.5)'
-                      : '1px solid rgba(255, 255, 255, 0.1)',
+                    border: `1px solid ${isSelected ? gradeData.color : 'rgba(255, 255, 255, 0.1)'}`,
+                    borderLeft: `3px solid ${cardAccent}`,
                     borderRadius: '4px',
                     opacity: !canAfford && !isSelected ? '0.5' : '1',
+                    transition: 'all 0.15s ease',
                   }}
                 >
                   <Stack justify="space-between" align="flex-start">
@@ -1060,7 +1231,7 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
                       <Box
                         style={{
                           fontWeight: 'bold',
-                          color: isSelected ? '#9b8fc7' : '#fff',
+                          color: isSelected ? gradeData.color : '#fff',
                           marginBottom: '0.25rem',
                         }}
                       >
@@ -1373,8 +1544,9 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
           style={{
             marginTop: '1rem',
             padding: '0.75rem',
-            background: 'rgba(155, 143, 199, 0.1)',
-            border: '1px solid rgba(155, 143, 199, 0.3)',
+            background: `rgba(255, 107, 107, 0.1)`,
+            border: `1px solid ${AUGMENT_ACCENT_DIM}`,
+            borderLeft: `3px solid ${AUGMENT_ACCENT}`,
             borderRadius: '4px',
           }}
         >
@@ -1383,12 +1555,33 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
               fontWeight: 'bold',
               marginBottom: '0.5rem',
               fontSize: '0.9rem',
+              color: AUGMENT_ACCENT,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
             }}
           >
-            <Icon name="list" mr={0.5} />
-            Selected Augments ({selectedCount})
+            <Icon name="list-check" />
+            Selected Augments
+            <Box
+              as="span"
+              style={{
+                background: 'rgba(0, 0, 0, 0.3)',
+                padding: '0.1rem 0.4rem',
+                borderRadius: '4px',
+                fontSize: '0.8rem',
+              }}
+            >
+              {selectedCount}
+            </Box>
           </Box>
-          <Box style={{ fontSize: '0.8rem' }}>
+          <Box
+            style={{
+              fontSize: '0.8rem',
+              maxHeight: '10rem',
+              overflowY: 'auto',
+            }}
+          >
             {Object.entries(selectedAugments).map(
               ([augId, augData]: [string, any]) => {
                 const augMeta = chargenConstData?.augments?.[augId];
@@ -1405,45 +1598,72 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
                 const nuyenCostItem =
                   (augMeta?.nuyen_cost || 0) * grade.costMultiplier;
                 return (
-                  <Stack key={augId} align="center" mb={0.25}>
-                    <Stack.Item grow>
-                      <Box as="span" style={{ color: grade.color }}>
+                  <Box
+                    key={augId}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '0.25rem 0',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                    }}
+                  >
+                    <Box style={{ flexGrow: '1' }}>
+                      <Box
+                        as="span"
+                        style={{
+                          color: grade.color,
+                          fontSize: '0.7rem',
+                          marginRight: '0.35rem',
+                        }}
+                      >
                         [{grade.name}]
-                      </Box>{' '}
+                      </Box>
                       {augMeta?.name || augId}
-                    </Stack.Item>
-                    <Stack.Item>
-                      <Box style={{ color: '#ffd700', fontSize: '0.75rem' }}>
-                        {formatNuyen(nuyenCostItem)}
-                      </Box>
-                    </Stack.Item>
-                    <Stack.Item ml={0.5}>
-                      <Box style={{ color: '#ff9800' }}>
-                        -{essenceCost.toFixed(2)} ESS
-                        {hasBiocompatibility && (
-                          <Box
-                            as="span"
-                            style={{
-                              fontSize: '0.7rem',
-                              color: '#4caf50',
-                              marginLeft: '4px',
-                            }}
-                          >
-                            (Bio)
-                          </Box>
-                        )}
-                      </Box>
-                    </Stack.Item>
-                    <Stack.Item>
-                      <Button
-                        icon="times"
-                        color="transparent"
-                        disabled={isSaved}
-                        onClick={() => handleToggleAugment(augId)}
-                        tooltip="Remove"
-                      />
-                    </Stack.Item>
-                  </Stack>
+                    </Box>
+                    <Box
+                      style={{
+                        color: NUYEN_COLOR,
+                        fontSize: '0.75rem',
+                        marginRight: '0.5rem',
+                      }}
+                    >
+                      {formatNuyen(nuyenCostItem)}
+                    </Box>
+                    <Box
+                      style={{
+                        color: ESSENCE_COLOR,
+                        fontSize: '0.75rem',
+                        marginRight: '0.5rem',
+                      }}
+                    >
+                      -{essenceCost.toFixed(2)}
+                      {hasBiocompatibility && (
+                        <Box
+                          as="span"
+                          style={{
+                            fontSize: '0.6rem',
+                            color: '#4caf50',
+                            marginLeft: '2px',
+                          }}
+                        >
+                          ✓
+                        </Box>
+                      )}
+                    </Box>
+                    <Button
+                      icon="times"
+                      compact
+                      color="transparent"
+                      disabled={isSaved}
+                      onClick={() => handleToggleAugment(augId)}
+                      tooltip="Remove"
+                      style={{
+                        minWidth: '1.2rem',
+                        height: '1.2rem',
+                        padding: '0',
+                      }}
+                    />
+                  </Box>
                 );
               },
             )}

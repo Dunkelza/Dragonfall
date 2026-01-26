@@ -1,16 +1,15 @@
 /**
- * JobsSection Component
+ * CareerSection Component
  *
- * Shadowrun-styled jobs/occupations selector.
+ * Shadowrun-styled career/occupations selector.
  * Simplified implementation focusing on reliability and visual consistency.
  */
 
 import { sortBy } from 'common/collections';
-import { classes } from 'common/react';
 import { FC, ReactNode, useCallback, useMemo } from 'react';
 
 import { useBackend, useLocalState } from '../../../backend';
-import { Box, Button, Dropdown, Icon, Stack, Tabs } from '../../../components';
+import { Box, Button, Dropdown, Icon, Stack } from '../../../components';
 import {
   createSetPreference,
   Job,
@@ -24,7 +23,10 @@ import { ServerPreferencesFetcher } from '../ServerPreferencesFetcher';
 // CONSTANTS
 // ============================================================================
 
-const JOBS_ACCENT = '#e67e22';
+// Career section accent colors
+const CAREER_ACCENT = '#e67e22';
+const CAREER_ACCENT_DIM = 'rgba(230, 126, 34, 0.15)';
+const CAREER_ACCENT_BORDER = 'rgba(230, 126, 34, 0.4)';
 
 const DEPARTMENTS: Record<
   string,
@@ -353,22 +355,21 @@ const JobRow: FC<JobRowProps> = ({
 
   return (
     <Box
-      className={classes([
-        'JobsSection__row',
-        isHead && 'JobsSection__row--head',
-        isUnavailable && 'JobsSection__row--unavailable',
-      ])}
       style={{
-        padding: '0.5rem 0.75rem',
-        marginBottom: '0.25rem',
+        padding: '0.6rem 0.75rem',
+        marginBottom: '0.35rem',
         background: isHead
           ? `linear-gradient(135deg, ${departmentColor}40, ${departmentColor}20)`
-          : 'rgba(0, 0, 0, 0.25)',
+          : 'rgba(0, 0, 0, 0.3)',
         border: isHead
-          ? `1px solid ${departmentColor}`
+          ? `2px solid ${departmentColor}`
           : '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '4px',
+        borderLeft: isHead
+          ? `4px solid ${departmentColor}`
+          : `3px solid ${departmentColor}60`,
+        borderRadius: '6px',
         opacity: isUnavailable ? '0.5' : '1',
+        transition: 'all 0.2s ease',
       }}
     >
       <Stack align="center">
@@ -430,7 +431,7 @@ type DepartmentSectionProps = {
 
 const DepartmentSection: FC<DepartmentSectionProps> = ({ departmentId }) => {
   const [isOpen, setIsOpen] = useLocalState(
-    `sr_jobs_dept_${departmentId}`,
+    `sr_career_dept_${departmentId}`,
     true,
   );
 
@@ -466,23 +467,54 @@ const DepartmentSection: FC<DepartmentSectionProps> = ({ departmentId }) => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                padding: '0.5rem 0.75rem',
-                background: 'rgba(0, 0, 0, 0.3)',
-                borderLeft: `3px solid ${deptInfo.color}`,
-                borderRadius: '4px 4px 0 0',
+                padding: '0.6rem 0.75rem',
+                background: `linear-gradient(135deg, ${deptInfo.color}20, rgba(0, 0, 0, 0.4))`,
+                borderLeft: `4px solid ${deptInfo.color}`,
+                borderRadius: isOpen ? '6px 6px 0 0' : '6px',
                 cursor: 'pointer',
                 userSelect: 'none',
+                transition: 'all 0.2s ease',
               }}
             >
-              <Icon
-                name={deptInfo.icon}
-                color={deptInfo.color}
-                style={{ marginRight: '0.5rem' }}
-              />
-              <Box style={{ fontWeight: 'bold', flex: '1' }}>
+              <Box
+                style={{
+                  width: '28px',
+                  height: '28px',
+                  borderRadius: '50%',
+                  background: `${deptInfo.color}30`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '0.5rem',
+                }}
+              >
+                <Icon
+                  name={deptInfo.icon}
+                  style={{ color: deptInfo.color, fontSize: '0.9rem' }}
+                />
+              </Box>
+              <Box
+                style={{
+                  fontWeight: 'bold',
+                  flex: '1',
+                  color: deptInfo.color,
+                }}
+              >
                 {deptInfo.name}
               </Box>
-              <Icon name={isOpen ? 'chevron-up' : 'chevron-down'} />
+              <Box
+                style={{
+                  fontSize: '0.75rem',
+                  opacity: '0.6',
+                  marginRight: '0.5rem',
+                }}
+              >
+                {jobsForDept.length} position{jobsForDept.length !== 1 && 's'}
+              </Box>
+              <Icon
+                name={isOpen ? 'chevron-up' : 'chevron-down'}
+                style={{ color: deptInfo.color }}
+              />
             </Box>
 
             {/* Jobs List */}
@@ -490,8 +522,9 @@ const DepartmentSection: FC<DepartmentSectionProps> = ({ departmentId }) => {
               <Box
                 style={{
                   padding: '0.5rem',
-                  background: 'rgba(0, 0, 0, 0.15)',
-                  borderRadius: '0 0 4px 4px',
+                  background: 'rgba(0, 0, 0, 0.2)',
+                  borderRadius: '0 0 6px 6px',
+                  borderLeft: `4px solid ${deptInfo.color}40`,
                 }}
               >
                 {jobsForDept.map(([name, job]) => (
@@ -551,16 +584,16 @@ const FallbackRoleSelector: FC = () => {
   return (
     <Box
       style={{
-        background: 'rgba(0, 0, 0, 0.3)',
-        border: `1px solid ${JOBS_ACCENT}40`,
-        borderRadius: '4px',
+        background: `linear-gradient(135deg, ${CAREER_ACCENT_DIM}, rgba(0, 0, 0, 0.3))`,
+        border: `1px solid ${CAREER_ACCENT_BORDER}`,
+        borderRadius: '6px',
         padding: '0.75rem',
         marginBottom: '1rem',
       }}
     >
       <Stack align="center">
         <Stack.Item>
-          <Icon name="random" size={1.2} color={JOBS_ACCENT} />
+          <Icon name="random" size={1.2} color={CAREER_ACCENT} />
         </Stack.Item>
         <Stack.Item grow>
           <Box style={{ fontWeight: 'bold', marginBottom: '0.25rem' }}>
@@ -589,38 +622,69 @@ const FallbackRoleSelector: FC = () => {
 
 const PriorityLegend: FC = () => {
   const items = [
-    { color: '#78909c', label: 'Off' },
-    { color: '#ef5350', label: 'Low' },
-    { color: '#fdd835', label: 'Medium' },
-    { color: '#66bb6a', label: 'High' },
+    { color: '#78909c', label: 'Off', icon: 'times' },
+    { color: '#ef5350', label: 'Low', icon: 'arrow-down' },
+    { color: '#fdd835', label: 'Medium', icon: 'minus' },
+    { color: '#66bb6a', label: 'High', icon: 'arrow-up' },
   ];
 
   return (
     <Box
       style={{
-        background: 'rgba(0, 0, 0, 0.2)',
-        borderRadius: '4px',
-        padding: '0.5rem 0.75rem',
+        background: 'rgba(0, 0, 0, 0.25)',
+        borderRadius: '6px',
+        padding: '0.6rem 1rem',
         marginBottom: '1rem',
-        fontSize: '0.8rem',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
       }}
     >
-      <Stack justify="center">
-        {items.map(({ color, label }) => (
+      <Stack justify="center" align="center">
+        <Stack.Item>
+          <Box
+            style={{
+              fontSize: '0.75rem',
+              opacity: '0.6',
+              marginRight: '1rem',
+            }}
+          >
+            Priority:
+          </Box>
+        </Stack.Item>
+        {items.map(({ color, label, icon }) => (
           <Stack.Item key={label}>
-            <Stack align="center" mr={1.5}>
-              <Stack.Item>
-                <Box
-                  style={{
-                    width: '12px',
-                    height: '12px',
-                    borderRadius: '50%',
-                    background: color,
-                  }}
+            <Box
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                marginRight: '1.25rem',
+                padding: '0.25rem 0.5rem',
+                background: `${color}20`,
+                borderRadius: '4px',
+                border: `1px solid ${color}40`,
+              }}
+            >
+              <Box
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  background: color,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '0.4rem',
+                  boxShadow: `0 0 6px ${color}66`,
+                }}
+              >
+                <Icon
+                  name={icon}
+                  style={{ color: '#fff', fontSize: '0.6rem' }}
                 />
-              </Stack.Item>
-              <Stack.Item>{label}</Stack.Item>
-            </Stack>
+              </Box>
+              <Box style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>
+                {label}
+              </Box>
+            </Box>
           </Stack.Item>
         ))}
       </Stack>
@@ -632,13 +696,13 @@ const PriorityLegend: FC = () => {
 // MAIN COMPONENT
 // ============================================================================
 
-export type JobsSectionProps = {
+export type CareerSectionProps = {
   isSaved?: boolean;
 };
 
-export const JobsSection: FC<JobsSectionProps> = () => {
+export const CareerSection: FC<CareerSectionProps> = () => {
   const [activeTab, setActiveTab] = useLocalState<'corporate' | 'independent'>(
-    'sr_jobs_active_tab',
+    'sr_career_active_tab',
     'corporate',
   );
 
@@ -646,7 +710,29 @@ export const JobsSection: FC<JobsSectionProps> = () => {
     activeTab === 'corporate' ? CORPORATE_DEPTS : INDEPENDENT_DEPTS;
 
   return (
-    <Box className="JobsSection" style={{ padding: '0.5rem' }}>
+    <Box
+      style={{
+        background: `linear-gradient(135deg, ${CAREER_ACCENT_DIM}, rgba(0, 0, 0, 0.4))`,
+        borderRadius: '8px',
+        border: `1px solid ${CAREER_ACCENT_BORDER}`,
+        padding: '1rem',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Decorative corner accent */}
+      <Box
+        style={{
+          position: 'absolute',
+          top: '0',
+          right: '0',
+          width: '80px',
+          height: '80px',
+          background: `linear-gradient(135deg, transparent 50%, ${CAREER_ACCENT_DIM} 50%)`,
+          opacity: '0.5',
+        }}
+      />
+
       {/* Header */}
       <Box
         style={{
@@ -654,23 +740,25 @@ export const JobsSection: FC<JobsSectionProps> = () => {
           alignItems: 'center',
           marginBottom: '1rem',
           paddingBottom: '0.5rem',
-          borderBottom: `2px solid ${JOBS_ACCENT}`,
+          borderBottom: `2px solid ${CAREER_ACCENT}`,
         }}
       >
-        <Icon name="id-badge" size={1.5} color={JOBS_ACCENT} />
+        <Icon
+          name="id-badge"
+          style={{ color: CAREER_ACCENT, fontSize: '1.3rem' }}
+        />
         <Box
           style={{
             marginLeft: '0.5rem',
-            fontSize: '1.2rem',
+            fontSize: '1.1rem',
             fontWeight: 'bold',
+            color: CAREER_ACCENT,
           }}
         >
-          Occupations
+          Career Selection
         </Box>
-        <Box
-          style={{ marginLeft: 'auto', fontSize: '0.85rem', opacity: '0.7' }}
-        >
-          Select your preferred job assignments
+        <Box style={{ marginLeft: 'auto', fontSize: '0.8rem', opacity: '0.7' }}>
+          Select your preferred assignments
         </Box>
       </Box>
 
@@ -681,31 +769,72 @@ export const JobsSection: FC<JobsSectionProps> = () => {
       <PriorityLegend />
 
       {/* Tab Buttons */}
-      <Tabs fluid mb={1}>
-        <Tabs.Tab
-          selected={activeTab === 'corporate'}
+      <Box
+        style={{
+          display: 'flex',
+          gap: '0.5rem',
+          marginBottom: '1rem',
+        }}
+      >
+        <Box
           onClick={() => setActiveTab('corporate')}
-          icon="building"
+          style={{
+            flex: '1',
+            padding: '0.6rem 1rem',
+            background:
+              activeTab === 'corporate'
+                ? `linear-gradient(135deg, ${CAREER_ACCENT}40, ${CAREER_ACCENT}20)`
+                : 'rgba(0, 0, 0, 0.3)',
+            border:
+              activeTab === 'corporate'
+                ? `2px solid ${CAREER_ACCENT}`
+                : '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            textAlign: 'center',
+            fontWeight: activeTab === 'corporate' ? 'bold' : 'normal',
+            color: activeTab === 'corporate' ? CAREER_ACCENT : '#fff',
+            transition: 'all 0.2s ease',
+          }}
         >
+          <Icon name="building" style={{ marginRight: '0.5rem' }} />
           Corporate Divisions
-        </Tabs.Tab>
-        <Tabs.Tab
-          selected={activeTab === 'independent'}
+        </Box>
+        <Box
           onClick={() => setActiveTab('independent')}
-          icon="users"
+          style={{
+            flex: '1',
+            padding: '0.6rem 1rem',
+            background:
+              activeTab === 'independent'
+                ? `linear-gradient(135deg, ${CAREER_ACCENT}40, ${CAREER_ACCENT}20)`
+                : 'rgba(0, 0, 0, 0.3)',
+            border:
+              activeTab === 'independent'
+                ? `2px solid ${CAREER_ACCENT}`
+                : '1px solid rgba(255, 255, 255, 0.2)',
+            borderRadius: '6px',
+            cursor: 'pointer',
+            textAlign: 'center',
+            fontWeight: activeTab === 'independent' ? 'bold' : 'normal',
+            color: activeTab === 'independent' ? CAREER_ACCENT : '#fff',
+            transition: 'all 0.2s ease',
+          }}
         >
+          <Icon name="users" style={{ marginRight: '0.5rem' }} />
           External Services
-        </Tabs.Tab>
-      </Tabs>
+        </Box>
+      </Box>
 
       {/* Department List */}
       <Box
         style={{
           maxHeight: '500px',
           overflowY: 'auto',
-          background: 'rgba(0, 0, 0, 0.15)',
-          borderRadius: '4px',
-          padding: '0.5rem',
+          background: 'rgba(0, 0, 0, 0.2)',
+          borderRadius: '6px',
+          padding: '0.75rem',
+          border: '1px solid rgba(255, 255, 255, 0.1)',
         }}
       >
         {departments.map((deptId) => (
@@ -716,4 +845,4 @@ export const JobsSection: FC<JobsSectionProps> = () => {
   );
 };
 
-export default JobsSection;
+export default CareerSection;
