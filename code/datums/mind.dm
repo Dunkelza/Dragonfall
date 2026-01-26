@@ -99,6 +99,11 @@
 	/// A lazylist of dream types we have fully experienced
 	var/list/finished_dream_types
 
+	/// Shadowrun chargen state snapshot - stores the character sheet state at spawn time.
+	/// This allows players to edit their preferences mid-round without affecting their
+	/// current character. Changes only take effect on respawn.
+	var/list/sr_chargen_snapshot
+
 /datum/mind/New(_key)
 	key = _key
 	martial_art = default_martial_art

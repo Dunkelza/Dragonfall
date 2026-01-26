@@ -5,6 +5,7 @@
  * awakening status (Mundane, Mage, Adept, etc.) based on priority selections.
  */
 
+import { memo } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { Box, Dropdown, Icon, Stack } from '../../../components';
@@ -53,7 +54,7 @@ const priorityRank = (letter: string): number => PRIORITY_RANKS[letter] || 1;
 // COMPONENT
 // ============================================================================
 
-export const MetatypeSelector = (props: MetatypeSelectorProps) => {
+export const MetatypeSelector = memo((props: MetatypeSelectorProps) => {
   const {
     chargenState,
     chargenConstData,
@@ -283,4 +284,4 @@ export const MetatypeSelector = (props: MetatypeSelectorProps) => {
       </Stack>
     </Box>
   );
-};
+});

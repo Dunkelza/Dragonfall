@@ -4,7 +4,8 @@
  * Handles gear selection and purchasing during character generation.
  */
 
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
+import { Tooltip } from 'tgui-core/components';
 
 import { useLocalState } from '../../../backend';
 import {
@@ -36,7 +37,7 @@ type GearSectionProps = {
   value: ChargenState | null;
 };
 
-export const GearSection = (props: GearSectionProps) => {
+export const GearSection = memo((props: GearSectionProps) => {
   const {
     chargenState,
     chargenConstData,
@@ -278,15 +279,20 @@ export const GearSection = (props: GearSectionProps) => {
                     <Stack align="center">
                       <Stack.Item grow>
                         <Box>
-                          <Box
-                            as="span"
-                            style={{
-                              fontWeight: 'bold',
-                              marginRight: '0.5rem',
-                            }}
+                          <Tooltip
+                            content={item.desc || item.name}
+                            position="right"
                           >
-                            {item.name}
-                          </Box>
+                            <Box
+                              as="span"
+                              style={{
+                                fontWeight: 'bold',
+                                marginRight: '0.5rem',
+                              }}
+                            >
+                              {item.name}
+                            </Box>
+                          </Tooltip>
                           {item.legality && (
                             <Box
                               as="span"
@@ -413,4 +419,4 @@ export const GearSection = (props: GearSectionProps) => {
       </Stack.Item>
     </Stack>
   );
-};
+});

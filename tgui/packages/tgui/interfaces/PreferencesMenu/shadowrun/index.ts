@@ -7,6 +7,47 @@
 // Types
 export * from './types';
 
+// Constants (pure data, no React dependencies)
+export {
+  AUGMENT_GRADES,
+  type AugmentGradeData,
+  AWAKENING_TYPES,
+  type AwakeningType,
+  BASE_ESSENCE,
+  CYBERLIMB_BASE_STATS,
+  CYBERLIMB_MAX_UPGRADE,
+  DEFAULT_CYBERLIMB_UPGRADE_COST,
+  DEFAULT_LIFESTYLE_COST,
+  LIFESTYLE_TIERS,
+  type LifestyleTier,
+  PRIORITY_LETTERS,
+  type PriorityLetter,
+} from './constants';
+
+// Pure Calculation Functions (for testing and reuse)
+export {
+  type AttributeInputs,
+  type DerivedStats as DerivedStatsCalc,
+  calculateAttributePointsSpent,
+  calculateAugmentEssenceCost,
+  calculateAugmentNuyenCost,
+  calculateAugmentNuyenSpent,
+  calculateCompletionPercent,
+  calculateDerivedStats,
+  calculateDroneNuyenSpent,
+  calculateGearNuyenSpent,
+  calculateMentalLimit,
+  calculatePhysicalCM,
+  calculatePhysicalLimit,
+  calculateSkillPointsSpent,
+  calculateSocialLimit,
+  calculateSpecialPointsSpent,
+  calculateStunCM,
+  calculateTotalEssenceSpent,
+  getLifestyleCost,
+  validateChargenState,
+} from './calculations';
+
 // Custom Hooks
 export {
   type DerivedStats,
@@ -30,7 +71,7 @@ export {
 
 // Selectors
 export { AttributeSelector } from './AttributeSelector';
-export { AUGMENT_GRADES, AugmentsSection } from './AugmentsSection';
+export { AugmentsSection } from './AugmentsSection';
 export { ContactsSelector } from './ContactsSelector';
 export { CoreTabContent, type CoreTabContentProps } from './CoreTabContent';
 export { DroneSection } from './DroneSection';

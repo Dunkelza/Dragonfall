@@ -11,7 +11,7 @@
 
 import { useMemo } from 'react';
 
-import { AUGMENT_GRADES } from './AugmentsSection';
+import { AUGMENT_GRADES } from './constants';
 import {
   AttributeMeta,
   AugmentSelection,
@@ -462,9 +462,7 @@ export function useChargenValidation(
     if (isAwakened) {
       // Check tradition selected for mages/adepts
       if (
-        (awakening === 'magician' ||
-          awakening === 'aspected_magician' ||
-          awakening === 'mystic_adept') &&
+        (awakening === 'mage' || awakening === 'mystic_adept') &&
         !chargenState.tradition
       ) {
         issues.push({
@@ -477,7 +475,7 @@ export function useChargenValidation(
       // Check spells for mages
       const selectedSpells = chargenState.selected_spells || [];
       if (
-        (awakening === 'magician' || awakening === 'mystic_adept') &&
+        (awakening === 'mage' || awakening === 'mystic_adept') &&
         selectedSpells.length === 0
       ) {
         issues.push({

@@ -32,13 +32,7 @@ export interface ChargenState {
   augments: Record<string, AugmentSelection>;
 
   // Magic
-  awakening:
-    | 'mundane'
-    | 'magician'
-    | 'aspected_magician'
-    | 'adept'
-    | 'mystic_adept'
-    | 'technomancer';
+  awakening: 'mundane' | 'mage' | 'adept' | 'mystic_adept' | 'technomancer';
   birthplace?: string;
   // Character notes
   character_notes?: CharacterNotes;

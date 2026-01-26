@@ -4,6 +4,7 @@
  * Handles augmentation (cyberware, bioware, etc.) selection for Shadowrun character generation.
  */
 
+import { memo } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { useLocalState } from '../../../backend';
@@ -16,6 +17,9 @@ import {
   Stack,
   Tabs,
 } from '../../../components';
+// Re-export AUGMENT_GRADES for backwards compatibility
+export { AUGMENT_GRADES } from './constants';
+import { AUGMENT_GRADES } from './constants';
 import {
   AugmentMeta,
   AugmentSelection,
@@ -27,54 +31,6 @@ import {
 // ============================================================================
 // AUGMENTS SECTION
 // ============================================================================
-
-// Augment grade definitions - affects essence cost multiplier and availability
-export const AUGMENT_GRADES: Record<
-  string,
-  {
-    color: string;
-    costMultiplier: number;
-    description: string;
-    essenceMultiplier: number;
-    name: string;
-  }
-> = {
-  used: {
-    name: 'Used',
-    essenceMultiplier: 1.25,
-    costMultiplier: 0.75,
-    description: 'Second-hand cyberware. Higher essence cost, lower price.',
-    color: '#888',
-  },
-  standard: {
-    name: 'Standard',
-    essenceMultiplier: 1.0,
-    costMultiplier: 1.0,
-    description: 'Factory-new augmentation at base stats.',
-    color: '#9b8fc7',
-  },
-  alphaware: {
-    name: 'Alphaware',
-    essenceMultiplier: 0.8,
-    costMultiplier: 2.0,
-    description: 'Higher quality, 20% less essence cost.',
-    color: '#4fc3f7',
-  },
-  betaware: {
-    name: 'Betaware',
-    essenceMultiplier: 0.6,
-    costMultiplier: 4.0,
-    description: 'Premium grade, 40% less essence cost.',
-    color: '#81c784',
-  },
-  deltaware: {
-    name: 'Deltaware',
-    essenceMultiplier: 0.5,
-    costMultiplier: 10.0,
-    description: 'Top-tier quality, 50% less essence cost. Very rare.',
-    color: '#ffb74d',
-  },
-};
 
 // Format nuyen with commas
 const formatNuyen = (amount: number) => {
@@ -96,7 +52,7 @@ type AugmentsSectionProps = {
 // Biocompatibility quality reduces essence cost by 10%
 const BIOCOMPATIBILITY_ESSENCE_REDUCTION = 0.9;
 
-export const AugmentsSection = (props: AugmentsSectionProps) => {
+export const AugmentsSection = memo((props: AugmentsSectionProps) => {
   const {
     chargenState,
     chargenConstData,
@@ -1324,4 +1280,4 @@ export const AugmentsSection = (props: AugmentsSectionProps) => {
       </Box>
     </Box>
   );
-};
+});

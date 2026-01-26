@@ -4,6 +4,7 @@
  * Handles allocation of special attribute points from the metatype priority.
  */
 
+import { memo } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { Box, Button, Icon, Stack } from '../../../components';
@@ -20,7 +21,7 @@ type SpecialSelectorProps = {
   setPredictedValue: (value: ChargenState) => void;
 };
 
-export const SpecialSelector = (props: SpecialSelectorProps) => {
+export const SpecialSelector = memo((props: SpecialSelectorProps) => {
   const {
     chargenState,
     chargenConstData,
@@ -414,4 +415,4 @@ export const SpecialSelector = (props: SpecialSelectorProps) => {
       </Box>
     </Box>
   );
-};
+});

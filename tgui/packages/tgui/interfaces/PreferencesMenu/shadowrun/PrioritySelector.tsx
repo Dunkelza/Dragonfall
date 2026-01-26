@@ -2,6 +2,9 @@
  * Priority Selector component for SR5 character generation
  */
 
+import { memo } from 'react';
+import { Tooltip } from 'tgui-core/components';
+
 import { Box, Dropdown, Icon, Stack } from '../../../components';
 import {
   EmbeddableChargenProps,
@@ -11,6 +14,19 @@ import {
 } from './types';
 
 export type PrioritySelectorProps = EmbeddableChargenProps;
+
+// Hints for each priority category
+const PRIORITY_HINTS: Record<string, string> = {
+  metatype:
+    'Determines available metatypes (Human, Elf, Dwarf, Ork, Troll) and special attribute points.',
+  attributes:
+    'Sets the number of points to allocate to physical and mental attributes.',
+  magic:
+    'Determines awakened status (Mundane, Mage, Adept, etc.) and magic rating.',
+  skills: 'Sets the number of points for active skills and skill groups.',
+  resources:
+    'Starting nuyen (¥) for gear, augments, lifestyle, and other purchases.',
+};
 
 const getLetterColor = (letter: string): string => {
   switch (letter) {
@@ -27,7 +43,7 @@ const getLetterColor = (letter: string): string => {
   }
 };
 
-export const PrioritySelector = (props: PrioritySelectorProps) => {
+export const PrioritySelector = memo((props: PrioritySelectorProps) => {
   const {
     chargenState,
     chargenConstData,
@@ -111,7 +127,12 @@ export const PrioritySelector = (props: PrioritySelectorProps) => {
             }}
           >
             <Stack.Item grow>
-              <Box style={{ fontSize: '0.85rem' }}>{display}</Box>
+              <Tooltip
+                content={PRIORITY_HINTS[category] || display}
+                position="right"
+              >
+                <Box style={{ fontSize: '0.85rem' }}>{display}</Box>
+              </Tooltip>
             </Stack.Item>
             <Stack.Item>
               {isSaved ? (
@@ -156,4 +177,4 @@ export const PrioritySelector = (props: PrioritySelectorProps) => {
       })}
     </Box>
   );
-};
+});

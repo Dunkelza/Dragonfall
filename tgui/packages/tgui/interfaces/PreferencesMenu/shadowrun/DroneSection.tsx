@@ -4,7 +4,8 @@
  * Handles drone selection and customization for Shadowrun character generation.
  */
 
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
+import { Tooltip } from 'tgui-core/components';
 
 import { useLocalState } from '../../../backend';
 import { Box, Button, Icon, Stack, Tabs } from '../../../components';
@@ -31,7 +32,7 @@ type DroneSectionProps = {
   value: unknown;
 };
 
-export const DroneSection = (props: DroneSectionProps) => {
+export const DroneSection = memo((props: DroneSectionProps) => {
   const {
     chargenState,
     chargenConstData,
@@ -339,7 +340,15 @@ export const DroneSection = (props: DroneSectionProps) => {
                       marginBottom: '0.25rem',
                     }}
                   >
-                    {drone.name}
+                    <Tooltip
+                      content={
+                        drone.desc ||
+                        `${drone.name} - ¥${drone.cost?.toLocaleString()}`
+                      }
+                      position="right"
+                    >
+                      <span>{drone.name}</span>
+                    </Tooltip>
                     {drone.legality && (
                       <Box
                         as="span"
@@ -983,4 +992,4 @@ export const DroneSection = (props: DroneSectionProps) => {
       )}
     </Box>
   );
-};
+});

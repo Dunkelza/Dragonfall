@@ -5,7 +5,7 @@
  * and Derived Statistics sections.
  */
 
-import { ReactNode } from 'react';
+import { memo, ReactNode } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import {
@@ -91,7 +91,7 @@ const FIELD_HINTS: Record<string, string> = {
 // COMPONENT
 // ============================================================================
 
-export const CoreTabContent = (props: CoreTabContentProps) => {
+export const CoreTabContent = memo((props: CoreTabContentProps) => {
   const {
     act,
     chargenConstData,
@@ -1095,4 +1095,4 @@ export const CoreTabContent = (props: CoreTabContentProps) => {
       )}
     </>
   );
-};
+});

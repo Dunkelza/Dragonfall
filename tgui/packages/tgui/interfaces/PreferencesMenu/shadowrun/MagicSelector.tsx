@@ -4,6 +4,7 @@
  * Handles magic-related selections for awakened characters.
  */
 
+import { memo } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { useLocalState } from '../../../backend';
@@ -30,7 +31,7 @@ type MagicSelectorProps = {
   value: unknown;
 };
 
-export const MagicSelector = (props: MagicSelectorProps) => {
+export const MagicSelector = memo((props: MagicSelectorProps) => {
   const {
     chargenState,
     chargenConstData,
@@ -49,10 +50,7 @@ export const MagicSelector = (props: MagicSelectorProps) => {
   const awakening = chargenState.awakening || 'mundane';
   const isAwakened = awakening !== 'mundane';
   const isTechnomancer = awakening === 'technomancer';
-  const isMage =
-    awakening === 'magician' ||
-    awakening === 'aspected_magician' ||
-    awakening === 'mystic_adept';
+  const isMage = awakening === 'mage' || awakening === 'mystic_adept';
   const isAdept = awakening === 'adept' || awakening === 'mystic_adept';
 
   // Don't render anything for mundanes
@@ -676,4 +674,4 @@ export const MagicSelector = (props: MagicSelectorProps) => {
       )}
     </Box>
   );
-};
+});

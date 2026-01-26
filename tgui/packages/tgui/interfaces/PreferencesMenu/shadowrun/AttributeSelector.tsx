@@ -2,6 +2,7 @@
  * Attribute Selector component for SR5 character generation
  */
 
+import { memo } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { Box, Button, Icon, Stack } from '../../../components';
@@ -26,7 +27,7 @@ const getValueColor = (current: number, min: number): string => {
   return '#fff';
 };
 
-export const AttributeSelector = (props: AttributeSelectorProps) => {
+export const AttributeSelector = memo((props: AttributeSelectorProps) => {
   const {
     chargenState,
     chargenConstData,
@@ -240,4 +241,4 @@ export const AttributeSelector = (props: AttributeSelectorProps) => {
       })}
     </Box>
   );
-};
+});

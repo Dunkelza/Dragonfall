@@ -4,6 +4,7 @@
  * Handles contact creation and management for character generation.
  */
 
+import { memo } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { useLocalState } from '../../../backend';
@@ -28,7 +29,7 @@ type ContactsSelectorProps = {
   value: ChargenState | null;
 };
 
-export const ContactsSelector = (props: ContactsSelectorProps) => {
+export const ContactsSelector = memo((props: ContactsSelectorProps) => {
   const {
     chargenState,
     chargenConstData,
@@ -435,4 +436,4 @@ export const ContactsSelector = (props: ContactsSelectorProps) => {
       </CollapsibleSection>
     </Box>
   );
-};
+});

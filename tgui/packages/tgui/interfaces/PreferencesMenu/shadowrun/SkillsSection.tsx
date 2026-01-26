@@ -4,6 +4,7 @@
  * Handles skill point allocation and skill group management.
  */
 
+import { memo } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { useLocalState } from '../../../backend';
@@ -26,7 +27,7 @@ type SkillsSectionProps = {
   value: ChargenState | null;
 };
 
-export const SkillsSection = (props: SkillsSectionProps) => {
+export const SkillsSection = memo((props: SkillsSectionProps) => {
   const {
     chargenState,
     chargenConstData,
@@ -544,4 +545,4 @@ export const SkillsSection = (props: SkillsSectionProps) => {
       </Box>
     </CollapsibleSection>
   );
-};
+});

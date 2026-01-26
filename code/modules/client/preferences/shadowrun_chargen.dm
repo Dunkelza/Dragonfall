@@ -27,42 +27,20 @@
 	return !!state["saved"]
 
 /// Returns TRUE if non-appearance preferences should be locked.
-/// Allow editing in the lobby even during active rounds.
-/// Only lock for players who have already spawned into the round.
+/// Since chargen state is now tied to the character's mind at spawn time,
+/// players can freely edit their sheet at any time - changes won't affect
+/// their current character until they respawn.
 /proc/shadowrun_should_lock_nonappearance_prefs(datum/preferences/preferences)
-	if (isnull(SSticker) || !SSticker.IsRoundInProgress())
-		return FALSE // Not in an active round, always allow editing
-
-	// Check if the player is in the lobby (new_player mob)
-	var/client/C = preferences?.parent
-	if (isnull(C))
-		return TRUE // No client, play it safe and lock
-
-	// If the player's mob is a new_player (lobby), allow editing
-	if (isnewplayer(C.mob))
-		return FALSE
-
-	// Player has spawned into the round, lock their preferences
-	return TRUE
+	// Never lock - the spawned character uses a snapshot stored on their mind
+	return FALSE
 
 /// Returns TRUE if character creation (stats, metatype, etc.) should be locked.
-/// Lock during active rounds AND after sheet is saved.
-/// Players in the lobby can still edit if they haven't saved their sheet.
+/// Since chargen state is now tied to the character's mind at spawn time,
+/// players can freely edit their sheet at any time - changes won't affect
+/// their current character until they respawn.
 /proc/shadowrun_should_lock_chargen(datum/preferences/preferences)
-	if (isnull(SSticker) || !SSticker.IsRoundInProgress())
-		return shadowrun_chargen_is_saved(preferences) // Only lock if saved
-
-	// Check if the player is in the lobby (new_player mob)
-	var/client/C = preferences?.parent
-	if (isnull(C))
-		return TRUE // No client, play it safe and lock
-
-	// If the player's mob is a new_player (lobby), check saved status
-	if (isnewplayer(C.mob))
-		return shadowrun_chargen_is_saved(preferences)
-
-	// Player has spawned into the round, lock their chargen
-	return TRUE
+	// Never lock - the spawned character uses a snapshot stored on their mind
+	return FALSE
 
 /datum/preference/blob/shadowrun_chargen
 	explanation = "Shadowrun Character Creation"
@@ -81,29 +59,9 @@
 	var/list/incoming = ..()
 	var/list/sanitized = sanitize_state(incoming)
 
-	if (isnull(preferences))
-		return sanitized
-
-	// Use the cached current value to avoid recursive calls into deserialize().
-	var/list/current = islist(preferences.value_cache[type]) ? preferences.value_cache[type] : sanitize_state(list())
-	current = sanitize_state(current)
-
-	// During active rounds, lock saved sheets to prevent mid-round edits.
-	// Players can still finish chargen and save if they haven't saved yet.
-	if (!isnull(SSticker) && SSticker.IsRoundInProgress())
-		// Always allow a full reset, even mid-round, so players can recover from
-		// an accidental empty save.
-		if (is_full_reset_state(sanitized))
-			return sanitized
-		// If already saved, lock edits.
-		if (!!current["saved"])
-			return current
-		// Otherwise, allow edits so the user can finish chargen and save.
-		return sanitized
-
-	// Outside of an active round (lobby, etc.), allow ALL changes including
-	// re-saves, resets, and edits. Players should be able to modify their
-	// sheets freely when not in a round.
+	// Since chargen state is now tied to the character's mind at spawn time,
+	// we allow ALL changes at any time. The spawned character uses a snapshot
+	// stored on their mind, so editing the preference won't affect them until respawn.
 	return sanitized
 
 /datum/preference/blob/shadowrun_chargen/is_valid(value)
@@ -129,7 +87,19 @@
 	if(!target?.stats)
 		return
 
-	var/list/state = sanitize_state(value)
+	// Determine which state to use:
+	// 1. If the target has a mind with a stored snapshot, use that (respawning)
+	// 2. Otherwise, use the preference value and store it on the mind (first spawn)
+	var/list/state
+	if(target.mind?.sr_chargen_snapshot)
+		// Respawning - use the stored snapshot from the mind
+		state = sanitize_state(target.mind.sr_chargen_snapshot)
+	else
+		// First spawn - use the preference value and store it on the mind
+		state = sanitize_state(value)
+		if(target.mind)
+			// Deep copy the state so future preference edits don't affect this snapshot
+			target.mind.sr_chargen_snapshot = deep_copy_list(state)
 
 	var/list/attrs = state["attributes"]
 	var/list/special = state["special"]

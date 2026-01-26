@@ -6,7 +6,7 @@
  * to reduce complexity.
  */
 
-import { ReactNode } from 'react';
+import { memo, ReactNode, useEffect, useState } from 'react';
 
 import { Box, Icon, Stack } from '../../../components';
 import { JobsPage } from '../JobsPage';
@@ -92,7 +92,31 @@ type TabContentRouterProps = {
   value: ChargenState | null;
 };
 
-export const TabContentRouter = (props: TabContentRouterProps) => {
+// Lazy Tab Loading Placeholder
+const TabLoadingPlaceholder = () => (
+  <Box
+    style={{
+      padding: '2rem',
+      textAlign: 'center',
+      color: 'rgba(255,255,255,0.5)',
+    }}
+  >
+    <Icon name="spinner" spin size={2} />
+    <Box mt={1}>Loading...</Box>
+  </Box>
+);
+
+// Heavy tabs that benefit from lazy loading (>500 lines)
+const HEAVY_TABS = new Set([
+  ShadowrunTab.Augments,
+  ShadowrunTab.Core,
+  ShadowrunTab.Drones,
+  ShadowrunTab.Magic,
+  ShadowrunTab.Build,
+  ShadowrunTab.Connections,
+]);
+
+export const TabContentRouter = memo((props: TabContentRouterProps) => {
   const {
     act,
     chargenConstData,
@@ -118,6 +142,44 @@ export const TabContentRouter = (props: TabContentRouterProps) => {
     validation,
     value,
   } = props;
+
+  // Track which tabs have been visited for lazy loading
+  const [visitedTabs, setVisitedTabs] = useState<Set<ShadowrunTab>>(
+    () => new Set([tab]),
+  );
+
+  // Mark current tab as visited
+  useEffect(() => {
+    if (!visitedTabs.has(tab)) {
+      setVisitedTabs((prev) => new Set([...prev, tab]));
+    }
+  }, [tab, visitedTabs]);
+
+  // For heavy tabs, show placeholder if not yet visited
+  // (This allows deferred rendering on first visit via requestAnimationFrame)
+  const [isReady, setIsReady] = useState(!HEAVY_TABS.has(tab));
+  useEffect(() => {
+    if (HEAVY_TABS.has(tab) && !isReady) {
+      // Defer heavy tab rendering to next frame for smoother tab switching
+      const timer = requestAnimationFrame(() => setIsReady(true));
+      return () => cancelAnimationFrame(timer);
+    }
+    return undefined;
+  }, [tab, isReady]);
+
+  // Reset ready state when tab changes
+  useEffect(() => {
+    if (HEAVY_TABS.has(tab)) {
+      setIsReady(false);
+    } else {
+      setIsReady(true);
+    }
+  }, [tab]);
+
+  // Show loading placeholder for heavy tabs on first render frame
+  if (!isReady && HEAVY_TABS.has(tab)) {
+    return <TabLoadingPlaceholder />;
+  }
 
   switch (tab) {
     case ShadowrunTab.Build:
@@ -307,7 +369,7 @@ export const TabContentRouter = (props: TabContentRouterProps) => {
     default:
       return null;
   }
-};
+});
 
 // Summary Tab Content - extracted to reduce complexity
 type SummaryTabContentProps = {
