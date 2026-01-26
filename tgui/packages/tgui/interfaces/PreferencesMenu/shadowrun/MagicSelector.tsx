@@ -11,6 +11,14 @@ import { useLocalState } from '../../../backend';
 import { Box, Button, Dropdown, Icon, Stack, Tabs } from '../../../components';
 import { CollapsibleSection } from './components';
 import {
+  AWAKENING,
+  isAdeptUser,
+  isAwakened as checkAwakened,
+  isMagicUser,
+  isTechnomancer as checkTechnomancer,
+} from './constants';
+import { calculateBumpedValue } from './hooks';
+import {
   AdeptPowerMeta,
   ChargenConstData,
   ChargenState,
@@ -47,11 +55,11 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
     return null;
   }
 
-  const awakening = chargenState.awakening || 'mundane';
-  const isAwakened = awakening !== 'mundane';
-  const isTechnomancer = awakening === 'technomancer';
-  const isMage = awakening === 'mage' || awakening === 'mystic_adept';
-  const isAdept = awakening === 'adept' || awakening === 'mystic_adept';
+  const awakening = chargenState.awakening || AWAKENING.MUNDANE;
+  const isAwakened = checkAwakened(awakening);
+  const isTechnomancer = checkTechnomancer(awakening);
+  const isMage = isMagicUser(awakening);
+  const isAdept = isAdeptUser(awakening);
 
   // Don't render anything for mundanes
   if (!isAwakened) {
@@ -201,38 +209,35 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
     });
   };
 
+  // Build power metadata map for quick lookup
+  const powerMetaMap = new Map(
+    adeptPowers.map((p: AdeptPowerMeta) => [
+      p.id,
+      { maxLevel: p.max_level || 1, ppCost: p.pp_cost },
+    ]),
+  );
+
   const handleBumpPower = (powerId: string, delta: number) => {
     if (isSaved) return;
 
-    const power = adeptPowers.find((p: AdeptPowerMeta) => p.id === powerId);
-    if (!power) return;
+    const powerMeta = powerMetaMap.get(powerId);
+    if (!powerMeta) return;
 
+    // Check PP cost before bumping
     const currentLevel = Number(selectedPowers[powerId]) || 0;
-    const newLevel = Math.max(0, currentLevel + delta);
-    const maxLevel = power.max_level || 1;
-
-    // Check PP cost
-    const costDelta = delta * power.pp_cost;
+    const costDelta = delta * powerMeta.ppCost;
     if (delta > 0 && spentPP + costDelta > maxPP) return;
-    if (newLevel > maxLevel) return;
 
-    const newPowers = { ...selectedPowers };
-    if (newLevel <= 0) {
-      delete newPowers[powerId];
-    } else {
-      newPowers[powerId] = newLevel;
-    }
-
-    const newState = {
-      ...value!,
-      selected_powers: newPowers,
-    };
-
-    setPredictedValue(newState);
-    act('set_preference', {
-      preference: featureId,
-      value: newState,
+    const result = calculateBumpedValue(powerId, delta, {
+      currentValues: selectedPowers,
+      getMax: () => powerMeta.maxLevel,
     });
+
+    if (!result.success) return;
+
+    const newState = { ...value!, selected_powers: result.newValues };
+    setPredictedValue(newState);
+    act('set_preference', { preference: featureId, value: newState });
   };
 
   // Group spells by category

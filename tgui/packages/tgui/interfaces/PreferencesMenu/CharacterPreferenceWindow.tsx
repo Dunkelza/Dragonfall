@@ -73,8 +73,8 @@ export const CharacterPreferenceWindow = (props) => {
     <Window
       title="Runner Dossier"
       theme="ntos_darkmode"
-      width={920}
-      height={770}
+      width={1380}
+      height={963}
     >
       <Window.Content scrollable className="PreferencesMenu__ShadowrunSheet">
         <Stack vertical fill>

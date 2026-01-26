@@ -7,11 +7,11 @@ import { Tooltip } from 'tgui-core/components';
 
 import { Box, Dropdown, Icon, Stack } from '../../../components';
 import {
-  EmbeddableChargenProps,
   PRIORITY_CATEGORIES,
   PRIORITY_LETTERS,
   PriorityLetter,
-} from './types';
+} from './constants';
+import { EmbeddableChargenProps } from './types';
 
 export type PrioritySelectorProps = EmbeddableChargenProps;
 

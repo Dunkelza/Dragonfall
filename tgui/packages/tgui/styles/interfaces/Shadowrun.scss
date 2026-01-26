@@ -57,6 +57,13 @@ $sr-border-medium: rgba(255, 255, 255, 0.25);
 $sr-border-gold: rgba($sr-gold, 0.5);
 $sr-border-teal: rgba($sr-teal, 0.5);
 
+// Focus indicator colors
+$sr-focus-color: $sr-cyan;
+$sr-focus-outline: 2px solid $sr-focus-color;
+$sr-focus-glow:
+  0 0 0 3px rgba($sr-cyan, 0.35),
+  0 0 12px rgba($sr-cyan, 0.25);
+
 // =============================================================================
 // TYPOGRAPHY
 // =============================================================================
@@ -73,6 +80,12 @@ $sr-font-mono: 'Consolas', 'Monaco', monospace;
 
 .Shadowrun {
   font-family: $sr-font-body;
+
+  // Global focus-visible fallback for any interactive element not explicitly styled
+  *:focus-visible {
+    outline: $sr-focus-outline;
+    outline-offset: 2px;
+  }
 
   // Section styling
   .Section {
@@ -125,6 +138,12 @@ $sr-font-mono: 'Consolas', 'Monaco', monospace;
         0 2px 6px rgba(0, 0, 0, 0.4),
         0 0 8px rgba($sr-gold, 0.2);
     }
+
+    &:focus-visible {
+      outline: $sr-focus-outline;
+      outline-offset: 2px;
+      box-shadow: $sr-focus-glow;
+    }
   }
 
   .Button--selected {
@@ -158,6 +177,11 @@ $sr-font-mono: 'Consolas', 'Monaco', monospace;
         inset 0 2px 4px rgba(0, 0, 0, 0.3),
         0 0 8px rgba($sr-gold, 0.2);
     }
+
+    &:focus-visible {
+      outline: $sr-focus-outline;
+      outline-offset: 1px;
+    }
   }
 
   // Dropdown styling
@@ -175,6 +199,12 @@ $sr-font-mono: 'Consolas', 'Monaco', monospace;
 
     &:hover {
       border-color: $sr-border-gold;
+    }
+
+    &:focus-visible {
+      outline: $sr-focus-outline;
+      outline-offset: 2px;
+      box-shadow: $sr-focus-glow;
     }
   }
 
@@ -199,6 +229,12 @@ $sr-font-mono: 'Consolas', 'Monaco', monospace;
 
     &:hover {
       background: rgba($sr-gold, 0.25);
+    }
+
+    &:focus-visible {
+      outline: none;
+      background: rgba($sr-cyan, 0.25);
+      box-shadow: inset 0 0 0 2px $sr-focus-color;
     }
   }
 
@@ -248,6 +284,12 @@ $sr-font-mono: 'Consolas', 'Monaco', monospace;
     background: $sr-bg-dark;
     font-family: $sr-font-display;
     letter-spacing: 0.01em;
+
+    &:focus-visible {
+      outline: $sr-focus-outline;
+      outline-offset: 2px;
+      box-shadow: $sr-focus-glow;
+    }
   }
 
   .Tabs__Tab--selected {

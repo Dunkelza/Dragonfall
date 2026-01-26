@@ -35,8 +35,8 @@ export const GamePreferenceWindow = (props: {
     <Window
       title="System Settings"
       theme="ntos_darkmode"
-      width={920}
-      height={770}
+      width={1380}
+      height={963}
     >
       <Window.Content className="PreferencesMenu__ShadowrunSheet">
         <Stack vertical fill>

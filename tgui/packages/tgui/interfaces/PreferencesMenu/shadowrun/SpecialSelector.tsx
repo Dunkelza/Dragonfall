@@ -8,7 +8,12 @@ import { memo } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { Box, Button, Icon, Stack } from '../../../components';
-import { clamp } from './components';
+import {
+  AWAKENING,
+  isAwakened as checkAwakened,
+  isTechnomancer as checkTechnomancer,
+} from './constants';
+import { calculateBumpedValue } from './hooks';
 import { AttributeMeta, ChargenConstData, ChargenState } from './types';
 
 type SpecialSelectorProps = {
@@ -36,7 +41,7 @@ export const SpecialSelector = memo((props: SpecialSelectorProps) => {
   const priorityTables = chargenConstData?.priority_tables;
   const priorities = chargenState?.priorities || {};
   const special = chargenState?.special || {};
-  const awakening = chargenState?.awakening || 'mundane';
+  const awakening = chargenState?.awakening || AWAKENING.MUNDANE;
 
   const metatypeLetter = priorities['metatype'] || 'E';
   const magicLetter = priorities['magic'] || 'E';
@@ -45,7 +50,7 @@ export const SpecialSelector = memo((props: SpecialSelectorProps) => {
   const magicBase = priorityTables?.magic?.[magicLetter] || 0;
   const edgeBase = chargenConstData?.edge_base ?? 2;
 
-  const isAwakened = awakening !== 'mundane';
+  const isAwakened = checkAwakened(awakening);
 
   const edgeMeta = specialAttributesMeta.find((s: AttributeMeta) =>
     s.id?.toLowerCase().includes('edge'),
@@ -63,12 +68,15 @@ export const SpecialSelector = memo((props: SpecialSelectorProps) => {
   );
   const remainingPoints = totalPoints - spentPoints;
 
+  // Build metadata map for special attributes
+  const specialMetaMap = new Map(
+    specialAttributesMeta.map((s: AttributeMeta) => [s.id, s]),
+  );
+
   const handleBumpSpecial = (specialId: string, delta: number) => {
     if (isSaved) return;
 
-    const meta = specialAttributesMeta.find(
-      (s: AttributeMeta) => s.id === specialId,
-    );
+    const meta = specialMetaMap.get(specialId);
     if (!meta) return;
 
     const isMagic = specialId === magicId;
@@ -80,17 +88,17 @@ export const SpecialSelector = memo((props: SpecialSelectorProps) => {
     const poolRemainingIfRemoveCurrent =
       totalPoints - (spentPoints - currentBonus);
     const maxBonusFromPool = Math.max(0, poolRemainingIfRemoveCurrent);
-    const nextBonus = clamp(
-      currentBonus + delta,
-      0,
-      Math.min(maxBonusFromStat, maxBonusFromPool),
-    );
+    const effectiveMax = Math.min(maxBonusFromStat, maxBonusFromPool);
 
-    const newState = {
-      ...chargenState!,
-      special: { ...special, [specialId]: nextBonus },
-    };
+    const result = calculateBumpedValue(specialId, delta, {
+      currentValues: special,
+      getMax: () => effectiveMax,
+      deleteOnZero: false,
+    });
 
+    if (!result.success) return;
+
+    const newState = { ...chargenState!, special: result.newValues };
     setPredictedValue(newState);
     act('set_preference', { preference: featureId, value: newState });
   };
@@ -248,7 +256,7 @@ export const SpecialSelector = memo((props: SpecialSelectorProps) => {
           <Stack.Item grow>
             <Tooltip
               content={
-                awakening === 'technomancer'
+                checkTechnomancer(awakening)
                   ? `Resonance determines your connection to the Matrix and ability to compile sprites and use complex forms. Higher Resonance means stronger technomancer abilities. Base: ${magicBase}`
                   : `Magic rating determines your mystical power for casting spells, summoning spirits, or using adept powers. Also affects your ability to resist drain. Base: ${magicBase}`
               }
@@ -261,7 +269,7 @@ export const SpecialSelector = memo((props: SpecialSelectorProps) => {
                   borderBottom: '1px dotted rgba(255,255,255,0.2)',
                 }}
               >
-                {awakening === 'technomancer' ? 'Resonance' : 'Magic'} (Base:{' '}
+                {checkTechnomancer(awakening) ? 'Resonance' : 'Magic'} (Base:{' '}
                 {magicBase})
               </Box>
             </Tooltip>

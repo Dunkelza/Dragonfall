@@ -10,6 +10,7 @@ import { Tooltip } from 'tgui-core/components';
 import { useLocalState } from '../../../backend';
 import { Box, Button, Dropdown, Icon, Stack, Tabs } from '../../../components';
 import { CollapsibleSection } from './components';
+import { calculateBumpedValue } from './hooks';
 import {
   ChargenConstData,
   ChargenState,
@@ -108,62 +109,40 @@ export const SkillsSection = memo((props: SkillsSectionProps) => {
   const handleBumpSkill = (skillId: string, delta: number) => {
     if (isSaved) return;
 
-    // Check if locked by group
-    if (groupInfoBySkillId.has(skillId)) return;
-
-    const current = Number(skills[skillId]) || 0;
-    const newValue = Math.max(0, Math.min(6, current + delta));
-
-    // Check points
-    const costDelta = newValue - current;
-    if (costDelta > 0 && skillSpent + costDelta > totalSkillPoints) return;
-
-    const newSkills = { ...skills };
-    if (newValue <= 0) {
-      delete newSkills[skillId];
-    } else {
-      newSkills[skillId] = newValue;
-    }
-
-    const newState = {
-      ...value!,
-      skills: newSkills,
-    };
-
-    setPredictedValue(newState);
-    act('set_preference', {
-      preference: featureId,
-      value: newState,
+    const result = calculateBumpedValue(skillId, delta, {
+      currentValues: skills,
+      getMax: () => 6,
+      canBump: (id) => !groupInfoBySkillId.has(id),
+      validatePoints: (_id, curr, next) => {
+        const costDelta = next - curr;
+        return costDelta <= 0 || skillSpent + costDelta <= totalSkillPoints;
+      },
     });
+
+    if (!result.success) return;
+
+    const newState = { ...value!, skills: result.newValues };
+    setPredictedValue(newState);
+    act('set_preference', { preference: featureId, value: newState });
   };
 
   const handleBumpGroup = (groupId: string, delta: number) => {
     if (isSaved) return;
 
-    const current = Number(skillGroups[groupId]) || 0;
-    const newValue = Math.max(0, Math.min(6, current + delta));
-
-    // Check points
-    const costDelta = newValue - current;
-    if (costDelta > 0 && groupSpent + costDelta > totalGroupPoints) return;
-
-    const newGroups = { ...skillGroups };
-    if (newValue <= 0) {
-      delete newGroups[groupId];
-    } else {
-      newGroups[groupId] = newValue;
-    }
-
-    const newState = {
-      ...value!,
-      skill_groups: newGroups,
-    };
-
-    setPredictedValue(newState);
-    act('set_preference', {
-      preference: featureId,
-      value: newState,
+    const result = calculateBumpedValue(groupId, delta, {
+      currentValues: skillGroups,
+      getMax: () => 6,
+      validatePoints: (_id, curr, next) => {
+        const costDelta = next - curr;
+        return costDelta <= 0 || groupSpent + costDelta <= totalGroupPoints;
+      },
     });
+
+    if (!result.success) return;
+
+    const newState = { ...value!, skill_groups: result.newValues };
+    setPredictedValue(newState);
+    act('set_preference', { preference: featureId, value: newState });
   };
 
   const handleSetSpecialization = (skillId: string, specValue: string) => {

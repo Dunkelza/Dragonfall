@@ -4,26 +4,21 @@
  * Renders the appropriate content based on the selected tab.
  * This component moves conditional rendering logic out of the main component
  * to reduce complexity.
+ *
+ * Uses React.lazy() for heavy tab components to enable code-splitting.
  */
 
-import { memo, ReactNode, useEffect, useState } from 'react';
+import { lazy, memo, ReactNode, Suspense } from 'react';
 
 import { Box, Icon, Stack } from '../../../components';
-import { JobsPage } from '../JobsPage';
 import { QuirksPage } from '../QuirksPage';
 import { AttributeSelector } from './AttributeSelector';
 import {
-  AugmentsSection,
   CollapsibleSection,
-  ContactsSelector,
-  CoreTabContent,
-  DroneSection,
-  GearSection,
-  KnowledgeSkillsSelector,
-  MagicSelector,
+  MetatypeSelectorProps,
   PrioritySelector,
-  SkillsSection,
 } from './index';
+import { JobsSection } from './JobsSection';
 import {
   ChargenConstData,
   ChargenState,
@@ -31,6 +26,42 @@ import {
   DerivedStats,
   ValidationResult,
 } from './types';
+
+// ============================================================================
+// LAZY-LOADED COMPONENTS (Code-split for better initial load)
+// ============================================================================
+
+// Heavy components are lazy-loaded to reduce initial bundle size
+const LazyAugmentsSection = lazy(() =>
+  import('./AugmentsSection').then((m) => ({ default: m.AugmentsSection })),
+);
+const LazyContactsSelector = lazy(() =>
+  import('./ContactsSelector').then((m) => ({ default: m.ContactsSelector })),
+);
+const LazyCoreTabContent = lazy(() =>
+  import('./CoreTabContent').then((m) => ({ default: m.CoreTabContent })),
+);
+const LazyDroneSection = lazy(() =>
+  import('./DroneSection').then((m) => ({ default: m.DroneSection })),
+);
+const LazyGearSection = lazy(() =>
+  import('./GearSection').then((m) => ({ default: m.GearSection })),
+);
+const LazyKnowledgeSkillsSelector = lazy(() =>
+  import('./KnowledgeSkillsSelector').then((m) => ({
+    default: m.KnowledgeSkillsSelector,
+  })),
+);
+const LazyMagicSelector = lazy(() =>
+  import('./MagicSelector').then((m) => ({ default: m.MagicSelector })),
+);
+const LazySkillsSection = lazy(() =>
+  import('./SkillsSection').then((m) => ({ default: m.SkillsSection })),
+);
+
+// ============================================================================
+// TYPES AND CONSTANTS
+// ============================================================================
 
 // Tab enum - must match the one in ShadowrunPage.tsx
 export enum ShadowrunTab {
@@ -46,16 +77,155 @@ export enum ShadowrunTab {
   Summary = 'summary',
 }
 
-// MetatypeSelector component prop type
-type MetatypeSelectorProps = {
-  act: (action: string, payload?: Record<string, unknown>) => void;
-  chargenConstData: ChargenConstData | null;
-  chargenState: ChargenState | null;
-  featureId: string;
-  isSaved: boolean;
-  setPredictedValue: (value: ChargenState) => void;
-  value: ChargenState | null;
+// Tab group definitions for organized navigation
+export type TabGroupId = 'character' | 'equipment' | 'social' | 'summary';
+
+export type TabGroupDefinition = {
+  icon: string;
+  id: TabGroupId;
+  name: string;
+  tabs: ShadowrunTab[];
 };
+
+/**
+ * Tab group configuration - organizes tabs into logical categories.
+ * This provides a cleaner navigation experience for complex character sheets.
+ */
+export const TAB_GROUPS: TabGroupDefinition[] = [
+  {
+    id: 'character',
+    name: 'Character',
+    icon: 'user',
+    tabs: [ShadowrunTab.Build, ShadowrunTab.Core, ShadowrunTab.Magic],
+  },
+  {
+    id: 'equipment',
+    name: 'Equipment',
+    icon: 'toolbox',
+    tabs: [ShadowrunTab.Augments, ShadowrunTab.Gear, ShadowrunTab.Drones],
+  },
+  {
+    id: 'social',
+    name: 'Social',
+    icon: 'users',
+    tabs: [
+      ShadowrunTab.Connections,
+      ShadowrunTab.Qualities,
+      ShadowrunTab.Occupations,
+    ],
+  },
+  {
+    id: 'summary',
+    name: 'Summary',
+    icon: 'clipboard-list',
+    tabs: [ShadowrunTab.Summary],
+  },
+];
+
+/**
+ * Get display metadata for a specific tab.
+ */
+export type TabDisplayInfo = {
+  /** Accent color for the tab (hex color) */
+  accentColor: string;
+  hint: string;
+  icon: string;
+  label: string;
+};
+
+/**
+ * Category-specific accent colors for tabs.
+ * These provide visual cues about the type of content.
+ */
+export const TAB_COLORS = {
+  // Character building - blue tones
+  build: '#4a90d9',
+  core: '#5c6bc0',
+  magic: '#9c27b0',
+
+  // Equipment - gold/orange tones
+  augments: '#ff7043',
+  gear: '#ffc107',
+  drones: '#8d6e63',
+
+  // Social - green/teal tones
+  connections: '#26a69a',
+  qualities: '#66bb6a',
+  occupations: '#78909c',
+
+  // Summary - neutral
+  summary: '#9b8fc7',
+} as const;
+
+export const TAB_DISPLAY_INFO: Record<ShadowrunTab, TabDisplayInfo> = {
+  [ShadowrunTab.Build]: {
+    icon: 'sliders-h',
+    label: 'Build',
+    hint: 'Set your priority selections, allocate attribute and skill points.',
+    accentColor: TAB_COLORS.build,
+  },
+  [ShadowrunTab.Core]: {
+    icon: 'id-card',
+    label: 'SIN',
+    hint: 'Your System Identification Number - the digital identity that defines who you are in the Sixth World.',
+    accentColor: TAB_COLORS.core,
+  },
+  [ShadowrunTab.Magic]: {
+    icon: 'hat-wizard',
+    label: 'Magic',
+    hint: 'Configure magical traditions, spells, adept powers, and mentor spirits for awakened characters.',
+    accentColor: TAB_COLORS.magic,
+  },
+  [ShadowrunTab.Augments]: {
+    icon: 'microchip',
+    label: 'Augments',
+    hint: 'Cyberware, bioware, and other bodily augmentations. Trade essence for capabilities.',
+    accentColor: TAB_COLORS.augments,
+  },
+  [ShadowrunTab.Gear]: {
+    icon: 'shopping-cart',
+    label: 'Gear',
+    hint: 'Purchase starting equipment with your nuyen. Weapons, armor, electronics, and more.',
+    accentColor: TAB_COLORS.gear,
+  },
+  [ShadowrunTab.Drones]: {
+    icon: 'robot',
+    label: 'Drones',
+    hint: 'Purchase and customize drones for surveillance, combat, and utility operations.',
+    accentColor: TAB_COLORS.drones,
+  },
+  [ShadowrunTab.Connections]: {
+    icon: 'address-book',
+    label: 'Connections',
+    hint: 'Knowledge skills, languages, and contacts that represent your social network.',
+    accentColor: TAB_COLORS.connections,
+  },
+  [ShadowrunTab.Qualities]: {
+    icon: 'star',
+    label: 'Qualities',
+    hint: 'Positive and negative qualities that define your character edges and flaws.',
+    accentColor: TAB_COLORS.qualities,
+  },
+  [ShadowrunTab.Occupations]: {
+    icon: 'id-badge',
+    label: 'Jobs',
+    hint: 'Select your assignment/role for the run.',
+    accentColor: TAB_COLORS.occupations,
+  },
+  [ShadowrunTab.Summary]: {
+    icon: 'clipboard-list',
+    label: 'Summary',
+    hint: 'Complete overview of your character build with validation status.',
+    accentColor: TAB_COLORS.summary,
+  },
+};
+
+/**
+ * Find which group a tab belongs to.
+ */
+export function getTabGroup(tab: ShadowrunTab): TabGroupDefinition | undefined {
+  return TAB_GROUPS.find((group) => group.tabs.includes(tab));
+}
 
 // Data structure from preferences system
 type PreferencesData = {
@@ -106,16 +276,6 @@ const TabLoadingPlaceholder = () => (
   </Box>
 );
 
-// Heavy tabs that benefit from lazy loading (>500 lines)
-const HEAVY_TABS = new Set([
-  ShadowrunTab.Augments,
-  ShadowrunTab.Core,
-  ShadowrunTab.Drones,
-  ShadowrunTab.Magic,
-  ShadowrunTab.Build,
-  ShadowrunTab.Connections,
-]);
-
 export const TabContentRouter = memo((props: TabContentRouterProps) => {
   const {
     act,
@@ -143,48 +303,13 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
     value,
   } = props;
 
-  // Track which tabs have been visited for lazy loading
-  const [visitedTabs, setVisitedTabs] = useState<Set<ShadowrunTab>>(
-    () => new Set([tab]),
-  );
-
-  // Mark current tab as visited
-  useEffect(() => {
-    if (!visitedTabs.has(tab)) {
-      setVisitedTabs((prev) => new Set([...prev, tab]));
-    }
-  }, [tab, visitedTabs]);
-
-  // For heavy tabs, show placeholder if not yet visited
-  // (This allows deferred rendering on first visit via requestAnimationFrame)
-  const [isReady, setIsReady] = useState(!HEAVY_TABS.has(tab));
-  useEffect(() => {
-    if (HEAVY_TABS.has(tab) && !isReady) {
-      // Defer heavy tab rendering to next frame for smoother tab switching
-      const timer = requestAnimationFrame(() => setIsReady(true));
-      return () => cancelAnimationFrame(timer);
-    }
-    return undefined;
-  }, [tab, isReady]);
-
-  // Reset ready state when tab changes
-  useEffect(() => {
-    if (HEAVY_TABS.has(tab)) {
-      setIsReady(false);
-    } else {
-      setIsReady(true);
-    }
-  }, [tab]);
-
-  // Show loading placeholder for heavy tabs on first render frame
-  if (!isReady && HEAVY_TABS.has(tab)) {
-    return <TabLoadingPlaceholder />;
-  }
+  // Note: React.lazy() + Suspense handles code-splitting automatically.
+  // Heavy components are loaded on-demand when their tab is first visited.
 
   switch (tab) {
     case ShadowrunTab.Build:
       return (
-        <>
+        <Suspense fallback={<TabLoadingPlaceholder />}>
           <CollapsibleSection
             title="Priority Selection"
             icon="list-ol"
@@ -221,7 +346,7 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
             />
           </CollapsibleSection>
 
-          <SkillsSection
+          <LazySkillsSection
             chargenState={chargenState}
             chargenConstData={chargenConstData}
             isSaved={isSaved}
@@ -230,27 +355,29 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
             setPredictedValue={setPredictedValue}
             value={value}
           />
-        </>
+        </Suspense>
       );
 
     case ShadowrunTab.Magic:
       return (
-        <MagicSelector
-          chargenState={chargenState}
-          chargenConstData={chargenConstData}
-          isSaved={isSaved}
-          act={act}
-          featureId={featureId}
-          setPredictedValue={setPredictedValue}
-          value={value}
-          embedded
-        />
+        <Suspense fallback={<TabLoadingPlaceholder />}>
+          <LazyMagicSelector
+            chargenState={chargenState}
+            chargenConstData={chargenConstData}
+            isSaved={isSaved}
+            act={act}
+            featureId={featureId}
+            setPredictedValue={setPredictedValue}
+            value={value}
+            embedded
+          />
+        </Suspense>
       );
 
     case ShadowrunTab.Connections:
       return (
-        <>
-          <KnowledgeSkillsSelector
+        <Suspense fallback={<TabLoadingPlaceholder />}>
+          <LazyKnowledgeSkillsSelector
             chargenState={chargenState}
             chargenConstData={chargenConstData}
             isSaved={isSaved}
@@ -261,7 +388,7 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
             embedded
           />
 
-          <ContactsSelector
+          <LazyContactsSelector
             chargenState={chargenState}
             chargenConstData={chargenConstData}
             isSaved={isSaved}
@@ -271,88 +398,96 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
             value={value}
             embedded
           />
-        </>
+        </Suspense>
       );
 
     case ShadowrunTab.Core:
       return (
-        <CoreTabContent
-          act={act}
-          chargenConstData={chargenConstData}
-          chargenState={chargenState}
-          dashboardData={dashboardData}
-          data={data}
-          derivedStats={derivedStats}
-          featureId={featureId}
-          isEditingName={isEditingName}
-          isSaved={isSaved}
-          MetatypeSelector={MetatypeSelector}
-          multiNameInputOpen={multiNameInputOpen}
-          nameDraft={nameDraft}
-          nameKey={nameKey}
-          nameLocked={nameLocked}
-          renderPreference={renderPreference}
-          setIsEditingName={setIsEditingName}
-          setMultiNameInputOpen={setMultiNameInputOpen}
-          setNameDraft={setNameDraft}
-          setPredictedValue={setPredictedValue}
-          value={value}
-        />
+        <Suspense fallback={<TabLoadingPlaceholder />}>
+          <LazyCoreTabContent
+            act={act}
+            chargenConstData={chargenConstData}
+            chargenState={chargenState}
+            dashboardData={dashboardData}
+            data={data}
+            derivedStats={derivedStats}
+            featureId={featureId}
+            isEditingName={isEditingName}
+            isSaved={isSaved}
+            MetatypeSelector={MetatypeSelector}
+            multiNameInputOpen={multiNameInputOpen}
+            nameDraft={nameDraft}
+            nameKey={nameKey}
+            nameLocked={nameLocked}
+            renderPreference={renderPreference}
+            setIsEditingName={setIsEditingName}
+            setMultiNameInputOpen={setMultiNameInputOpen}
+            setNameDraft={setNameDraft}
+            setPredictedValue={setPredictedValue}
+            value={value}
+          />
+        </Suspense>
       );
 
     case ShadowrunTab.Augments:
       return (
-        <Box className="PreferencesMenu__ShadowrunSheet__augmentsContent">
-          <AugmentsSection
-            chargenState={chargenState}
-            chargenConstData={chargenConstData}
-            isSaved={isSaved}
-            act={act}
-            featureId={featureId}
-            setPredictedValue={setPredictedValue}
-            value={value}
-            totalNuyen={dashboardData?.resources || 0}
-            hasBiocompatibility={hasBiocompatibility}
-          />
-        </Box>
+        <Suspense fallback={<TabLoadingPlaceholder />}>
+          <Box className="PreferencesMenu__ShadowrunSheet__augmentsContent">
+            <LazyAugmentsSection
+              chargenState={chargenState}
+              chargenConstData={chargenConstData}
+              isSaved={isSaved}
+              act={act}
+              featureId={featureId}
+              setPredictedValue={setPredictedValue}
+              value={value}
+              totalNuyen={dashboardData?.resources || 0}
+              hasBiocompatibility={hasBiocompatibility}
+            />
+          </Box>
+        </Suspense>
       );
 
     case ShadowrunTab.Gear:
       return (
-        <Box className="PreferencesMenu__ShadowrunSheet__gearContent">
-          <GearSection
-            chargenState={chargenState}
-            chargenConstData={chargenConstData}
-            isSaved={isSaved}
-            act={act}
-            featureId={featureId}
-            setPredictedValue={setPredictedValue}
-            value={value}
-            dashboardData={dashboardData}
-          />
-        </Box>
+        <Suspense fallback={<TabLoadingPlaceholder />}>
+          <Box className="PreferencesMenu__ShadowrunSheet__gearContent">
+            <LazyGearSection
+              chargenState={chargenState}
+              chargenConstData={chargenConstData}
+              isSaved={isSaved}
+              act={act}
+              featureId={featureId}
+              setPredictedValue={setPredictedValue}
+              value={value}
+              dashboardData={dashboardData}
+            />
+          </Box>
+        </Suspense>
       );
 
     case ShadowrunTab.Drones:
       return (
-        <Box className="PreferencesMenu__ShadowrunSheet__dronesContent">
-          <DroneSection
-            chargenState={chargenState}
-            chargenConstData={chargenConstData}
-            isSaved={isSaved}
-            act={act}
-            featureId={featureId}
-            setPredictedValue={setPredictedValue}
-            value={value}
-            dashboardData={dashboardData}
-          />
-        </Box>
+        <Suspense fallback={<TabLoadingPlaceholder />}>
+          <Box className="PreferencesMenu__ShadowrunSheet__dronesContent">
+            <LazyDroneSection
+              chargenState={chargenState}
+              chargenConstData={chargenConstData}
+              isSaved={isSaved}
+              act={act}
+              featureId={featureId}
+              setPredictedValue={setPredictedValue}
+              value={value}
+              dashboardData={dashboardData}
+            />
+          </Box>
+        </Suspense>
       );
 
     case ShadowrunTab.Occupations:
       return (
         <Box className="PreferencesMenu__ShadowrunSheet__jobsContent">
-          <JobsPage />
+          <JobsSection isSaved={isSaved} />
         </Box>
       );
 

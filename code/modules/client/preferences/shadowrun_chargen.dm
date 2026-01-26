@@ -947,6 +947,51 @@
 		list("id" = "utility", "name" = "Utility", "icon" = "toolbox", "sort" = 6)
 	)
 
+	// Augment modifications catalog
+	var/list/sr_augment_mods = get_sr_augment_mods()
+	var/list/augment_mod_catalog = list()
+	var/list/augment_mods_by_category = list()
+	for(var/mod_id in sr_augment_mods)
+		var/datum/sr_augment_mod/M = sr_augment_mods[mod_id]
+		var/list/mod_data = list(
+			"id" = "[mod_id]",
+			"name" = M.name,
+			"desc" = M.desc,
+			"cost" = M.cost,
+			"essence_cost" = M.essence_cost,
+			"availability" = M.availability,
+			"legality" = M.legality,
+			"allowed_categories" = M.allowed_categories,
+			"allowed_augments" = M.allowed_augments,
+			"max_per_augment" = M.max_per_augment,
+			"stat_bonuses" = M.stat_bonuses,
+			"icon" = M.icon,
+			"mod_category" = M.mod_category,
+			"cyberlimb_only" = M.cyberlimb_only,
+			"sort" = M.ui_sort_order
+		)
+		augment_mod_catalog["[mod_id]"] = mod_data
+		if(!augment_mods_by_category[M.mod_category])
+			augment_mods_by_category[M.mod_category] = list()
+		augment_mods_by_category[M.mod_category] += list(mod_data)
+	data["augment_mod_catalog"] = augment_mod_catalog
+	data["augment_mods_by_category"] = augment_mods_by_category
+
+	// Augment mod category metadata for UI
+	data["augment_mod_categories"] = list(
+		list("id" = "concealment", "name" = "Concealment", "icon" = "eye-slash", "sort" = 1),
+		list("id" = "armor", "name" = "Armor", "icon" = "shield-alt", "sort" = 2),
+		list("id" = "sensor", "name" = "Sensors", "icon" = "satellite-dish", "sort" = 3),
+		list("id" = "capacity", "name" = "Capacity", "icon" = "expand-arrows-alt", "sort" = 4),
+		list("id" = "utility", "name" = "Utility", "icon" = "toolbox", "sort" = 5),
+		list("id" = "enhancement", "name" = "Enhancement", "icon" = "bolt", "sort" = 6),
+		list("id" = "bioware", "name" = "Bioware", "icon" = "dna", "sort" = 7),
+		list("id" = "organ", "name" = "Organ", "icon" = "lungs", "sort" = 8),
+		list("id" = "geneware", "name" = "Geneware", "icon" = "seedling", "sort" = 9),
+		list("id" = "nanoware", "name" = "Nanoware", "icon" = "microscope", "sort" = 10),
+		list("id" = "cosmetic", "name" = "Cosmetic", "icon" = "paint-brush", "sort" = 11)
+	)
+
 	return data
 
 /datum/preference/blob/shadowrun_chargen/proc/get_priority_categories()

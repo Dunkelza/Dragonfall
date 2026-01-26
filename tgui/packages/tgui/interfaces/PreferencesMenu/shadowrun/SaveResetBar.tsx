@@ -1,7 +1,7 @@
 /**
  * Save/Reset Action Bar Component
  *
- * Displays save/reset buttons and validation summary for chargen.
+ * Displays save/reset buttons, undo/redo controls, and validation summary for chargen.
  */
 
 import { Box, Button, Icon, Stack } from '../../../components';
@@ -18,15 +18,47 @@ type Validation = {
   warningCount: number;
 };
 
+type UndoRedoState = {
+  canRedo: boolean;
+  canUndo: boolean;
+  futureCount: number;
+  historyCount: number;
+  lastChangeLabel?: string;
+  nextRedoLabel?: string;
+};
+
 type SaveResetBarProps = {
   isSaved: boolean;
+  onRedo?: () => void;
   onResetAll: () => void;
   onSaveSheet: () => void;
+  onUndo?: () => void;
+  undoRedo?: UndoRedoState;
   validation: Validation;
 };
 
 export const SaveResetBar = (props: SaveResetBarProps) => {
-  const { isSaved, validation, onResetAll, onSaveSheet } = props;
+  const {
+    isSaved,
+    validation,
+    onResetAll,
+    onSaveSheet,
+    onUndo,
+    onRedo,
+    undoRedo,
+  } = props;
+
+  // Build tooltip content for undo/redo
+  const undoTooltip = undoRedo?.canUndo
+    ? `Undo${undoRedo.lastChangeLabel ? `: ${undoRedo.lastChangeLabel}` : ''} (Ctrl+Z)`
+    : 'Nothing to undo';
+
+  const redoTooltip = undoRedo?.canRedo
+    ? `Redo${undoRedo.nextRedoLabel ? `: ${undoRedo.nextRedoLabel}` : ''} (Ctrl+Y)`
+    : 'Nothing to redo';
+
+  const undoDisabled = !undoRedo?.canUndo || isSaved;
+  const redoDisabled = !undoRedo?.canRedo || isSaved;
 
   return (
     <Box
@@ -62,10 +94,43 @@ export const SaveResetBar = (props: SaveResetBarProps) => {
         </Stack.Item>
         <Stack.Item>
           <Stack>
-            <Stack.Item>
+            {/* Undo/Redo buttons - only show when available and not saved */}
+            {onUndo && onRedo && (
+              <>
+                <Stack.Item>
+                  <Tooltip content={undoTooltip}>
+                    <Button
+                      icon="undo"
+                      disabled={undoDisabled}
+                      onClick={onUndo}
+                      color={undoDisabled ? 'transparent' : 'default'}
+                    />
+                  </Tooltip>
+                </Stack.Item>
+                <Stack.Item>
+                  <Tooltip content={redoTooltip}>
+                    <Button
+                      icon="redo"
+                      disabled={redoDisabled}
+                      onClick={onRedo}
+                      color={redoDisabled ? 'transparent' : 'default'}
+                    />
+                  </Tooltip>
+                </Stack.Item>
+                <Stack.Item ml={0.5}>
+                  <Box
+                    style={{
+                      borderLeft: '1px solid rgba(255,255,255,0.2)',
+                      height: '100%',
+                    }}
+                  />
+                </Stack.Item>
+              </>
+            )}
+            <Stack.Item ml={onUndo && onRedo ? 0.5 : 0}>
               <Button
                 color="bad"
-                icon="undo"
+                icon="trash"
                 onClick={onResetAll}
                 tooltip="Reset all selections and unlock editing"
               >

@@ -10,6 +10,7 @@ import { Tooltip } from 'tgui-core/components';
 import { useLocalState } from '../../../backend';
 import { Box, Button, Dropdown, Icon, Stack, Tabs } from '../../../components';
 import { CollapsibleSection } from './components';
+import { calculateBumpedValue } from './hooks';
 import {
   AttributeMeta,
   ChargenConstData,
@@ -107,32 +108,22 @@ export const KnowledgeSkillsSelector = memo(
     const handleBumpKnowledge = (skillId: string, delta: number) => {
       if (isSaved) return;
 
-      const current = Number(selectedKnowledge[skillId]) || 0;
-      const newValue = Math.max(0, Math.min(6, current + delta));
-
-      // Check points
-      const costDelta = newValue - current;
-      if (costDelta > 0 && spentPoints + costDelta > freeKnowledgePoints) {
-        return;
-      }
-
-      const newKnowledge = { ...selectedKnowledge };
-      if (newValue <= 0) {
-        delete newKnowledge[skillId];
-      } else {
-        newKnowledge[skillId] = newValue;
-      }
-
-      const newState = {
-        ...value!,
-        knowledge_skills: newKnowledge,
-      };
-
-      setPredictedValue(newState);
-      act('set_preference', {
-        preference: featureId,
-        value: newState,
+      const result = calculateBumpedValue(skillId, delta, {
+        currentValues: selectedKnowledge,
+        getMax: () => 6,
+        validatePoints: (_id, curr, next) => {
+          const costDelta = next - curr;
+          return (
+            costDelta <= 0 || spentPoints + costDelta <= freeKnowledgePoints
+          );
+        },
       });
+
+      if (!result.success) return;
+
+      const newState = { ...value!, knowledge_skills: result.newValues };
+      setPredictedValue(newState);
+      act('set_preference', { preference: featureId, value: newState });
     };
 
     const handleSetNativeLanguage = (langId: string) => {
@@ -153,35 +144,23 @@ export const KnowledgeSkillsSelector = memo(
     const handleBumpLanguage = (langId: string, delta: number) => {
       if (isSaved) return;
 
-      // Native language is always at N (not rated)
-      if (langId === nativeLanguage) return;
-
-      const current = Number(selectedLanguages[langId]) || 0;
-      const newValue = Math.max(0, Math.min(6, current + delta));
-
-      // Check if we have enough points
-      const costDelta = newValue - current;
-      if (costDelta > 0 && spentPoints + costDelta > freeKnowledgePoints) {
-        return;
-      }
-
-      const newLanguages = { ...selectedLanguages };
-      if (newValue <= 0) {
-        delete newLanguages[langId];
-      } else {
-        newLanguages[langId] = newValue;
-      }
-
-      const newState = {
-        ...value!,
-        languages: newLanguages,
-      };
-
-      setPredictedValue(newState);
-      act('set_preference', {
-        preference: featureId,
-        value: newState,
+      const result = calculateBumpedValue(langId, delta, {
+        currentValues: selectedLanguages,
+        getMax: () => 6,
+        canBump: (id) => id !== nativeLanguage,
+        validatePoints: (_id, curr, next) => {
+          const costDelta = next - curr;
+          return (
+            costDelta <= 0 || spentPoints + costDelta <= freeKnowledgePoints
+          );
+        },
       });
+
+      if (!result.success) return;
+
+      const newState = { ...value!, languages: result.newValues };
+      setPredictedValue(newState);
+      act('set_preference', { preference: featureId, value: newState });
     };
 
     const nativeLang = languages.find(

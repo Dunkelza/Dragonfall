@@ -7,6 +7,7 @@ import { Tooltip } from 'tgui-core/components';
 
 import { Box, Button, Icon, Stack } from '../../../components';
 import { getAttributeDescription } from './components';
+import { calculateBumpedValue } from './hooks';
 import { AttributeMeta, EmbeddableChargenProps } from './types';
 
 export type AttributeSelectorProps = EmbeddableChargenProps;
@@ -16,9 +17,6 @@ type EffectiveAttributeMeta = AttributeMeta & {
   max: number;
   min: number;
 };
-
-const clamp = (value: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, value));
 
 const getValueColor = (current: number, min: number): string => {
   if (current === min) return '#888';
@@ -70,20 +68,30 @@ export const AttributeSelector = memo((props: AttributeSelectorProps) => {
   );
   const remainingPoints = totalPoints - spentPoints;
 
+  // Build a map of attribute bounds for quick lookup
+  const attrBoundsMap = new Map(
+    effectiveAttributesMeta.map((a: EffectiveAttributeMeta) => [
+      a.id,
+      { min: a.min, max: a.max },
+    ]),
+  );
+
   const handleBumpAttribute = (attrId: string, delta: number) => {
     if (isSaved) return;
 
-    const attrMeta = effectiveAttributesMeta.find(
-      (a: EffectiveAttributeMeta) => a.id === attrId,
-    );
-    if (!attrMeta) return;
+    const bounds = attrBoundsMap.get(attrId);
+    if (!bounds) return;
 
-    const current = attributes[attrId] ?? attrMeta.min;
-    const nextValue = clamp(current + delta, attrMeta.min, attrMeta.max);
+    const result = calculateBumpedValue(attrId, delta, {
+      currentValues: attributes,
+      getMin: () => bounds.min,
+      getMax: () => bounds.max,
+      deleteOnZero: false, // Attributes are always kept
+    });
 
-    const nextAttrs = { ...attributes, [attrId]: nextValue };
-    const newState = { ...chargenState!, attributes: nextAttrs };
+    if (!result.success) return;
 
+    const newState = { ...chargenState!, attributes: result.newValues };
     setPredictedValue(newState);
     act('set_preference', { preference: featureId, value: newState });
   };

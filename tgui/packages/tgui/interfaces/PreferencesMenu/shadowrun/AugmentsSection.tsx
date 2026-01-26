@@ -17,11 +17,11 @@ import {
   Stack,
   Tabs,
 } from '../../../components';
-// Re-export AUGMENT_GRADES for backwards compatibility
-export { AUGMENT_GRADES } from './constants';
 import { AUGMENT_GRADES } from './constants';
 import {
   AugmentMeta,
+  AugmentModCategoryMeta,
+  AugmentModMeta,
   AugmentSelection,
   ChargenConstData,
   ChargenState,
@@ -72,7 +72,10 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
   // Filter text for searching augments
   const [filterText, setFilterText] = useLocalState('sr_augment_filter', '');
 
-  // Calculate essence cost from selected augments with grade multipliers
+  // Get augment mod data from server (moved up for use in calculations)
+  const augmentModCatalog = chargenConstData?.augment_mod_catalog || {};
+
+  // Calculate essence cost from selected augments with grade multipliers and mod modifiers
   const essenceCost = Object.entries(selectedAugments).reduce(
     (total, [augmentId, augmentData]: [string, any]) => {
       if (!augmentData) return total;
@@ -84,7 +87,18 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
       const biocompMultiplier = hasBiocompatibility
         ? BIOCOMPATIBILITY_ESSENCE_REDUCTION
         : 1.0;
-      return total + baseCost * gradeMultiplier * biocompMultiplier;
+      let essenceCostForAugment =
+        baseCost * gradeMultiplier * biocompMultiplier;
+
+      // Add/subtract mod essence cost modifiers
+      for (const modId of augmentData?.mods || []) {
+        const mod = augmentModCatalog[modId];
+        if (mod?.essence_cost) {
+          essenceCostForAugment += mod.essence_cost;
+        }
+      }
+
+      return total + Math.max(0, essenceCostForAugment);
     },
     0,
   );
@@ -94,7 +108,7 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
     chargenConstData?.cyberlimb_upgrade_cost || 5000;
 
   // Calculate nuyen cost from selected augments with grade multipliers
-  // Also includes cyberlimb stat upgrade costs
+  // Also includes cyberlimb stat upgrade costs and mod costs
   const nuyenCost = Object.entries(selectedAugments).reduce(
     (total, [augmentId, augmentData]: [string, any]) => {
       if (!augmentData) return total;
@@ -110,6 +124,14 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
         const agiUpgrade = augmentData.agi_upgrade || 0;
         const strUpgrade = augmentData.str_upgrade || 0;
         cost += (agiUpgrade + strUpgrade) * cyberlimbUpgradeCostPerPoint;
+      }
+
+      // Add mod costs
+      for (const modId of augmentData?.mods || []) {
+        const mod = augmentModCatalog[modId];
+        if (mod) {
+          cost += mod.cost || 0;
+        }
       }
 
       return total + cost;
@@ -147,6 +169,21 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
     'sr_augment_category',
     'cyberware',
   );
+
+  // State for customizing a specific augment (mod installation)
+  const [customizingAugmentId, setCustomizingAugmentId] = useLocalState<
+    string | null
+  >('sr_customizing_augment', null);
+
+  const [selectedModCategory, setSelectedModCategory] = useLocalState<string>(
+    'sr_augment_mod_category',
+    'concealment',
+  );
+
+  // Get additional augment mod data from server
+  const augmentModsByCategory =
+    chargenConstData?.augment_mods_by_category || {};
+  const augmentModCategories = chargenConstData?.augment_mod_categories || [];
 
   // Get cyberware suites from server data
   const cyberwareSuites = chargenConstData?.cyberware_suites || [];
@@ -311,6 +348,85 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
       preference: featureId,
       value: newState,
     });
+  };
+
+  // Handler for adding a mod to an augment
+  const handleAddMod = (augmentId: string, modId: string) => {
+    if (isSaved) return;
+    if (!selectedAugments[augmentId]) return;
+    const mod = augmentModCatalog[modId];
+    if (!mod) return;
+
+    // Check if can afford
+    if ((mod.cost || 0) > nuyenRemaining) return;
+
+    const currentAugment = selectedAugments[augmentId];
+    const currentMods = currentAugment.mods || [];
+
+    // Check if mod is already applied
+    if (currentMods.includes(modId)) return;
+
+    // Check max per augment
+    const currentCount = currentMods.filter((m: string) => m === modId).length;
+    if (currentCount >= (mod.max_per_augment || 1)) return;
+
+    // Check if mod is allowed for this augment's category
+    const augmentMeta = chargenConstData?.augments?.[augmentId];
+    if (
+      mod.allowed_categories &&
+      mod.allowed_categories.length > 0 &&
+      !mod.allowed_categories.includes(augmentMeta?.category)
+    ) {
+      return;
+    }
+
+    // Check if mod is cyberlimb-only
+    if (mod.cyberlimb_only && !augmentMeta?.is_cyberlimb) {
+      return;
+    }
+
+    const newMods = [...currentMods, modId];
+    const newAugments = {
+      ...selectedAugments,
+      [augmentId]: { ...currentAugment, mods: newMods },
+    };
+    const newState = { ...value!, augments: newAugments };
+    setPredictedValue(newState);
+    act('set_preference', { preference: featureId, value: newState });
+  };
+
+  // Handler for removing a mod from an augment
+  const handleRemoveMod = (augmentId: string, modId: string) => {
+    if (isSaved) return;
+    if (!selectedAugments[augmentId]) return;
+
+    const currentAugment = selectedAugments[augmentId];
+    const newMods = (currentAugment.mods || []).filter(
+      (m: string) => m !== modId,
+    );
+    const newAugments = {
+      ...selectedAugments,
+      [augmentId]: { ...currentAugment, mods: newMods },
+    };
+    const newState = { ...value!, augments: newAugments };
+    setPredictedValue(newState);
+    act('set_preference', { preference: featureId, value: newState });
+  };
+
+  // Calculate stat bonuses from mods for an augment
+  const getAugmentModBonuses = (augmentId: string) => {
+    const augmentData = selectedAugments[augmentId];
+    if (!augmentData?.mods) return {};
+    const bonuses: Record<string, number> = {};
+    for (const modId of augmentData.mods) {
+      const mod = augmentModCatalog[modId];
+      if (mod?.stat_bonuses) {
+        for (const [stat, bonus] of Object.entries(mod.stat_bonuses)) {
+          bonuses[stat] = (bonuses[stat] || 0) + (bonus as number);
+        }
+      }
+    }
+    return bonuses;
   };
 
   // Handler for applying a cyberware suite
@@ -922,14 +1038,6 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
                 nuyenRemaining >= effectiveNuyen || isSelected;
               const canAfford = canAffordEssence && canAffordNuyen;
 
-              const tooltipText = isSelected
-                ? 'Click to remove'
-                : !canAffordEssence
-                  ? 'Not enough Essence'
-                  : !canAffordNuyen
-                    ? 'Not enough Nuyen'
-                    : 'Click to add';
-
               return (
                 <Box
                   key={augment.id}
@@ -937,69 +1045,82 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
                     padding: '0.75rem',
                     marginBottom: '0.5rem',
                     background: isSelected
-                      ? 'rgba(155, 143, 199, 0.15)'
-                      : 'rgba(0, 0, 0, 0.25)',
-                    border: `1px solid ${isSelected ? gradeData.color : 'rgba(255, 255, 255, 0.1)'}`,
+                      ? 'rgba(155, 143, 199, 0.2)'
+                      : 'rgba(0, 0, 0, 0.3)',
+                    border: isSelected
+                      ? '1px solid rgba(155, 143, 199, 0.5)'
+                      : '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '4px',
-                    opacity: isSaved ? '0.6' : canAfford ? '1' : '0.5',
+                    opacity: !canAfford && !isSelected ? '0.5' : '1',
                   }}
                 >
-                  <Stack align="center">
-                    {/* Selection Checkbox */}
-                    <Stack.Item>
-                      <Button
-                        icon={isSelected ? 'check-square' : 'square'}
-                        color={isSelected ? 'good' : 'transparent'}
-                        disabled={isSaved || (!isSelected && !canAfford)}
-                        onClick={() =>
-                          handleToggleAugment(augment.id, currentGrade)
-                        }
-                        tooltip={tooltipText}
-                      />
-                    </Stack.Item>
-
-                    {/* Augment Info */}
+                  <Stack justify="space-between" align="flex-start">
                     <Stack.Item grow>
-                      <Box style={{ fontSize: '0.95rem', fontWeight: '600' }}>
-                        {augment.name}
+                      {/* Augment Name & Description */}
+                      <Box
+                        style={{
+                          fontWeight: 'bold',
+                          color: isSelected ? '#9b8fc7' : '#fff',
+                          marginBottom: '0.25rem',
+                        }}
+                      >
+                        <Tooltip
+                          content={
+                            augment.description ||
+                            `${augment.name} - ${formatNuyen(effectiveNuyen)}`
+                          }
+                          position="right"
+                        >
+                          <span>{augment.name}</span>
+                        </Tooltip>
                         {augment.slot && (
                           <Box
                             as="span"
                             ml={0.5}
-                            style={{ fontSize: '0.75rem', opacity: '0.6' }}
+                            style={{
+                              fontSize: '0.75rem',
+                              padding: '0.1rem 0.3rem',
+                              background: 'rgba(255, 255, 255, 0.1)',
+                              borderRadius: '3px',
+                              color: 'rgba(255, 255, 255, 0.6)',
+                            }}
                           >
-                            [{augment.slot}]
+                            {augment.slot}
                           </Box>
                         )}
                       </Box>
-                      <Box style={{ fontSize: '0.8rem', opacity: '0.7' }}>
+                      <Box
+                        style={{
+                          fontSize: '0.8rem',
+                          color: 'rgba(255, 255, 255, 0.7)',
+                          marginBottom: '0.5rem',
+                        }}
+                      >
                         {augment.description}
                       </Box>
-                    </Stack.Item>
 
-                    {/* Grade Selector (only when selected) */}
-                    {isSelected && (
-                      <Stack.Item>
-                        <Dropdown
-                          width="7rem"
-                          disabled={isSaved}
-                          selected={currentGrade}
-                          options={Object.entries(AUGMENT_GRADES).map(
-                            ([gId, gData]) => ({
-                              value: gId,
-                              displayText: gData.name,
-                            }),
-                          )}
-                          onSelected={(val) =>
-                            handleChangeGrade(augment.id, val)
-                          }
-                        />
-                      </Stack.Item>
-                    )}
+                      {/* Grade Selector Row (when selected) */}
+                      {isSelected && (
+                        <Box style={{ marginBottom: '0.25rem' }}>
+                          <Dropdown
+                            width="8rem"
+                            disabled={isSaved}
+                            selected={currentGrade}
+                            options={Object.entries(AUGMENT_GRADES).map(
+                              ([gId, gData]) => ({
+                                value: gId,
+                                displayText: gData.name,
+                              }),
+                            )}
+                            onSelected={(val) =>
+                              handleChangeGrade(augment.id, val)
+                            }
+                          />
+                        </Box>
+                      )}
 
-                    {/* Cyberlimb Stat Upgrades (only for cyberlimbs when selected) */}
-                    {isSelected && augment.is_cyberlimb && (
-                      <Stack.Item>
+                      {/* Cyberlimb Stats (when selected and is cyberlimb) */}
+                      {isSelected && augment.is_cyberlimb && (
                         <Box
                           style={{
                             display: 'flex',
@@ -1130,44 +1251,112 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
                             </Box>
                           </Tooltip>
                         </Box>
-                      </Stack.Item>
-                    )}
+                      )}
 
-                    {/* Cost Display */}
-                    <Stack.Item ml={0.5}>
-                      <Stack vertical align="flex-end">
-                        <Stack.Item>
-                          <Tooltip
-                            content={`Base: ${baseEssence.toFixed(2)} ESS × ${gradeData.name} (${(gradeData.essenceMultiplier * 100).toFixed(0)}%)`}
+                      {/* Show mods count badge if augment has mods */}
+                      {isSelected &&
+                        (selectedAugments[augment.id]?.mods?.length || 0) >
+                          0 && (
+                          <Box
+                            style={{
+                              marginTop: '0.25rem',
+                              fontSize: '0.75rem',
+                              color: '#4caf50',
+                            }}
                           >
-                            <Box
-                              style={{
-                                fontSize: '0.85rem',
-                                color: isSelected ? gradeData.color : '#ff9800',
-                                fontWeight: 'bold',
-                                textAlign: 'right',
-                              }}
-                            >
-                              -{effectiveEssence.toFixed(2)} ESS
-                            </Box>
-                          </Tooltip>
-                        </Stack.Item>
-                        <Stack.Item>
-                          <Tooltip
-                            content={`Base: ${formatNuyen(baseNuyen)} × ${gradeData.name} (${(gradeData.costMultiplier * 100).toFixed(0)}%)`}
+                            <Icon name="cog" mr={0.25} />
+                            {selectedAugments[augment.id]?.mods?.length} mod
+                            {(selectedAugments[augment.id]?.mods?.length ||
+                              0) !== 1
+                              ? 's'
+                              : ''}{' '}
+                            installed
+                          </Box>
+                        )}
+                    </Stack.Item>
+
+                    {/* Cost & Buttons Column */}
+                    <Stack.Item>
+                      <Box
+                        style={{
+                          textAlign: 'right',
+                          marginBottom: '0.5rem',
+                        }}
+                      >
+                        <Box
+                          style={{
+                            fontWeight: 'bold',
+                            color:
+                              canAfford || isSelected ? '#ffd700' : '#ff6b6b',
+                          }}
+                        >
+                          {formatNuyen(effectiveNuyen)}
+                        </Box>
+                        <Tooltip
+                          content={`Base: ${baseEssence.toFixed(2)} ESS × ${gradeData.name} (${(gradeData.essenceMultiplier * 100).toFixed(0)}%)`}
+                        >
+                          <Box
+                            style={{
+                              fontSize: '0.8rem',
+                              color: isSelected ? gradeData.color : '#ff9800',
+                              fontWeight: 'bold',
+                            }}
                           >
-                            <Box
-                              style={{
-                                fontSize: '0.75rem',
-                                color: '#ffd700',
-                                fontWeight: 'bold',
-                                textAlign: 'right',
-                              }}
+                            -{effectiveEssence.toFixed(2)} ESS
+                          </Box>
+                        </Tooltip>
+                        <Box
+                          style={{
+                            fontSize: '0.7rem',
+                            color: 'rgba(255,255,255,0.5)',
+                          }}
+                        >
+                          Avail: {augment.availability || '-'}
+                        </Box>
+                      </Box>
+                      <Stack vertical>
+                        {isSelected ? (
+                          <>
+                            <Stack.Item>
+                              <Button
+                                fluid
+                                icon="cog"
+                                color="transparent"
+                                disabled={isSaved}
+                                onClick={() =>
+                                  setCustomizingAugmentId(augment.id)
+                                }
+                              >
+                                Customize
+                              </Button>
+                            </Stack.Item>
+                            <Stack.Item>
+                              <Button
+                                fluid
+                                icon="trash"
+                                color="bad"
+                                disabled={isSaved}
+                                onClick={() => handleToggleAugment(augment.id)}
+                              >
+                                Remove
+                              </Button>
+                            </Stack.Item>
+                          </>
+                        ) : (
+                          <Stack.Item>
+                            <Button
+                              fluid
+                              icon="plus"
+                              color="good"
+                              disabled={isSaved || !canAfford}
+                              onClick={() =>
+                                handleToggleAugment(augment.id, 'standard')
+                              }
                             >
-                              {formatNuyen(effectiveNuyen)}
-                            </Box>
-                          </Tooltip>
-                        </Stack.Item>
+                              Add
+                            </Button>
+                          </Stack.Item>
+                        )}
                       </Stack>
                     </Stack.Item>
                   </Stack>
@@ -1278,6 +1467,457 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
         character dies. Magic users lose 1 Magic for each full point of Essence
         lost. Higher grade augments cost more nuyen but use less Essence.
       </Box>
+
+      {/* Augment Customization Modal */}
+      {customizingAugmentId && selectedAugments[customizingAugmentId] && (
+        <Box
+          style={{
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            right: '0',
+            bottom: '0',
+            background: 'rgba(0, 0, 0, 0.8)',
+            zIndex: '1000',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '2rem',
+          }}
+          onClick={() => setCustomizingAugmentId(null)}
+        >
+          <Box
+            style={{
+              background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+              border: '2px solid rgba(155, 143, 199, 0.5)',
+              borderRadius: '8px',
+              padding: '1.5rem',
+              maxWidth: '700px',
+              width: '100%',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+            }}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          >
+            {(() => {
+              const augmentMeta =
+                chargenConstData?.augments?.[customizingAugmentId];
+              const augmentData = selectedAugments[customizingAugmentId];
+              const installedMods = augmentData?.mods || [];
+              const augmentBonuses = getAugmentModBonuses(customizingAugmentId);
+
+              if (!augmentMeta) return null;
+
+              // Calculate mod cost for this augment
+              const modCost = installedMods.reduce(
+                (sum: number, modId: string) => {
+                  const mod = augmentModCatalog[modId];
+                  return sum + (mod?.cost || 0);
+                },
+                0,
+              );
+
+              return (
+                <>
+                  {/* Header */}
+                  <Stack justify="space-between" align="center" mb={1}>
+                    <Stack.Item>
+                      <Box
+                        style={{
+                          fontSize: '1.3rem',
+                          fontWeight: 'bold',
+                          color: '#9b8fc7',
+                        }}
+                      >
+                        <Icon name="cog" mr={0.5} />
+                        Customize: {augmentMeta.name}
+                      </Box>
+                    </Stack.Item>
+                    <Stack.Item>
+                      <Button
+                        icon="times"
+                        color="transparent"
+                        onClick={() => setCustomizingAugmentId(null)}
+                      />
+                    </Stack.Item>
+                  </Stack>
+
+                  {/* Augment Info */}
+                  <Box
+                    style={{
+                      background: 'rgba(0, 0, 0, 0.3)',
+                      padding: '0.75rem',
+                      borderRadius: '4px',
+                      marginBottom: '1rem',
+                    }}
+                  >
+                    <Box
+                      style={{
+                        fontSize: '0.85rem',
+                        opacity: '0.8',
+                        marginBottom: '0.5rem',
+                      }}
+                    >
+                      {augmentMeta.description}
+                    </Box>
+                    <Stack>
+                      <Stack.Item>
+                        <Box style={{ color: '#ffd700', fontWeight: 'bold' }}>
+                          Base: {formatNuyen(augmentMeta.nuyen_cost || 0)}
+                        </Box>
+                      </Stack.Item>
+                      {modCost > 0 && (
+                        <Stack.Item>
+                          <Box style={{ color: '#4caf50', fontWeight: 'bold' }}>
+                            +{formatNuyen(modCost)} (mods)
+                          </Box>
+                        </Stack.Item>
+                      )}
+                      <Stack.Item>
+                        <Box style={{ color: '#ff9800' }}>
+                          -{(augmentMeta.essence_cost || 0).toFixed(2)} ESS
+                        </Box>
+                      </Stack.Item>
+                    </Stack>
+                    {/* Show stat bonuses from mods */}
+                    {Object.keys(augmentBonuses).length > 0 && (
+                      <Box style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
+                        <Box
+                          as="span"
+                          style={{ color: 'rgba(255,255,255,0.6)' }}
+                        >
+                          Mod bonuses:{' '}
+                        </Box>
+                        {Object.entries(augmentBonuses).map(([stat, bonus]) => (
+                          <Box
+                            key={stat}
+                            as="span"
+                            mr={0.5}
+                            style={{ color: bonus > 0 ? '#4caf50' : '#ff6b6b' }}
+                          >
+                            {stat.toUpperCase()}: {bonus > 0 ? '+' : ''}
+                            {bonus}
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+                  </Box>
+
+                  {/* Installed Mods */}
+                  {installedMods.length > 0 && (
+                    <Box
+                      style={{
+                        background: 'rgba(76, 175, 80, 0.1)',
+                        border: '1px solid rgba(76, 175, 80, 0.3)',
+                        padding: '0.75rem',
+                        borderRadius: '4px',
+                        marginBottom: '1rem',
+                      }}
+                    >
+                      <Box
+                        style={{
+                          fontWeight: 'bold',
+                          marginBottom: '0.5rem',
+                          color: '#4caf50',
+                        }}
+                      >
+                        <Icon name="check-circle" mr={0.5} />
+                        Installed Mods ({installedMods.length})
+                      </Box>
+                      {installedMods.map((modId: string) => {
+                        const mod = augmentModCatalog[modId];
+                        if (!mod) return null;
+                        return (
+                          <Stack key={modId} align="center" mb={0.25}>
+                            <Stack.Item grow>
+                              <Box style={{ fontSize: '0.9rem' }}>
+                                <Icon name={mod.icon || 'cog'} mr={0.5} />
+                                {mod.name}
+                              </Box>
+                            </Stack.Item>
+                            <Stack.Item>
+                              <Box
+                                style={{ color: '#ffd700', fontSize: '0.8rem' }}
+                              >
+                                {formatNuyen(mod.cost || 0)}
+                              </Box>
+                            </Stack.Item>
+                            <Stack.Item>
+                              <Button
+                                icon="times"
+                                compact
+                                color="bad"
+                                disabled={isSaved}
+                                onClick={() =>
+                                  handleRemoveMod(customizingAugmentId, modId)
+                                }
+                              />
+                            </Stack.Item>
+                          </Stack>
+                        );
+                      })}
+                    </Box>
+                  )}
+
+                  {/* Mod Category Tabs */}
+                  <Tabs fluid mb={0.5}>
+                    {augmentModCategories
+                      .sort(
+                        (
+                          a: AugmentModCategoryMeta,
+                          b: AugmentModCategoryMeta,
+                        ) => (a.sort || 0) - (b.sort || 0),
+                      )
+                      .map((cat: AugmentModCategoryMeta) => (
+                        <Tabs.Tab
+                          key={cat.id}
+                          selected={selectedModCategory === cat.id}
+                          onClick={() => setSelectedModCategory(cat.id)}
+                        >
+                          <Icon name={cat.icon || 'cog'} mr={0.25} />
+                          {cat.name}
+                        </Tabs.Tab>
+                      ))}
+                  </Tabs>
+
+                  {/* Available Mods */}
+                  <Box
+                    style={{
+                      maxHeight: '250px',
+                      overflowY: 'auto',
+                      background: 'rgba(0, 0, 0, 0.2)',
+                      padding: '0.5rem',
+                      borderRadius: '4px',
+                    }}
+                  >
+                    {(augmentModsByCategory[selectedModCategory] || [])
+                      .sort(
+                        (a: AugmentModMeta, b: AugmentModMeta) =>
+                          (a.sort || 0) - (b.sort || 0),
+                      )
+                      .map((mod: AugmentModMeta) => {
+                        const isInstalled = installedMods.includes(mod.id);
+                        const canAffordMod = (mod.cost || 0) <= nuyenRemaining;
+                        const isAllowedForCategory =
+                          !mod.allowed_categories?.length ||
+                          mod.allowed_categories.includes(augmentMeta.category);
+                        const isCyberlimbCompatible =
+                          !mod.cyberlimb_only || augmentMeta.is_cyberlimb;
+                        const isAllowed =
+                          isAllowedForCategory && isCyberlimbCompatible;
+
+                        return (
+                          <Box
+                            key={mod.id}
+                            style={{
+                              padding: '0.5rem',
+                              marginBottom: '0.5rem',
+                              background: isInstalled
+                                ? 'rgba(76, 175, 80, 0.15)'
+                                : 'rgba(0, 0, 0, 0.3)',
+                              border: isInstalled
+                                ? '1px solid rgba(76, 175, 80, 0.5)'
+                                : '1px solid rgba(255, 255, 255, 0.1)',
+                              borderRadius: '4px',
+                              opacity: !isAllowed
+                                ? '0.4'
+                                : !canAffordMod && !isInstalled
+                                  ? '0.6'
+                                  : '1',
+                            }}
+                          >
+                            <Stack align="center">
+                              <Stack.Item>
+                                <Icon
+                                  name={mod.icon || 'cog'}
+                                  size={1.2}
+                                  color={isInstalled ? '#4caf50' : '#9b8fc7'}
+                                />
+                              </Stack.Item>
+                              <Stack.Item grow>
+                                <Box
+                                  style={{
+                                    fontWeight: 'bold',
+                                    fontSize: '0.9rem',
+                                  }}
+                                >
+                                  {mod.name}
+                                  {mod.legality && (
+                                    <Box
+                                      as="span"
+                                      ml={0.5}
+                                      style={{
+                                        fontSize: '0.65rem',
+                                        padding: '0.1rem 0.25rem',
+                                        background:
+                                          mod.legality === 'F'
+                                            ? 'rgba(255, 0, 0, 0.3)'
+                                            : 'rgba(255, 165, 0, 0.3)',
+                                        borderRadius: '2px',
+                                        color:
+                                          mod.legality === 'F'
+                                            ? '#ff6b6b'
+                                            : '#ffb74d',
+                                      }}
+                                    >
+                                      {mod.legality}
+                                    </Box>
+                                  )}
+                                  {!isAllowed && (
+                                    <Box
+                                      as="span"
+                                      ml={0.5}
+                                      style={{
+                                        fontSize: '0.7rem',
+                                        color: '#ff6b6b',
+                                      }}
+                                    >
+                                      (
+                                      {mod.cyberlimb_only
+                                        ? 'Cyberlimb only'
+                                        : 'Incompatible'}
+                                      )
+                                    </Box>
+                                  )}
+                                </Box>
+                                <Box
+                                  style={{
+                                    fontSize: '0.75rem',
+                                    opacity: '0.7',
+                                  }}
+                                >
+                                  {mod.desc}
+                                </Box>
+                                {mod.stat_bonuses &&
+                                  Object.keys(mod.stat_bonuses).length > 0 && (
+                                    <Box
+                                      style={{
+                                        fontSize: '0.7rem',
+                                        marginTop: '0.25rem',
+                                      }}
+                                    >
+                                      {Object.entries(mod.stat_bonuses).map(
+                                        ([stat, bonus]: [string, any]) => (
+                                          <Box
+                                            key={stat}
+                                            as="span"
+                                            mr={0.5}
+                                            style={{
+                                              color:
+                                                bonus > 0
+                                                  ? '#4caf50'
+                                                  : '#ff6b6b',
+                                            }}
+                                          >
+                                            {stat.toUpperCase()}:{' '}
+                                            {bonus > 0 ? '+' : ''}
+                                            {bonus}
+                                          </Box>
+                                        ),
+                                      )}
+                                    </Box>
+                                  )}
+                              </Stack.Item>
+                              <Stack.Item>
+                                <Box style={{ textAlign: 'right' }}>
+                                  <Box
+                                    style={{
+                                      color: '#ffd700',
+                                      fontWeight: 'bold',
+                                    }}
+                                  >
+                                    {formatNuyen(mod.cost || 0)}
+                                  </Box>
+                                  {mod.essence_cost !== undefined &&
+                                    mod.essence_cost !== 0 && (
+                                      <Box
+                                        style={{
+                                          fontSize: '0.7rem',
+                                          color:
+                                            mod.essence_cost < 0
+                                              ? '#4caf50'
+                                              : '#ff9800',
+                                          fontWeight: 'bold',
+                                        }}
+                                      >
+                                        {mod.essence_cost > 0 ? '+' : ''}
+                                        {mod.essence_cost.toFixed(2)} ESS
+                                      </Box>
+                                    )}
+                                  <Box
+                                    style={{
+                                      fontSize: '0.7rem',
+                                      opacity: '0.6',
+                                    }}
+                                  >
+                                    Avail: {mod.availability}
+                                  </Box>
+                                </Box>
+                              </Stack.Item>
+                              <Stack.Item ml={0.5}>
+                                {isInstalled ? (
+                                  <Button
+                                    icon="times"
+                                    color="bad"
+                                    disabled={isSaved}
+                                    onClick={() =>
+                                      handleRemoveMod(
+                                        customizingAugmentId,
+                                        mod.id,
+                                      )
+                                    }
+                                  >
+                                    Remove
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    icon="plus"
+                                    color="good"
+                                    disabled={
+                                      isSaved || !canAffordMod || !isAllowed
+                                    }
+                                    onClick={() =>
+                                      handleAddMod(customizingAugmentId, mod.id)
+                                    }
+                                  >
+                                    Install
+                                  </Button>
+                                )}
+                              </Stack.Item>
+                            </Stack>
+                          </Box>
+                        );
+                      })}
+                    {(augmentModsByCategory[selectedModCategory] || [])
+                      .length === 0 && (
+                      <Box
+                        style={{
+                          textAlign: 'center',
+                          padding: '1.5rem',
+                          opacity: '0.6',
+                        }}
+                      >
+                        No mods available in this category.
+                      </Box>
+                    )}
+                  </Box>
+
+                  {/* Close Button */}
+                  <Box style={{ marginTop: '1rem', textAlign: 'center' }}>
+                    <Button
+                      icon="check"
+                      color="good"
+                      onClick={() => setCustomizingAugmentId(null)}
+                    >
+                      Done
+                    </Button>
+                  </Box>
+                </>
+              );
+            })()}
+          </Box>
+        </Box>
+      )}
     </Box>
   );
 });

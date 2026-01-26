@@ -9,6 +9,7 @@ import { memo } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { Box, Dropdown, Icon, Stack } from '../../../components';
+import { AWAKENING, AWAKENING_DISPLAY_NAMES } from './constants';
 import { ChargenConstData, ChargenState } from './types';
 
 // ============================================================================
@@ -73,16 +74,16 @@ export const MetatypeSelector = memo((props: MetatypeSelectorProps) => {
     { id: '/datum/species/human', name: 'Human', min_priority: 'E' },
   ];
   const awakeningChoices = chargenConstData.awakening_choices || [
-    { id: 'mundane', name: 'Mundane' },
-    { id: 'mage', name: 'Mage' },
-    { id: 'adept', name: 'Adept' },
+    { id: AWAKENING.MUNDANE, name: AWAKENING_DISPLAY_NAMES.mundane },
+    { id: AWAKENING.MAGE, name: AWAKENING_DISPLAY_NAMES.mage },
+    { id: AWAKENING.ADEPT, name: AWAKENING_DISPLAY_NAMES.adept },
   ];
 
   const metatypeLetter = chargenState.priorities?.['metatype'] || 'E';
   const magicLetter = chargenState.priorities?.['magic'] || 'E';
   const metatypeSpecies =
     chargenState.metatype_species || '/datum/species/human';
-  const awakening = chargenState.awakening || 'mundane';
+  const awakening = chargenState.awakening || AWAKENING.MUNDANE;
 
   const allowedMetatypes = metatypeChoices.filter((c) =>
     metatypeLetter === 'E'
@@ -143,7 +144,7 @@ export const MetatypeSelector = memo((props: MetatypeSelectorProps) => {
       ...value!,
       awakening: newAwakening as ChargenState['awakening'],
       special:
-        newAwakening === 'mundane'
+        newAwakening === AWAKENING.MUNDANE
           ? { ...chargenState.special }
           : chargenState.special,
     };
@@ -258,7 +259,12 @@ export const MetatypeSelector = memo((props: MetatypeSelectorProps) => {
                   disabled={isSaved || magicDisabled}
                   options={
                     magicDisabled
-                      ? [{ value: 'mundane', displayText: 'Mundane' }]
+                      ? [
+                          {
+                            value: AWAKENING.MUNDANE,
+                            displayText: AWAKENING_DISPLAY_NAMES.mundane,
+                          },
+                        ]
                       : awakeningChoices.map((c) => ({
                           value: c.id,
                           displayText: c.name,

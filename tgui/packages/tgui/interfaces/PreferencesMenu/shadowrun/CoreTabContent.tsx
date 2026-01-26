@@ -20,6 +20,7 @@ import {
 import { createSetPreference } from '../data';
 import { Gender, GENDERS } from '../preferences/gender';
 import { CollapsibleSection } from './components';
+import { MetatypeSelectorProps } from './MetatypeSelector';
 import {
   ChargenConstData,
   ChargenState,
@@ -34,17 +35,6 @@ import {
 
 // Re-export for consumers
 export type { DashboardData, DerivedStats } from './types';
-
-// MetatypeSelector component prop type
-type MetatypeSelectorProps = {
-  act: (action: string, payload?: Record<string, unknown>) => void;
-  chargenConstData: ChargenConstData | null;
-  chargenState: ChargenState | null;
-  featureId: string;
-  isSaved: boolean;
-  setPredictedValue: (value: unknown) => void;
-  value: unknown;
-};
 
 export type CoreTabContentProps = {
   MetatypeSelector: React.ComponentType<MetatypeSelectorProps>;
@@ -115,300 +105,509 @@ export const CoreTabContent = memo((props: CoreTabContentProps) => {
     value,
   } = props;
 
+  // SIN accent color
+  const SIN_ACCENT = '#00d4ff';
+  const SIN_ACCENT_DIM = 'rgba(0, 212, 255, 0.3)';
+
+  // Status icon helper for SIN status
+  const getSINStatusIcon = (status: string) => {
+    switch (status) {
+      case 'legitimate':
+        return { icon: 'check-circle', color: '#4caf50' };
+      case 'criminal':
+        return { icon: 'exclamation-triangle', color: '#ff6b6b' };
+      case 'corporate':
+        return { icon: 'building', color: '#ffd700' };
+      case 'sinless':
+        return { icon: 'question-circle', color: '#9e9e9e' };
+      case 'fake_low':
+        return { icon: 'user-secret', color: '#ff9800' };
+      case 'fake_mid':
+        return { icon: 'user-secret', color: '#ff9800' };
+      case 'fake_high':
+        return { icon: 'user-secret', color: '#4caf50' };
+      default:
+        return { icon: 'id-card', color: '#9e9e9e' };
+    }
+  };
+
+  const sinStatusInfo = getSINStatusIcon(
+    chargenState?.sin_status || 'legitimate',
+  );
+
   return (
     <>
-      {/* SIN Section - Collapsible */}
+      {/* SIN Section - Fully Redesigned */}
       <CollapsibleSection
         title="SIN (Identity)"
         icon="id-card"
         stateKey={`sr_sin_${data.active_slot}`}
         defaultOpen
       >
-        <Box className="PreferencesMenu__ShadowrunSheet__labeledList">
-          <LabeledList>
-            <LabeledList.Item label="Name:">
-              <Box style={{ maxWidth: '28rem' }}>
-                <Stack align="center">
-                  <Stack.Item grow>
-                    <Input
-                      placeholder="Enter name"
-                      value={nameDraft}
-                      disabled={nameLocked}
-                      onInput={(_, v) => {
-                        if (nameLocked) return;
-                        setIsEditingName(true);
-                        setNameDraft(v);
-                      }}
-                      onChange={(_, v) => {
-                        if (nameLocked) return;
-                        act('set_preference', {
-                          preference: nameKey,
-                          value: (v ?? '').trim(),
-                        });
-                        setIsEditingName(false);
-                      }}
-                    />
-                  </Stack.Item>
-                  <Stack.Item>
-                    <Button
-                      icon="id-card"
-                      tooltip={
-                        nameLocked
-                          ? 'Names locked during round'
-                          : 'Alternate names'
-                      }
-                      tooltipPosition="bottom"
-                      disabled={nameLocked}
-                      onClick={() => setMultiNameInputOpen(true)}
-                    />
-                  </Stack.Item>
-                </Stack>
+        {/* SIN Card - Main Identity Display */}
+        <Box
+          style={{
+            background: `linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(0, 0, 0, 0.4))`,
+            border: `1px solid ${SIN_ACCENT_DIM}`,
+            borderRadius: '8px',
+            padding: '1rem',
+            marginBottom: '1rem',
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          {/* Decorative corner accent */}
+          <Box
+            style={{
+              position: 'absolute',
+              top: '0',
+              right: '0',
+              width: '80px',
+              height: '80px',
+              background: `linear-gradient(135deg, transparent 50%, ${SIN_ACCENT_DIM} 50%)`,
+              opacity: '0.5',
+            }}
+          />
+
+          {/* SIN Status Badge */}
+          <Box
+            style={{
+              position: 'absolute',
+              top: '0.75rem',
+              right: '0.75rem',
+              padding: '0.25rem 0.5rem',
+              background: `rgba(0, 0, 0, 0.5)`,
+              border: `1px solid ${sinStatusInfo.color}`,
+              borderRadius: '4px',
+              fontSize: '0.75rem',
+              color: sinStatusInfo.color,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}
+          >
+            <Icon name={sinStatusInfo.icon} />
+            {(chargenState?.sin_status || 'legitimate')
+              .replace(/_/g, ' ')
+              .toUpperCase()}
+          </Box>
+
+          <Stack vertical>
+            {/* Name Row - Prominent */}
+            <Stack.Item>
+              <Box
+                style={{
+                  fontSize: '0.7rem',
+                  color: SIN_ACCENT,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  marginBottom: '0.25rem',
+                }}
+              >
+                <Icon name="user" mr={0.5} />
+                Legal Name
               </Box>
-            </LabeledList.Item>
+              <Stack align="center">
+                <Stack.Item grow>
+                  <Input
+                    placeholder="Enter name"
+                    value={nameDraft}
+                    disabled={nameLocked}
+                    fluid
+                    style={{
+                      fontSize: '1.1rem',
+                      fontWeight: 'bold',
+                    }}
+                    onInput={(_, v) => {
+                      if (nameLocked) return;
+                      setIsEditingName(true);
+                      setNameDraft(v);
+                    }}
+                    onChange={(_, v) => {
+                      if (nameLocked) return;
+                      act('set_preference', {
+                        preference: nameKey,
+                        value: (v ?? '').trim(),
+                      });
+                      setIsEditingName(false);
+                    }}
+                  />
+                </Stack.Item>
+                <Stack.Item>
+                  <Button
+                    icon="id-card"
+                    color="transparent"
+                    tooltip={
+                      nameLocked
+                        ? 'Names locked during round'
+                        : 'Manage alternate names / aliases'
+                    }
+                    tooltipPosition="left"
+                    disabled={nameLocked}
+                    onClick={() => setMultiNameInputOpen(true)}
+                    style={{
+                      border: `1px solid ${SIN_ACCENT_DIM}`,
+                    }}
+                  />
+                </Stack.Item>
+              </Stack>
+            </Stack.Item>
 
-            <LabeledList.Item label="Gender:">
-              <Box style={{ maxWidth: '16rem' }}>
-                <Dropdown
-                  width="100%"
-                  selected={data.character_preferences.misc.gender}
-                  displayText={
-                    GENDERS[
-                      (data.character_preferences.misc.gender as Gender) ||
-                        Gender.Male
-                    ]?.text || 'Gender'
-                  }
-                  options={Object.entries(GENDERS).map(([value, { text }]) => ({
-                    value,
-                    displayText: text,
-                  }))}
-                  onSelected={createSetPreference(act, 'gender')}
-                />
+            {/* Horizontal divider */}
+            <Stack.Item>
+              <Box
+                style={{
+                  height: '1px',
+                  background: `linear-gradient(90deg, ${SIN_ACCENT_DIM}, transparent)`,
+                  margin: '0.75rem 0',
+                }}
+              />
+            </Stack.Item>
+
+            {/* Basic Info Grid */}
+            <Stack.Item>
+              <Box
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                  gap: '1rem',
+                }}
+              >
+                {/* Gender */}
+                <Box>
+                  <Box
+                    style={{
+                      fontSize: '0.7rem',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '0.25rem',
+                    }}
+                  >
+                    Gender
+                  </Box>
+                  <Dropdown
+                    width="100%"
+                    selected={data.character_preferences.misc.gender}
+                    displayText={
+                      GENDERS[
+                        (data.character_preferences.misc.gender as Gender) ||
+                          Gender.Male
+                      ]?.text || 'Gender'
+                    }
+                    options={Object.entries(GENDERS).map(
+                      ([value, { text }]) => ({
+                        value,
+                        displayText: text,
+                      }),
+                    )}
+                    onSelected={createSetPreference(act, 'gender')}
+                  />
+                </Box>
+
+                {/* Employer - Rendered via preference system */}
+                <Box>
+                  <Box
+                    style={{
+                      fontSize: '0.7rem',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '0.25rem',
+                    }}
+                  >
+                    Employer
+                  </Box>
+                  {renderPreference('employer')}
+                </Box>
+
+                {/* Age */}
+                <Box>
+                  <Box
+                    style={{
+                      fontSize: '0.7rem',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '0.25rem',
+                    }}
+                  >
+                    Age
+                  </Box>
+                  {renderPreference('age')}
+                </Box>
+
+                {/* Dominant Hand */}
+                <Box>
+                  <Box
+                    style={{
+                      fontSize: '0.7rem',
+                      color: 'rgba(255, 255, 255, 0.5)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                      marginBottom: '0.25rem',
+                    }}
+                  >
+                    Dominant Hand
+                  </Box>
+                  {renderPreference('dominant_hand')}
+                </Box>
               </Box>
-            </LabeledList.Item>
-
-            {renderPreference('employer')}
-
-            {renderPreference('age')}
-
-            {renderPreference('dominant_hand')}
-          </LabeledList>
+            </Stack.Item>
+          </Stack>
         </Box>
 
-        {/* Extended SIN Information */}
+        {/* Extended SIN Data - Styled Cards */}
         <Box
           style={{
             marginTop: '1rem',
-            paddingTop: '0.75rem',
-            borderTop: '1px solid rgba(155, 143, 199, 0.25)',
           }}
         >
           <Box
             style={{
-              fontSize: '0.85rem',
-              fontWeight: 'bold',
-              color: '#9b8fc7',
-              marginBottom: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: '0.75rem',
+              paddingBottom: '0.5rem',
+              borderBottom: `2px solid ${SIN_ACCENT}`,
             }}
           >
-            <Icon name="file-alt" mr={0.5} />
-            Extended SIN Data
+            <Icon name="file-alt" size={1.2} color={SIN_ACCENT} />
+            <Box
+              style={{
+                marginLeft: '0.5rem',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+              }}
+            >
+              Extended SIN Data
+            </Box>
+            <Box
+              style={{
+                marginLeft: 'auto',
+                fontSize: '0.75rem',
+                opacity: '0.6',
+              }}
+            >
+              Official records & documentation
+            </Box>
           </Box>
-          <Box className="PreferencesMenu__ShadowrunSheet__labeledList">
-            <LabeledList>
-              <LabeledList.Item label="SIN Status:">
-                <Box style={{ maxWidth: '16rem' }}>
-                  <Tooltip content={FIELD_HINTS.SINStatus} position="bottom">
-                    <Dropdown
-                      width="100%"
-                      disabled={isSaved}
-                      selected={chargenState?.sin_status || 'legitimate'}
-                      options={[
-                        {
-                          value: 'legitimate',
-                          displayText: 'Legitimate SIN',
-                        },
-                        {
-                          value: 'criminal',
-                          displayText: 'Criminal SIN',
-                        },
-                        {
-                          value: 'corporate',
-                          displayText: 'Corporate SIN',
-                        },
-                        {
-                          value: 'sinless',
-                          displayText: 'SINless',
-                        },
-                        {
-                          value: 'fake_low',
-                          displayText: 'Fake SIN (Rating 1-2)',
-                        },
-                        {
-                          value: 'fake_mid',
-                          displayText: 'Fake SIN (Rating 3-4)',
-                        },
-                        {
-                          value: 'fake_high',
-                          displayText: 'Fake SIN (Rating 5-6)',
-                        },
-                      ]}
-                      onSelected={(val) => {
-                        if (isSaved) return;
-                        const newState = {
-                          ...value!,
-                          sin_status: val,
-                        };
-                        setPredictedValue(newState);
-                        act('set_preference', {
-                          preference: featureId,
-                          value: newState,
-                        });
-                      }}
-                    />
-                  </Tooltip>
-                </Box>
-              </LabeledList.Item>
 
-              <LabeledList.Item label="Birthplace:">
-                <Box style={{ maxWidth: '16rem' }}>
-                  <Tooltip content={FIELD_HINTS.Birthplace} position="bottom">
-                    <Dropdown
-                      width="100%"
-                      disabled={isSaved}
-                      selected={chargenState?.birthplace || 'seattle'}
-                      options={[
-                        {
-                          value: 'seattle',
-                          displayText: 'Seattle Metroplex',
-                        },
-                        {
-                          value: 'ucas',
-                          displayText: 'UCAS (Other)',
-                        },
-                        {
-                          value: 'cas',
-                          displayText: 'Confederation of American States',
-                        },
-                        {
-                          value: 'native_nations',
-                          displayText: 'Native American Nations',
-                        },
-                        {
-                          value: 'aztlan',
-                          displayText: 'Aztlan',
-                        },
-                        {
-                          value: 'tir',
-                          displayText: 'Tír Tairngire / Tír na nÓg',
-                        },
-                        {
-                          value: 'japan',
-                          displayText: 'Japan',
-                        },
-                        {
-                          value: 'europe',
-                          displayText: 'European Nations',
-                        },
-                        {
-                          value: 'other',
-                          displayText: 'Other / Unknown',
-                        },
-                      ]}
-                      onSelected={(val) => {
-                        if (isSaved) return;
-                        const newState = {
-                          ...value!,
-                          birthplace: val,
-                        };
-                        setPredictedValue(newState);
-                        act('set_preference', {
-                          preference: featureId,
-                          value: newState,
-                        });
-                      }}
-                    />
-                  </Tooltip>
+          <Box
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+              gap: '0.75rem',
+            }}
+          >
+            {/* SIN Status Card */}
+            <Box
+              style={{
+                background: 'rgba(0, 0, 0, 0.3)',
+                border: `1px solid ${sinStatusInfo.color}40`,
+                borderLeft: `3px solid ${sinStatusInfo.color}`,
+                borderRadius: '4px',
+                padding: '0.75rem',
+              }}
+            >
+              <Box
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <Icon name="fingerprint" color={sinStatusInfo.color} mr={0.5} />
+                <Box
+                  style={{
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    color: sinStatusInfo.color,
+                  }}
+                >
+                  SIN Status
                 </Box>
-              </LabeledList.Item>
+              </Box>
+              <Tooltip content={FIELD_HINTS.SINStatus} position="bottom">
+                <Dropdown
+                  width="100%"
+                  disabled={isSaved}
+                  selected={chargenState?.sin_status || 'legitimate'}
+                  options={[
+                    { value: 'legitimate', displayText: 'Legitimate SIN' },
+                    { value: 'criminal', displayText: 'Criminal SIN' },
+                    { value: 'corporate', displayText: 'Corporate SIN' },
+                    { value: 'sinless', displayText: 'SINless' },
+                    { value: 'fake_low', displayText: 'Fake SIN (Rating 1-2)' },
+                    { value: 'fake_mid', displayText: 'Fake SIN (Rating 3-4)' },
+                    {
+                      value: 'fake_high',
+                      displayText: 'Fake SIN (Rating 5-6)',
+                    },
+                  ]}
+                  onSelected={(val) => {
+                    if (isSaved) return;
+                    const newState = { ...value!, sin_status: val };
+                    setPredictedValue(newState);
+                    act('set_preference', {
+                      preference: featureId,
+                      value: newState,
+                    });
+                  }}
+                />
+              </Tooltip>
+              <Box
+                style={{
+                  fontSize: '0.7rem',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  marginTop: '0.25rem',
+                }}
+              >
+                Affects how corps and law enforcement view you
+              </Box>
+            </Box>
 
-              <LabeledList.Item label="Religion:">
-                <Box style={{ maxWidth: '16rem' }}>
-                  <Tooltip content={FIELD_HINTS.Religion} position="bottom">
-                    <Dropdown
-                      width="100%"
-                      disabled={isSaved}
-                      selected={chargenState?.religion || 'none'}
-                      options={[
-                        {
-                          value: 'none',
-                          displayText: 'None / Atheist',
-                        },
-                        {
-                          value: 'christian',
-                          displayText: 'Christianity',
-                        },
-                        {
-                          value: 'islam',
-                          displayText: 'Islam',
-                        },
-                        {
-                          value: 'buddhist',
-                          displayText: 'Buddhism',
-                        },
-                        {
-                          value: 'hindu',
-                          displayText: 'Hinduism',
-                        },
-                        {
-                          value: 'shinto',
-                          displayText: 'Shinto',
-                        },
-                        {
-                          value: 'jewish',
-                          displayText: 'Judaism',
-                        },
-                        {
-                          value: 'neo_pagan',
-                          displayText: 'Neo-Paganism',
-                        },
-                        {
-                          value: 'shamanic',
-                          displayText: 'Shamanic Tradition',
-                        },
-                        {
-                          value: 'hermetic',
-                          displayText: 'Hermetic Philosophy',
-                        },
-                        {
-                          value: 'druidic',
-                          displayText: 'Druidism',
-                        },
-                        {
-                          value: 'aztec',
-                          displayText: 'Aztec Tradition',
-                        },
-                        {
-                          value: 'other',
-                          displayText: 'Other',
-                        },
-                      ]}
-                      onSelected={(val) => {
-                        if (isSaved) return;
-                        const newState = {
-                          ...value!,
-                          religion: val,
-                        };
-                        setPredictedValue(newState);
-                        act('set_preference', {
-                          preference: featureId,
-                          value: newState,
-                        });
-                      }}
-                    />
-                  </Tooltip>
+            {/* Birthplace Card */}
+            <Box
+              style={{
+                background: 'rgba(0, 0, 0, 0.3)',
+                border: '1px solid rgba(79, 195, 247, 0.3)',
+                borderLeft: '3px solid #4fc3f7',
+                borderRadius: '4px',
+                padding: '0.75rem',
+              }}
+            >
+              <Box
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <Icon name="globe-americas" color="#4fc3f7" mr={0.5} />
+                <Box
+                  style={{
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    color: '#4fc3f7',
+                  }}
+                >
+                  Place of Origin
                 </Box>
-              </LabeledList.Item>
-            </LabeledList>
+              </Box>
+              <Tooltip content={FIELD_HINTS.Birthplace} position="bottom">
+                <Dropdown
+                  width="100%"
+                  disabled={isSaved}
+                  selected={chargenState?.birthplace || 'seattle'}
+                  options={[
+                    { value: 'seattle', displayText: 'Seattle Metroplex' },
+                    { value: 'ucas', displayText: 'UCAS (Other)' },
+                    {
+                      value: 'cas',
+                      displayText: 'Confederation of American States',
+                    },
+                    {
+                      value: 'native_nations',
+                      displayText: 'Native American Nations',
+                    },
+                    { value: 'aztlan', displayText: 'Aztlan' },
+                    { value: 'tir', displayText: 'Tír Tairngire / Tír na nÓg' },
+                    { value: 'japan', displayText: 'Japan' },
+                    { value: 'europe', displayText: 'European Nations' },
+                    { value: 'other', displayText: 'Other / Unknown' },
+                  ]}
+                  onSelected={(val) => {
+                    if (isSaved) return;
+                    const newState = { ...value!, birthplace: val };
+                    setPredictedValue(newState);
+                    act('set_preference', {
+                      preference: featureId,
+                      value: newState,
+                    });
+                  }}
+                />
+              </Tooltip>
+              <Box
+                style={{
+                  fontSize: '0.7rem',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  marginTop: '0.25rem',
+                }}
+              >
+                Where you were born or claim origin
+              </Box>
+            </Box>
+
+            {/* Religion Card */}
+            <Box
+              style={{
+                background: 'rgba(0, 0, 0, 0.3)',
+                border: '1px solid rgba(155, 89, 182, 0.3)',
+                borderLeft: '3px solid #9b59b6',
+                borderRadius: '4px',
+                padding: '0.75rem',
+              }}
+            >
+              <Box
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <Icon name="pray" color="#9b59b6" mr={0.5} />
+                <Box
+                  style={{
+                    fontSize: '0.8rem',
+                    fontWeight: 'bold',
+                    color: '#9b59b6',
+                  }}
+                >
+                  Spiritual Beliefs
+                </Box>
+              </Box>
+              <Tooltip content={FIELD_HINTS.Religion} position="bottom">
+                <Dropdown
+                  width="100%"
+                  disabled={isSaved}
+                  selected={chargenState?.religion || 'none'}
+                  options={[
+                    { value: 'none', displayText: 'None / Atheist' },
+                    { value: 'christian', displayText: 'Christianity' },
+                    { value: 'islam', displayText: 'Islam' },
+                    { value: 'buddhist', displayText: 'Buddhism' },
+                    { value: 'hindu', displayText: 'Hinduism' },
+                    { value: 'shinto', displayText: 'Shinto' },
+                    { value: 'jewish', displayText: 'Judaism' },
+                    { value: 'neo_pagan', displayText: 'Neo-Paganism' },
+                    { value: 'shamanic', displayText: 'Shamanic Tradition' },
+                    { value: 'hermetic', displayText: 'Hermetic Philosophy' },
+                    { value: 'druidic', displayText: 'Druidism' },
+                    { value: 'aztec', displayText: 'Aztec Tradition' },
+                    { value: 'other', displayText: 'Other' },
+                  ]}
+                  onSelected={(val) => {
+                    if (isSaved) return;
+                    const newState = { ...value!, religion: val };
+                    setPredictedValue(newState);
+                    act('set_preference', {
+                      preference: featureId,
+                      value: newState,
+                    });
+                  }}
+                />
+              </Tooltip>
+              <Box
+                style={{
+                  fontSize: '0.7rem',
+                  color: 'rgba(255, 255, 255, 0.5)',
+                  marginTop: '0.25rem',
+                }}
+              >
+                May affect roleplay interactions
+              </Box>
+            </Box>
           </Box>
         </Box>
       </CollapsibleSection>
@@ -865,7 +1064,7 @@ export const CoreTabContent = memo((props: CoreTabContentProps) => {
           act={act}
           featureId={featureId}
           setPredictedValue={setPredictedValue}
-          value={value}
+          value={value as ChargenState | null}
         />
 
         {/* Two-column Biometrics Grid */}

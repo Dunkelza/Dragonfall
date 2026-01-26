@@ -5,12 +5,18 @@
  * for testability. They are pure functions with no React dependencies.
  */
 
-import { AUGMENT_GRADES } from './constants';
+import {
+  AUGMENT_GRADES,
+  AWAKENING,
+  isAwakened as checkAwakened,
+  isMagicUser,
+} from './constants';
 import {
   AttributeMeta,
   AugmentSelection,
   ChargenState,
   DashboardData,
+  DerivedStats,
   DroneSelection,
   GearSelection,
   LifestyleMeta,
@@ -18,22 +24,8 @@ import {
   ValidationResult,
 } from './types';
 
-// ============================================================================
-// Types
-// ============================================================================
-
-export type DerivedStats = {
-  composure: number;
-  initiative: number;
-  judgeIntentions: number;
-  liftCarry: number;
-  memory: number;
-  mentalLimit: number;
-  physicalCM: number;
-  physicalLimit: number;
-  socialLimit: number;
-  stunCM: number;
-};
+// Re-export DerivedStats for backwards compatibility
+export type { DerivedStats } from './types';
 
 export type AttributeInputs = {
   agility: number;
@@ -390,6 +382,50 @@ export function calculateCompletionPercent(
 // ============================================================================
 
 /**
+ * Group issues by a key function for O(1) lookup
+ */
+function groupIssuesBy(
+  issues: ValidationIssue[],
+  getKey: (issue: ValidationIssue) => string | undefined,
+): Record<string, ValidationIssue[]> {
+  const grouped: Record<string, ValidationIssue[]> = {};
+  for (const issue of issues) {
+    const key = getKey(issue);
+    if (key) {
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push(issue);
+    }
+  }
+  return grouped;
+}
+
+/**
+ * Build a ValidationResult from a list of issues
+ */
+function buildValidationResult(
+  issues: ValidationIssue[],
+  options: { hasData?: boolean } = {},
+): ValidationResult {
+  const { hasData = true } = options;
+  const errorCount = issues.filter((i) => i.severity === 'error').length;
+  const warningCount = issues.filter((i) => i.severity === 'warning').length;
+  const infoCount = issues.filter((i) => i.severity === 'info').length;
+
+  return {
+    issues,
+    errorCount,
+    warningCount,
+    infoCount,
+    // isValid is false if there are any errors/warnings OR if there's no data
+    isValid: hasData && errorCount === 0 && warningCount === 0,
+    // canSave is false if there are errors OR if there's no data
+    canSave: hasData && errorCount === 0,
+    issuesBySection: groupIssuesBy(issues, (i) => i.section),
+    issuesByField: groupIssuesBy(issues, (i) => i.field),
+  };
+}
+
+/**
  * Validate character sheet and return issues
  */
 export function validateChargenState(
@@ -399,14 +435,12 @@ export function validateChargenState(
   const issues: ValidationIssue[] = [];
 
   if (!dashboardData || !chargenState) {
-    return {
-      issues,
-      isValid: false,
-      canSave: false,
-      errorCount: 0,
-      warningCount: 0,
-    };
+    return buildValidationResult(issues, { hasData: false });
   }
+
+  // ========================================================================
+  // POINT ALLOCATION VALIDATION
+  // ========================================================================
 
   // Attribute points validation
   if (dashboardData.attrRemaining < 0) {
@@ -414,12 +448,15 @@ export function validateChargenState(
       message: `Overspent ${Math.abs(dashboardData.attrRemaining)} attribute point(s)`,
       severity: 'error',
       section: 'attributes',
+      field: 'attributes',
     });
   } else if (dashboardData.attrRemaining > 0) {
     issues.push({
       message: `${dashboardData.attrRemaining} attribute point(s) unspent`,
       severity: 'warning',
       section: 'attributes',
+      field: 'attributes',
+      suggestion: 'Allocate remaining points to attributes before saving.',
     });
   }
 
@@ -429,12 +466,15 @@ export function validateChargenState(
       message: `Overspent ${Math.abs(dashboardData.skillRemaining)} skill point(s)`,
       severity: 'error',
       section: 'skills',
+      field: 'skills',
     });
   } else if (dashboardData.skillRemaining > 0) {
     issues.push({
       message: `${dashboardData.skillRemaining} skill point(s) unspent`,
       severity: 'warning',
       section: 'skills',
+      field: 'skills',
+      suggestion: 'Allocate remaining points to skills before saving.',
     });
   }
 
@@ -444,6 +484,7 @@ export function validateChargenState(
       message: `Overspent ${Math.abs(dashboardData.specialRemaining)} special point(s)`,
       severity: 'error',
       section: 'special',
+      field: 'special',
     });
   } else if (
     dashboardData.specialRemaining > 0 &&
@@ -453,40 +494,47 @@ export function validateChargenState(
       message: `${dashboardData.specialRemaining} special point(s) unspent`,
       severity: 'warning',
       section: 'special',
+      field: 'special',
+      suggestion: 'Allocate remaining points to Magic or Resonance.',
     });
   }
 
-  // Magic user validation
-  const awakening = chargenState.awakening || 'mundane';
+  // ========================================================================
+  // MAGIC/RESONANCE VALIDATION
+  // ========================================================================
+
+  const awakening = chargenState.awakening || AWAKENING.MUNDANE;
   const magicLetter = chargenState.priorities?.['magic'] || 'E';
-  const isAwakened = awakening !== 'mundane' && magicLetter !== 'E';
+  const isAwakened = checkAwakened(awakening) && magicLetter !== 'E';
 
   if (isAwakened) {
     // Check tradition selected for mages/adepts
-    if (
-      (awakening === 'mage' || awakening === 'mystic_adept') &&
-      !chargenState.tradition
-    ) {
+    if (isMagicUser(awakening) && !chargenState.tradition) {
       issues.push({
         message: 'No magical tradition selected',
         severity: 'warning',
         section: 'magic',
+        field: 'magic',
+        suggestion: 'Select a tradition to define your magical practice.',
       });
     }
 
     // Check spells for mages
     const selectedSpells = chargenState.selected_spells || [];
-    if (
-      (awakening === 'mage' || awakening === 'mystic_adept') &&
-      selectedSpells.length === 0
-    ) {
+    if (isMagicUser(awakening) && selectedSpells.length === 0) {
       issues.push({
         message: 'No spells selected',
         severity: 'warning',
         section: 'magic',
+        field: 'magic',
+        suggestion: 'Select spells to use your magical abilities.',
       });
     }
   }
+
+  // ========================================================================
+  // RESOURCE VALIDATION (Essence, Nuyen)
+  // ========================================================================
 
   // Essence validation
   if (dashboardData.essenceRemaining < 0) {
@@ -494,6 +542,7 @@ export function validateChargenState(
       message: 'Essence cannot go below 0',
       severity: 'error',
       section: 'augments',
+      field: 'augments',
     });
   }
 
@@ -503,18 +552,170 @@ export function validateChargenState(
       message: `Overspent ¥${Math.abs(dashboardData.nuyenRemaining).toLocaleString()} nuyen`,
       severity: 'error',
       section: 'augments',
+      field: 'nuyen',
     });
   }
 
-  // Count errors and warnings
-  const errorCount = issues.filter((i) => i.severity === 'error').length;
-  const warningCount = issues.filter((i) => i.severity === 'warning').length;
+  // ========================================================================
+  // CROSS-SECTION VALIDATION
+  // ========================================================================
 
-  return {
-    issues,
-    errorCount,
-    warningCount,
-    isValid: errorCount === 0 && warningCount === 0,
-    canSave: errorCount === 0,
-  };
+  validateCrossSectionRules(chargenState, dashboardData, issues);
+
+  // ========================================================================
+  // INFO-LEVEL SUGGESTIONS
+  // ========================================================================
+
+  validateSuggestions(chargenState, dashboardData, issues);
+
+  return buildValidationResult(issues);
+}
+
+/**
+ * Cross-section validation rules.
+ * These check combinations across different parts of the character.
+ */
+function validateCrossSectionRules(
+  state: ChargenState,
+  dashboard: DashboardData,
+  issues: ValidationIssue[],
+): void {
+  const selectedAugments = state.augments || {};
+  const augmentCount = Object.keys(selectedAugments).length;
+  const qualities = state.qualities || [];
+
+  // Check: Has cyberware but no Biocompatibility
+  if (augmentCount > 0) {
+    const hasBiocompatibility = qualities.some(
+      (q) =>
+        q.id === 'biocompatibility' ||
+        q.id === 'biocompatibility_cyberware' ||
+        q.id === 'biocompatibility_bioware',
+    );
+
+    // Only suggest if they have significant augments (essence cost > 0.5)
+    if (!hasBiocompatibility && dashboard.essenceSpent > 0.5) {
+      issues.push({
+        message: 'Consider taking Biocompatibility quality',
+        severity: 'info',
+        section: 'qualities',
+        field: 'qualities',
+        suggestion:
+          'Biocompatibility reduces essence cost of augments by 10%, saving you essence.',
+        relatedItems: Object.keys(selectedAugments).slice(0, 3),
+      });
+    }
+  }
+
+  // Check: Has combat skills but no weapon
+  const combatSkills = [
+    'firearms',
+    'automatics',
+    'longarms',
+    'pistols',
+    'blades',
+    'clubs',
+    'unarmed_combat',
+  ];
+  const skills = state.skills || {};
+  const hasCombatSkill = combatSkills.some(
+    (skillId) => (skills[skillId] || 0) >= 1,
+  );
+  const gear = state.gear || [];
+  const hasWeapon = gear.some(
+    (g) =>
+      g.id?.includes('gun') ||
+      g.id?.includes('pistol') ||
+      g.id?.includes('rifle') ||
+      g.id?.includes('blade') ||
+      g.id?.includes('sword') ||
+      g.id?.includes('knife'),
+  );
+
+  if (hasCombatSkill && !hasWeapon) {
+    issues.push({
+      message: 'Combat skills but no weapons purchased',
+      severity: 'info',
+      section: 'gear',
+      field: 'gear',
+      suggestion:
+        "You have combat skills but haven't purchased any weapons yet.",
+    });
+  }
+
+  // Check: Mage without reagents
+  const awakening = state.awakening || AWAKENING.MUNDANE;
+  if (isMagicUser(awakening)) {
+    const hasReagents = gear.some((g) => g.id?.includes('reagent'));
+    if (!hasReagents) {
+      issues.push({
+        message: 'Consider purchasing reagents',
+        severity: 'info',
+        section: 'gear',
+        field: 'gear',
+        suggestion:
+          'Reagents are useful for ritual spellcasting and binding spirits.',
+      });
+    }
+  }
+
+  // Check: Decker/Technomancer without commlink
+  const hasDeckingSkills =
+    (skills['computer'] || 0) >= 1 ||
+    (skills['hacking'] || 0) >= 1 ||
+    (skills['cybercombat'] || 0) >= 1;
+  const hasCommlink = gear.some(
+    (g) => g.id?.includes('commlink') || g.id?.includes('deck'),
+  );
+
+  if (hasDeckingSkills && !hasCommlink) {
+    issues.push({
+      message: 'Matrix skills but no commlink or deck',
+      severity: 'info',
+      section: 'gear',
+      field: 'gear',
+      suggestion:
+        'You have Matrix skills but no commlink or cyberdeck. Consider purchasing one.',
+    });
+  }
+}
+
+/**
+ * Generate helpful suggestions based on character build.
+ */
+function validateSuggestions(
+  state: ChargenState,
+  dashboard: DashboardData,
+  issues: ValidationIssue[],
+): void {
+  // Suggest specialization for high-rated skills
+  const skills = state.skills || {};
+  const specializations = state.skill_specializations || {};
+
+  for (const [skillId, rating] of Object.entries(skills)) {
+    if ((rating as number) >= 4 && !specializations[skillId]) {
+      issues.push({
+        message: `Consider specializing in ${skillId}`,
+        severity: 'info',
+        section: 'skills',
+        field: `skill_${skillId}` as const,
+        suggestion: `Skills at 4+ benefit from specializations (+2 dice for 1 skill point).`,
+      });
+      // Only show first suggestion to avoid spam
+      break;
+    }
+  }
+
+  // Suggest contacts if none selected
+  const contacts = state.contacts || [];
+  if (contacts.length === 0) {
+    issues.push({
+      message: 'No contacts selected',
+      severity: 'info',
+      section: 'contacts',
+      field: 'contacts',
+      suggestion:
+        'Contacts provide valuable information and services during runs.',
+    });
+  }
 }

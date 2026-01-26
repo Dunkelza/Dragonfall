@@ -11,53 +11,81 @@
 
 import { useMemo } from 'react';
 
-import { AUGMENT_GRADES } from './constants';
+import {
+  AUGMENT_GRADES,
+  AWAKENING,
+  isAwakened as checkAwakened,
+  isMagicUser,
+} from './constants';
 import {
   AttributeMeta,
   AugmentSelection,
   ChargenConstData,
   ChargenState,
   DashboardData,
+  DerivedStats,
   GearSelection,
   LifestyleMeta,
   ValidationIssue,
   ValidationResult,
 } from './types';
 
-// ============================================================================
-// TYPES
-// ============================================================================
+// Re-export DerivedStats for backwards compatibility
+export type { DerivedStats } from './types';
 
-export type DerivedStats = {
-  composure: number;
-  initiative: number;
-  judgeIntentions: number;
-  liftCarry: number;
-  memory: number;
-  mentalLimit: number;
-  physicalCM: number;
-  physicalLimit: number;
-  socialLimit: number;
-  stunCM: number;
+/** Point allocation data from usePointAllocation hook */
+export type PointAllocationData = {
+  attrRemaining: number;
+  attrSpent: number;
+  attrTotal: number;
+  effectiveAttributesMeta: AttributeMeta[];
+  magicRating: number;
+  metatypeLetter: string;
+  priorities: PartialPrioritySelection;
+  resources: number;
+  skillRemaining: number;
+  skillSpent: number;
+  skillTotal: number;
+  specialRemaining: number;
+  specialTotal: number;
+};
+
+/** Essence calculation data from useEssenceCalculation hook */
+export type EssenceCalculationData = {
+  essenceCost: number;
+  essenceRemaining: number;
+  essenceTotal: number;
+  hasBiocompatibility: boolean;
+};
+
+/** Nuyen calculation data from useNuyenCalculation hook */
+export type NuyenCalculationData = {
+  augmentNuyenSpent: number;
+  droneNuyenSpent: number;
+  gearNuyenSpent: number;
+  lifestyle: string;
+  lifestyleCost: number;
+  nuyenRemaining: number;
+  nuyenSpent: number;
+  nuyenTotal: number;
 };
 
 // ============================================================================
-// useDashboardData Hook
+// usePointAllocation Hook
 // ============================================================================
 
 /**
- * Calculates all dashboard data including point allocations, essence, and nuyen.
+ * Calculates attribute, skill, and special point allocations.
+ * Focused hook for tracking point spend vs. available from priorities.
  *
  * @param chargenState - Current character generation state
  * @param chargenConstData - Constant data from server (priority tables, etc.)
- * @param hasBiocompatibility - Whether player has Biocompatibility quality
- * @returns Dashboard data object or null if inputs are invalid
+ * @returns Point allocation data or null if inputs are invalid
  */
-export function useDashboardData(
+export function usePointAllocation(
   chargenState: ChargenState | null,
   chargenConstData: ChargenConstData | null,
-  hasBiocompatibility: boolean,
-): DashboardData | null {
+): PointAllocationData | null {
   return useMemo(() => {
     if (!chargenState || !chargenConstData) {
       return null;
@@ -82,7 +110,7 @@ export function useDashboardData(
     const resourcesAmount = priorityTables.resources?.[resourcesLetter] || 0;
     const magicRating = priorityTables.magic?.[magicLetter] || 0;
 
-    // Calculate spent points
+    // Calculate attribute points spent
     const attributesMeta = chargenConstData.attributes || [];
     const metatypeBounds =
       chargenConstData.metatype_attribute_bounds?.[
@@ -118,11 +146,52 @@ export function useDashboardData(
       chargenState.special || {},
     ).reduce<number>((sum, v) => sum + Math.max(0, Number(v) || 0), 0);
 
-    // Calculate essence from augments
+    return {
+      attrRemaining: totalAttrPoints - attrSpent,
+      attrSpent,
+      attrTotal: totalAttrPoints,
+      skillRemaining: totalSkillPoints - skillSpent,
+      skillSpent,
+      skillTotal: totalSkillPoints,
+      specialRemaining: totalSpecialPoints - specialSpent,
+      specialTotal: totalSpecialPoints,
+      resources: resourcesAmount,
+      magicRating,
+      metatypeLetter,
+      priorities,
+      effectiveAttributesMeta,
+    };
+  }, [chargenState, chargenConstData]);
+}
+
+// ============================================================================
+// useEssenceCalculation Hook
+// ============================================================================
+
+/**
+ * Calculates essence spent and remaining from augmentations.
+ * Handles grade multipliers and Biocompatibility quality bonus.
+ *
+ * @param chargenState - Current character generation state
+ * @param chargenConstData - Constant data from server (augment catalog)
+ * @param hasBiocompatibility - Whether player has Biocompatibility quality
+ * @returns Essence calculation data or null if inputs are invalid
+ */
+export function useEssenceCalculation(
+  chargenState: ChargenState | null,
+  chargenConstData: ChargenConstData | null,
+  hasBiocompatibility: boolean,
+): EssenceCalculationData | null {
+  return useMemo(() => {
+    if (!chargenState || !chargenConstData) {
+      return null;
+    }
+
     const essenceBase = 6.0;
     const selectedAugments = chargenState.augments || {};
     // Biocompatibility reduces essence cost by 10%
     const biocompMultiplier = hasBiocompatibility ? 0.9 : 1.0;
+
     const essenceCost = Object.entries(selectedAugments).reduce(
       (
         total,
@@ -138,11 +207,44 @@ export function useDashboardData(
       },
       0,
     );
-    const essenceRemaining = essenceBase - essenceCost;
+
+    return {
+      essenceCost,
+      essenceRemaining: essenceBase - essenceCost,
+      essenceTotal: essenceBase,
+      hasBiocompatibility,
+    };
+  }, [chargenState, chargenConstData, hasBiocompatibility]);
+}
+
+// ============================================================================
+// useNuyenCalculation Hook
+// ============================================================================
+
+/**
+ * Calculates nuyen spent and remaining from all purchases.
+ * Includes augments, gear, drones, and lifestyle costs.
+ *
+ * @param chargenState - Current character generation state
+ * @param chargenConstData - Constant data from server (catalogs, costs)
+ * @param totalResources - Total nuyen from Resources priority
+ * @returns Nuyen calculation data or null if inputs are invalid
+ */
+export function useNuyenCalculation(
+  chargenState: ChargenState | null,
+  chargenConstData: ChargenConstData | null,
+  totalResources: number,
+): NuyenCalculationData | null {
+  return useMemo(() => {
+    if (!chargenState || !chargenConstData) {
+      return null;
+    }
 
     // Calculate nuyen spent on augments (including cyberlimb upgrades)
+    const selectedAugments = chargenState.augments || {};
     const cyberlimbUpgradeCost =
       chargenConstData?.cyberlimb_upgrade_cost || 5000;
+
     const augmentNuyenSpent = Object.entries(selectedAugments).reduce(
       (
         total,
@@ -195,6 +297,7 @@ export function useDashboardData(
     const droneCatalog = chargenConstData?.drone_catalog || {};
     const droneModCatalog = chargenConstData?.drone_mod_catalog || {};
     const rawDrones = chargenState.drones;
+
     // Handle both legacy array format and new object format
     const droneNuyenSpent = (() => {
       if (!rawDrones) return 0;
@@ -227,34 +330,71 @@ export function useDashboardData(
 
     const nuyenSpent =
       augmentNuyenSpent + lifestyleCost + gearNuyenSpent + droneNuyenSpent;
-    const nuyenRemaining = resourcesAmount - nuyenSpent;
 
     return {
-      attrRemaining: totalAttrPoints - attrSpent,
-      attrSpent,
-      attrTotal: totalAttrPoints,
-      skillRemaining: totalSkillPoints - skillSpent,
-      skillSpent,
-      skillTotal: totalSkillPoints,
-      specialRemaining: totalSpecialPoints - specialSpent,
-      specialTotal: totalSpecialPoints,
-      resources: resourcesAmount,
-      nuyenRemaining,
-      nuyenSpent,
-      nuyenTotal: resourcesAmount,
       augmentNuyenSpent,
+      droneNuyenSpent,
       gearNuyenSpent,
-      lifestyleCost,
       lifestyle: selectedLifestyle,
-      magicRating,
-      metatypeLetter,
-      priorities,
-      effectiveAttributesMeta,
-      essenceRemaining,
-      essenceTotal: essenceBase,
-      hasBiocompatibility,
+      lifestyleCost,
+      nuyenRemaining: totalResources - nuyenSpent,
+      nuyenSpent,
+      nuyenTotal: totalResources,
     };
-  }, [chargenState, chargenConstData, hasBiocompatibility]);
+  }, [chargenState, chargenConstData, totalResources]);
+}
+
+// ============================================================================
+// useDashboardData Hook (Composition of focused hooks)
+// ============================================================================
+
+/**
+ * Calculates all dashboard data including point allocations, essence, and nuyen.
+ * This is a composition hook that combines the focused hooks for convenience.
+ *
+ * For more granular control, use the individual hooks:
+ * - usePointAllocation - Attribute/skill/special points
+ * - useEssenceCalculation - Essence tracking
+ * - useNuyenCalculation - Budget tracking
+ *
+ * @param chargenState - Current character generation state
+ * @param chargenConstData - Constant data from server (priority tables, etc.)
+ * @param hasBiocompatibility - Whether player has Biocompatibility quality
+ * @returns Dashboard data object or null if inputs are invalid
+ */
+export function useDashboardData(
+  chargenState: ChargenState | null,
+  chargenConstData: ChargenConstData | null,
+  hasBiocompatibility: boolean,
+): DashboardData | null {
+  const pointAllocation = usePointAllocation(chargenState, chargenConstData);
+  const essenceCalc = useEssenceCalculation(
+    chargenState,
+    chargenConstData,
+    hasBiocompatibility,
+  );
+  const nuyenCalc = useNuyenCalculation(
+    chargenState,
+    chargenConstData,
+    pointAllocation?.resources || 0,
+  );
+
+  return useMemo(() => {
+    if (!pointAllocation || !essenceCalc || !nuyenCalc) {
+      return null;
+    }
+
+    return {
+      // Point allocation
+      ...pointAllocation,
+      // Essence
+      essenceRemaining: essenceCalc.essenceRemaining,
+      essenceTotal: essenceCalc.essenceTotal,
+      hasBiocompatibility: essenceCalc.hasBiocompatibility,
+      // Nuyen
+      ...nuyenCalc,
+    };
+  }, [pointAllocation, essenceCalc, nuyenCalc]);
 }
 
 // ============================================================================
@@ -455,16 +595,13 @@ export function useChargenValidation(
     }
 
     // Magic user validation
-    const awakening = chargenState.awakening || 'mundane';
+    const awakening = chargenState.awakening || AWAKENING.MUNDANE;
     const magicLetter = chargenState.priorities?.['magic'] || 'E';
-    const isAwakened = awakening !== 'mundane' && magicLetter !== 'E';
+    const isAwakened = checkAwakened(awakening) && magicLetter !== 'E';
 
     if (isAwakened) {
       // Check tradition selected for mages/adepts
-      if (
-        (awakening === 'mage' || awakening === 'mystic_adept') &&
-        !chargenState.tradition
-      ) {
+      if (isMagicUser(awakening) && !chargenState.tradition) {
         issues.push({
           message: 'No magical tradition selected',
           severity: 'warning',
@@ -474,10 +611,7 @@ export function useChargenValidation(
 
       // Check spells for mages
       const selectedSpells = chargenState.selected_spells || [];
-      if (
-        (awakening === 'mage' || awakening === 'mystic_adept') &&
-        selectedSpells.length === 0
-      ) {
+      if (isMagicUser(awakening) && selectedSpells.length === 0) {
         issues.push({
           message: 'No spells selected',
           severity: 'warning',
@@ -516,4 +650,146 @@ export function useChargenValidation(
       canSave: errorCount === 0, // Can save with warnings, but not errors
     };
   }, [dashboardData, chargenState]);
+}
+
+// ============================================================================
+// Bump Value Utilities
+// ============================================================================
+
+/**
+ * Configuration for createBumpHandler.
+ */
+export type BumpHandlerConfig<T extends Record<string, number>> = {
+  /** Function to check if bumping is allowed (e.g., locked by group) */
+  canBump?: (id: string, delta: number) => boolean;
+  /** Current record of id -> value */
+  currentValues: T;
+  /** Whether to delete entry when value becomes 0 (default true) */
+  deleteOnZero?: boolean;
+  /** Function to get max value for an id (defaults to 6) */
+  getMax?: (id: string) => number;
+  /** Function to get min value for an id (defaults to 0) */
+  getMin?: (id: string) => number;
+  /** Function to validate point budget. Returns true if valid. */
+  validatePoints?: (
+    id: string,
+    currentValue: number,
+    newValue: number,
+  ) => boolean;
+};
+
+/**
+ * Result from a bump operation.
+ */
+export type BumpResult<T extends Record<string, number>> = {
+  changedId?: string;
+  newValue?: number;
+  newValues: T;
+  oldValue?: number;
+  success: boolean;
+};
+
+/**
+ * Utility function to calculate a bumped value record.
+ * This is the pure logic extracted from all the handleBump* functions.
+ *
+ * @param id - The ID of the item to bump
+ * @param delta - The amount to change (+1 or -1 typically)
+ * @param config - Configuration for the bump operation
+ * @returns BumpResult with the new values record
+ *
+ * @example
+ * ```tsx
+ * const result = calculateBumpedValue(skillId, delta, {
+ *   currentValues: skills,
+ *   getMin: () => 0,
+ *   getMax: () => 6,
+ *   validatePoints: (id, curr, next) => {
+ *     const costDelta = next - curr;
+ *     return costDelta <= 0 || spentPoints + costDelta <= totalPoints;
+ *   },
+ * });
+ * if (result.success) {
+ *   updateState({ skills: result.newValues });
+ * }
+ * ```
+ */
+export function calculateBumpedValue<T extends Record<string, number>>(
+  id: string,
+  delta: number,
+  config: BumpHandlerConfig<T>,
+): BumpResult<T> {
+  const {
+    currentValues,
+    getMin = () => 0,
+    getMax = () => 6,
+    canBump = () => true,
+    validatePoints = () => true,
+    deleteOnZero = true,
+  } = config;
+
+  const current = Number(currentValues[id]) || 0;
+  const minValue = getMin(id);
+  const maxValue = getMax(id);
+
+  // Clamp to valid range
+  const newValue = Math.max(minValue, Math.min(maxValue, current + delta));
+
+  // No change
+  if (newValue === current) {
+    return { success: false, newValues: currentValues };
+  }
+
+  // Check if bumping is allowed
+  if (!canBump(id, delta)) {
+    return { success: false, newValues: currentValues };
+  }
+
+  // Validate points budget
+  if (!validatePoints(id, current, newValue)) {
+    return { success: false, newValues: currentValues };
+  }
+
+  // Create new values object
+  const newValues = { ...currentValues } as T;
+  if (deleteOnZero && newValue <= 0) {
+    delete newValues[id];
+  } else {
+    (newValues as Record<string, number>)[id] = newValue;
+  }
+
+  return {
+    success: true,
+    newValues,
+    changedId: id,
+    oldValue: current,
+    newValue,
+  };
+}
+
+/**
+ * Factory function to create a bump handler with consistent behavior.
+ * This reduces boilerplate in components that need bump functionality.
+ *
+ * @param config - Static configuration for the handler
+ * @returns A handler function that takes (id, delta) and returns BumpResult
+ *
+ * @example
+ * ```tsx
+ * const bumpSkill = createBumpHandler({
+ *   currentValues: skills,
+ *   getMax: () => 6,
+ *   validatePoints: (id, curr, next) => next - curr <= remainingPoints,
+ * });
+ *
+ * const result = bumpSkill(skillId, 1);
+ * if (result.success) {
+ *   handleStateUpdate({ skills: result.newValues });
+ * }
+ * ```
+ */
+export function createBumpHandler<T extends Record<string, number>>(
+  config: BumpHandlerConfig<T>,
+): (id: string, delta: number) => BumpResult<T> {
+  return (id: string, delta: number) => calculateBumpedValue(id, delta, config);
 }
