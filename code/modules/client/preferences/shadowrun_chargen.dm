@@ -59,6 +59,14 @@
 	var/list/incoming = ..()
 	var/list/sanitized = sanitize_state(incoming)
 
+	// DEBUG: Log saved flag changes
+	var/input_saved = islist(input) ? !!input["saved"] : FALSE
+	var/output_saved = !!sanitized["saved"]
+	if(input_saved != output_saved)
+		log_game("SR5_CHARGEN_DEBUG: deserialize saved flag changed! input=[input_saved] output=[output_saved]")
+	else if(output_saved)
+		log_game("SR5_CHARGEN_DEBUG: deserialize preserving saved=TRUE")
+
 	// Since chargen state is now tied to the character's mind at spawn time,
 	// we allow ALL changes at any time. The spawned character uses a snapshot
 	// stored on their mind, so editing the preference won't affect them until respawn.

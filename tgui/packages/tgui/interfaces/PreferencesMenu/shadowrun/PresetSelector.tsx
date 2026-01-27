@@ -9,7 +9,7 @@ import { memo, useCallback, useState } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
 import { Box, Button, Icon, Modal, Stack } from '../../../components';
-import { PRIORITY_CATEGORIES } from './constants';
+import { AWAKENING, PRIORITY_CATEGORIES } from './constants';
 import {
   CharacterPreset,
   getPresetsByCategory,
@@ -169,7 +169,7 @@ const PresetCard = memo(
         </Stack>
 
         {/* Awakening badge for magic users */}
-        {preset.awakening !== 'mundane' && (
+        {preset.awakening !== AWAKENING.MUNDANE && (
           <Box
             style={{
               position: 'absolute',

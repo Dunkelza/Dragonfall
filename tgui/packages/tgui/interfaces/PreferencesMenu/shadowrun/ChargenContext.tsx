@@ -20,6 +20,13 @@
 
 import { createContext, memo, ReactNode, useCallback, useContext } from 'react';
 
+import {
+  DEFAULT_AWAKENING,
+  DEFAULT_BIRTHPLACE,
+  DEFAULT_METATYPE,
+  DEFAULT_RELIGION,
+  DEFAULT_SIN_STATUS,
+} from './constants';
 import { ChargenState, DashboardData, ValidationResult } from './types';
 
 // ============================================================================
@@ -244,8 +251,8 @@ export const ChargenProvider = memo((props: ChargenProviderProps) => {
       skills: {},
       skill_groups: {},
       special: {},
-      awakening: 'mundane',
-      metatype_species: '/datum/species/human',
+      awakening: DEFAULT_AWAKENING,
+      metatype_species: DEFAULT_METATYPE,
       saved: false,
       knowledge_skills: {},
       languages: {},
@@ -255,9 +262,9 @@ export const ChargenProvider = memo((props: ChargenProviderProps) => {
       selected_powers: {},
       selected_complex_forms: [],
       augments: {},
-      sin_status: 'legitimate',
-      birthplace: 'seattle',
-      religion: 'none',
+      sin_status: DEFAULT_SIN_STATUS,
+      birthplace: DEFAULT_BIRTHPLACE,
+      religion: DEFAULT_RELIGION,
       karma_spent: 0,
     };
 

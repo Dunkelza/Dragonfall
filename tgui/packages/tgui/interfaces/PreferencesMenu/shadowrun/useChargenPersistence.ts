@@ -43,6 +43,14 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 
+import {
+  DEFAULT_AWAKENING,
+  DEFAULT_BIRTHPLACE,
+  DEFAULT_LIFESTYLE,
+  DEFAULT_METATYPE,
+  DEFAULT_RELIGION,
+  DEFAULT_SIN_STATUS,
+} from './constants';
 import { ChargenState } from './types';
 
 // ============================================================================
@@ -275,8 +283,8 @@ export const DEFAULT_CHARGEN_STATE: ChargenState = {
   skill_groups: {},
   skill_specializations: {},
   special: {},
-  awakening: 'mundane',
-  metatype_species: '/datum/species/human',
+  awakening: DEFAULT_AWAKENING,
+  metatype_species: DEFAULT_METATYPE,
   saved: false,
   knowledge_skills: {},
   languages: {},
@@ -286,14 +294,14 @@ export const DEFAULT_CHARGEN_STATE: ChargenState = {
   selected_powers: {},
   selected_complex_forms: [],
   augments: {},
-  sin_status: 'legitimate',
-  birthplace: 'seattle',
-  religion: 'none',
+  sin_status: DEFAULT_SIN_STATUS,
+  birthplace: DEFAULT_BIRTHPLACE,
+  religion: DEFAULT_RELIGION,
   karma_spent: 0,
   gear: [],
-  drones: [],
+  drones: {},
   nuyen: 0,
-  lifestyle: 'street',
+  lifestyle: DEFAULT_LIFESTYLE,
   positive_qualities: [],
   negative_qualities: [],
 };

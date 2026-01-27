@@ -171,58 +171,159 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
       serverValue as ChargenState | null,
     );
 
+  // Track if this is the initial mount to properly sync server state
+  const isInitialMountRef = useRef(true);
+
+  // Track pending changes (save or template application) to prevent sync overwriting optimistic updates
+  const pendingChangeRef = useRef(false);
+
+  // Wrap setPredictedValue to automatically set pending flag
+  const setPredictedValueWithPending = useCallback(
+    (value: ChargenState | null) => {
+      pendingChangeRef.current = true;
+      setPredictedValue(value);
+    },
+    [setPredictedValue],
+  );
+
+  // On initial mount, trust the server's saved state
+  // This handles the case where the sheet was saved, closed, and reopened
+  useEffect(() => {
+    if (isInitialMountRef.current && serverValue) {
+      isInitialMountRef.current = false;
+      const serverSaved = Boolean(
+        serverValue &&
+          typeof serverValue === 'object' &&
+          (serverValue as any).saved,
+      );
+      const currentSaved = Boolean(
+        predictedValue &&
+          typeof predictedValue === 'object' &&
+          (predictedValue as any).saved,
+      );
+
+      console.log('[SR5 Save Debug] Initial mount check:', {
+        serverSaved,
+        currentSaved,
+      });
+
+      // If server says saved, ensure our local state reflects that
+      if (serverSaved && !currentSaved) {
+        console.log(
+          '[SR5 Save Debug] Initial mount: server has saved state, syncing',
+        );
+        setPredictedValue(serverValue);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run on mount
+
   // Track pending save to prevent useEffect from resetting optimistic update
   const pendingSaveRef = useRef(false);
+
+  // Track predicted saved state in a ref to avoid stale closures in useEffect
+  const predictedSavedRef = useRef(
+    Boolean(
+      predictedValue &&
+        typeof predictedValue === 'object' &&
+        (predictedValue as any).saved,
+    ),
+  );
+
+  // Keep the ref in sync with predictedValue
+  useEffect(() => {
+    predictedSavedRef.current = Boolean(
+      predictedValue &&
+        typeof predictedValue === 'object' &&
+        (predictedValue as any).saved,
+    );
+  }, [predictedValue]);
 
   // Sync predictedValue with serverValue when server state changes
   // This ensures we pick up changes from the server (e.g., after save/load)
   useEffect(() => {
-    // Only sync if server has a value and it's different from predicted
-    if (serverValue !== undefined) {
-      const serverSaved =
-        serverValue &&
+    // Only sync if server has a value
+    if (serverValue === undefined) {
+      return;
+    }
+
+    const serverSaved = Boolean(
+      serverValue &&
         typeof serverValue === 'object' &&
-        (serverValue as any).saved;
-      const predictedSaved =
-        predictedValue &&
-        typeof predictedValue === 'object' &&
-        (predictedValue as any).saved;
+        (serverValue as any).saved,
+    );
+    const predictedSaved = predictedSavedRef.current;
 
-      // DEBUG: Log state sync
-      console.log('[SR5 Save Debug] useEffect triggered:', {
-        serverSaved,
-        predictedSaved,
-        pendingSave: pendingSaveRef.current,
-        willSync: serverSaved !== predictedSaved,
-      });
+    // DEBUG: Log state sync
+    console.log('[SR5 Save Debug] useEffect triggered:', {
+      serverSaved,
+      predictedSaved,
+      pendingSave: pendingSaveRef.current,
+      pendingChange: pendingChangeRef.current,
+    });
 
-      // If we have a pending save and server confirms saved, clear the flag
+    // If we have a pending change (save or template), check if server confirms it
+    if (pendingChangeRef.current) {
+      // Server responded - clear the pending flag
+      console.log(
+        '[SR5 Save Debug] Server responded to pending change, clearing flag',
+      );
+      pendingChangeRef.current = false;
+
+      // If this was a save and server confirms saved, also clear pendingSaveRef
       if (pendingSaveRef.current && serverSaved) {
         console.log(
-          '[SR5 Save Debug] Server confirmed save, clearing pending flag',
+          '[SR5 Save Debug] Server confirmed save, clearing pending save flag',
         );
         pendingSaveRef.current = false;
-        // Don't sync - our optimistic update was correct
-        return;
       }
 
-      // If we have a pending save but server says not saved, wait for next update
-      // This prevents resetting our optimistic update while server is processing
-      if (pendingSaveRef.current && !serverSaved && predictedSaved) {
+      // Don't sync - trust our optimistic update since server just processed our change
+      return;
+    }
+
+    // Legacy check for pending save (in case pendingChangeRef was missed)
+    if (pendingSaveRef.current && serverSaved) {
+      console.log(
+        '[SR5 Save Debug] Server confirmed save, clearing pending flag',
+      );
+      pendingSaveRef.current = false;
+      return;
+    }
+
+    if (pendingSaveRef.current && !serverSaved && predictedSaved) {
+      console.log('[SR5 Save Debug] Pending save, ignoring stale server state');
+      return;
+    }
+
+    // CRITICAL: Never downgrade from saved to unsaved based on stale server data
+    if (serverSaved) {
+      // Server confirms saved - always accept this
+      if (!predictedSaved) {
         console.log(
-          '[SR5 Save Debug] Pending save, ignoring stale server state',
+          '[SR5 Save Debug] Server says saved, updating predictedValue',
         );
-        return;
-      }
-
-      // If server says saved but we don't, sync to server
-      // If server says not saved but we do (after reset on server), sync to server
-      if (serverSaved !== predictedSaved) {
-        console.log('[SR5 Save Debug] Syncing predictedValue to serverValue');
         setPredictedValue(serverValue);
       }
+    } else if (predictedSaved) {
+      // We think it's saved but server says not
+      console.log(
+        '[SR5 Save Debug] Mismatch: predicted=saved, server=unsaved. ' +
+          'Waiting for confirmation.',
+      );
+    } else {
+      // Both unsaved - only sync if this is likely a fresh load, not a pending update response
+      // We use isInitialMountRef to detect fresh loads
+      if (isInitialMountRef.current) {
+        console.log('[SR5 Save Debug] Initial load, syncing state from server');
+        setPredictedValue(serverValue);
+      } else {
+        console.log(
+          '[SR5 Save Debug] Both unsaved but not initial load, keeping local state',
+        );
+      }
     }
-  }, [serverValue]);
+  }, [serverValue, setPredictedValue]);
 
   // Use predictedValue if available, otherwise fall back to server value
   const value = predictedValue ?? serverValue;
@@ -274,6 +375,7 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
   // Restore draft handler
   const handleRestoreDraft = useCallback(() => {
     if (recoveredDraft) {
+      pendingChangeRef.current = true;
       setPredictedValue(recoveredDraft);
       act('set_preference', {
         preference: featureId,
@@ -385,9 +487,10 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
       saved: true,
     } as ChargenState;
 
-    // Set pending flag to prevent useEffect from resetting optimistic update
-    console.log('[SR5 Save Debug] Setting pendingSaveRef to true');
+    // Set pending flags to prevent useEffect from resetting optimistic update
+    console.log('[SR5 Save Debug] Setting pending flags to true');
     pendingSaveRef.current = true;
+    pendingChangeRef.current = true;
 
     console.log('[SR5 Save Debug] Setting predictedValue with saved=true');
     setPredictedValue(nextValue);
@@ -428,6 +531,7 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
       karma_spent: 0,
     };
 
+    pendingChangeRef.current = true;
     setPredictedValue(nextValue);
     act('set_preference', {
       preference: featureId,
@@ -930,7 +1034,7 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                         setIsEditingName={setIsEditingName}
                         setMultiNameInputOpen={setMultiNameInputOpen}
                         setNameDraft={setNameDraft}
-                        setPredictedValue={setPredictedValue}
+                        setPredictedValue={setPredictedValueWithPending}
                         tab={tab}
                         validation={validation}
                         value={value}

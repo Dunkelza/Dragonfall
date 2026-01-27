@@ -16,15 +16,19 @@ export {
   AWAKENING_TYPES,
   type AwakeningType,
   BASE_ESSENCE,
-  CYBERLIMB_BASE_STATS,
-  CYBERLIMB_MAX_UPGRADE,
-  DEFAULT_CYBERLIMB_UPGRADE_COST,
-  DEFAULT_LIFESTYLE_COST,
+  BIRTHPLACE,
+  DEFAULT_AWAKENING,
+  DEFAULT_BIRTHPLACE,
+  DEFAULT_LIFESTYLE,
+  DEFAULT_METATYPE,
+  DEFAULT_RELIGION,
+  DEFAULT_SIN_STATUS,
   isAdeptUser,
   isAwakened,
   isMagicUser,
   isPrioritySelectionComplete,
   isTechnomancer,
+  LIFESTYLE,
   LIFESTYLE_TIERS,
   type LifestyleTier,
   type PartialPrioritySelection,
@@ -33,6 +37,10 @@ export {
   type PriorityCategory,
   type PriorityLetter,
   type PrioritySelection,
+  RELIGION,
+  SIN_STATUS,
+  SIN_STATUS_TYPES,
+  type SinStatusType,
   toPrioritySelection,
 } from './constants';
 
@@ -55,8 +63,15 @@ export {
   calculateSpecialPointsSpent,
   calculateStunCM,
   calculateTotalEssenceSpent,
+  formatPortraitUrl,
   getLifestyleCost,
+  PORTRAIT_ALLOWED_EXTENSIONS,
+  PORTRAIT_MAX_SIZE_BYTES,
+  PORTRAIT_REQUIRED_HOST,
+  type PortraitValidationResult,
   validateChargenState,
+  validatePortraitSize,
+  validatePortraitUrl,
 } from './calculations';
 
 // Custom Hooks
@@ -77,6 +92,16 @@ export {
   usePointAllocation,
 } from './hooks';
 
+// Chargen Handlers Hook
+export {
+  type ActionResult,
+  type AddOptions,
+  type BumpOptions,
+  type ChargenHandlersConfig,
+  type ChargenHandlersResult,
+  useChargenHandlers,
+} from './useChargenHandlers';
+
 // Local Draft Storage
 export {
   type LocalDraftStorageConfig,
@@ -94,6 +119,11 @@ export {
   BreadcrumbNav,
   type BreadcrumbNavProps,
   type BreadcrumbSegment,
+  BumpControls,
+  type BumpControlsProps,
+  type BumpFactoryConfig,
+  type BumpFactoryResult,
+  type BumpHandlerOptions,
   clamp,
   CollapsibleSection,
   CurrentLocation,
@@ -109,6 +139,7 @@ export {
   ProgressBar,
   UndoRedoControls,
   type UndoRedoControlsProps,
+  useBumpFactory,
   ValidationBadge,
   ValidationSummary,
   type ValidationSummaryProps,
@@ -131,6 +162,13 @@ export {
   type MetatypeSelectorProps,
 } from './MetatypeSelector';
 export {
+  PortraitsSection,
+  type PortraitsSectionProps,
+  type PortraitType,
+  PortraitUpload,
+  type PortraitUploadProps,
+} from './PortraitUpload';
+export {
   CHARACTER_PRESETS,
   type CharacterPreset,
   getPresetById,
@@ -141,7 +179,6 @@ export { PresetSelector } from './PresetSelector';
 export { PrioritySelector } from './PrioritySelector';
 export { getSectionTab, SaveResetBar } from './SaveResetBar';
 export { SkillsSection } from './SkillsSection';
-export { SpecialSelector } from './SpecialSelector';
 
 // Tab Navigation
 export {
@@ -225,18 +262,24 @@ export {
   useSelectionCatalog,
 } from './SelectionCatalog';
 
-// Compound Components
+// Catalog Helper Components (shared building blocks)
 export {
-  Skills,
-  SkillsGroups,
-  SkillsList,
-  type SkillsListProps,
-  SkillsPoints,
-  SkillsProvider,
-  type SkillsProviderProps,
-  SkillsSectionCompound,
-  useSkills,
-} from './SkillsCompound';
+  CategoryDescription,
+  type CategoryDescriptionProps,
+  type CategoryTabData,
+  CategoryTabs,
+  type CategoryTabsProps,
+  EmptyState,
+  type EmptyStateProps,
+  ItemBadge,
+  type ItemBadgeProps,
+  ResourceBar,
+  type ResourceBarProps,
+  SearchInput,
+  type SearchInputProps,
+  SectionHeader,
+  type SectionHeaderProps,
+} from './CatalogHelpers';
 
 // Deferred Computation (performance optimization)
 export {
@@ -264,7 +307,7 @@ export {
   SkeletonCard,
   SkeletonLine,
   SkeletonSectionHeader,
-  SkillsSkeleton,
   SkeletonStatBar,
   SkeletonTabs,
+  SkillsSkeleton,
 } from './SkeletonLoaders';

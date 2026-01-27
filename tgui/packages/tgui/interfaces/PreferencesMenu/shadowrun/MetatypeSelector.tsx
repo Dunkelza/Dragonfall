@@ -16,17 +16,6 @@ import { ChargenConstData, ChargenState } from './types';
 // TYPES
 // ============================================================================
 
-export type MetatypeChoice = {
-  id: string;
-  min_priority: string;
-  name: string;
-};
-
-export type AwakeningChoice = {
-  id: string;
-  name: string;
-};
-
 export type MetatypeSelectorProps = {
   act: (action: string, payload?: Record<string, unknown>) => void;
   chargenConstData: ChargenConstData | null;
@@ -99,7 +88,11 @@ export const MetatypeSelector = memo((props: MetatypeSelectorProps) => {
   const magicDisabled = magicLetter === 'E' || magicRating <= 0;
 
   const currentAwakeningName =
-    awakeningChoices.find((c) => c.id === awakening)?.name || 'Mundane';
+    awakeningChoices.find((c) => c.id === awakening)?.name ||
+    AWAKENING_DISPLAY_NAMES[
+      awakening as keyof typeof AWAKENING_DISPLAY_NAMES
+    ] ||
+    'Mundane';
 
   const handleSetMetatype = (newSpecies: string) => {
     if (isSaved) {

@@ -1245,3 +1245,307 @@ export const UndoRedoControls = memo((props: UndoRedoControlsProps) => {
 });
 
 UndoRedoControls.displayName = 'UndoRedoControls';
+
+// ============================================================================
+// BUMP CONTROLS COMPONENT
+// ============================================================================
+
+/**
+ * Standard colors for increment/decrement buttons.
+ */
+const BUMP_COLORS = {
+  decrease: {
+    active: '#ff6b6b',
+    activeBg: 'rgba(255, 107, 107, 0.2)',
+    activeBorder: 'rgba(255, 107, 107, 0.4)',
+  },
+  disabled: {
+    color: 'rgba(255, 255, 255, 0.3)',
+    bg: 'rgba(0, 0, 0, 0.3)',
+    border: 'rgba(255, 255, 255, 0.1)',
+  },
+  increase: {
+    active: '#4caf50',
+    activeBg: 'rgba(76, 175, 80, 0.2)',
+    activeBorder: 'rgba(76, 175, 80, 0.4)',
+  },
+};
+
+export type BumpControlsProps = {
+  /** Whether decrease button is enabled */
+  canDecrease: boolean;
+  /** Whether increase button is enabled */
+  canIncrease: boolean;
+  /** Current value to display */
+  current: number;
+  /** Accent color for the value display (default: white) */
+  displayColor?: string;
+  /** Maximum value (for tooltip) */
+  max?: number;
+  /** Minimum value (for tooltip) */
+  min?: number;
+  /** Called when decrement button is clicked */
+  onDecrease: () => void;
+  /** Called when increment button is clicked */
+  onIncrease: () => void;
+  /** Whether to show range tooltip on value */
+  showRangeTooltip?: boolean;
+  /** Size variant: 'compact' for smaller buttons, 'normal' for standard */
+  size?: 'compact' | 'normal';
+};
+
+/**
+ * Reusable -/+ button controls with value display.
+ *
+ * Consolidates the common pattern of decrement button, value display,
+ * and increment button used across chargen sections.
+ *
+ * @example
+ * ```tsx
+ * <BumpControls
+ *   current={attributeValue}
+ *   min={1}
+ *   max={6}
+ *   canDecrease={value > min && !isSaved}
+ *   canIncrease={value < max && hasPoints && !isSaved}
+ *   onDecrease={() => handleBump(-1)}
+ *   onIncrease={() => handleBump(1)}
+ *   displayColor={accentColor}
+ * />
+ * ```
+ */
+export const BumpControls = memo((props: BumpControlsProps) => {
+  const {
+    current,
+    min,
+    max,
+    canDecrease,
+    canIncrease,
+    onDecrease,
+    onIncrease,
+    displayColor = '#ffffff',
+    size = 'normal',
+    showRangeTooltip = true,
+  } = props;
+
+  const isCompact = size === 'compact';
+  const buttonSize = isCompact ? '1.25rem' : '1.5rem';
+  const fontSize = isCompact ? '0.65rem' : '0.75rem';
+  const valueFontSize = isCompact ? '0.9rem' : '1.1rem';
+  const valueWidth = isCompact ? '2rem' : '2.5rem';
+
+  const decreaseStyle = {
+    minWidth: buttonSize,
+    height: buttonSize,
+    padding: '0',
+    fontSize,
+    background: canDecrease
+      ? BUMP_COLORS.decrease.activeBg
+      : BUMP_COLORS.disabled.bg,
+    border: `1px solid ${canDecrease ? BUMP_COLORS.decrease.activeBorder : BUMP_COLORS.disabled.border}`,
+    color: canDecrease
+      ? BUMP_COLORS.decrease.active
+      : BUMP_COLORS.disabled.color,
+  };
+
+  const increaseStyle = {
+    minWidth: buttonSize,
+    height: buttonSize,
+    padding: '0',
+    fontSize,
+    background: canIncrease
+      ? BUMP_COLORS.increase.activeBg
+      : BUMP_COLORS.disabled.bg,
+    border: `1px solid ${canIncrease ? BUMP_COLORS.increase.activeBorder : BUMP_COLORS.disabled.border}`,
+    color: canIncrease
+      ? BUMP_COLORS.increase.active
+      : BUMP_COLORS.disabled.color,
+  };
+
+  const valueStyle = {
+    color: displayColor,
+    fontSize: valueFontSize,
+    fontWeight: 'bold' as const,
+    minWidth: valueWidth,
+    textAlign: 'center' as const,
+    textShadow:
+      min !== undefined && current > min ? `0 0 8px ${displayColor}` : 'none',
+  };
+
+  const valueDisplay = <Box style={valueStyle}>{current}</Box>;
+
+  const hasRangeInfo = min !== undefined && max !== undefined;
+
+  return (
+    <Box
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: isCompact ? '0.2rem' : '0.25rem',
+      }}
+    >
+      <Button
+        icon="minus"
+        disabled={!canDecrease}
+        onClick={onDecrease}
+        style={decreaseStyle}
+      />
+      {showRangeTooltip && hasRangeInfo ? (
+        <Tooltip content={`Range: ${min} - ${max}`} position="top">
+          {valueDisplay}
+        </Tooltip>
+      ) : (
+        valueDisplay
+      )}
+      <Button
+        icon="plus"
+        disabled={!canIncrease}
+        onClick={onIncrease}
+        style={increaseStyle}
+      />
+    </Box>
+  );
+});
+
+BumpControls.displayName = 'BumpControls';
+
+// ============================================================================
+// BUMP HANDLER FACTORY HOOK
+// ============================================================================
+
+import { BumpHandlerConfig, BumpResult, calculateBumpedValue } from './hooks';
+import { ChargenState } from './types';
+
+/**
+ * Configuration for useBumpFactory hook.
+ */
+export type BumpFactoryConfig = {
+  /** The act function for server communication */
+  act: (action: string, payload?: Record<string, unknown>) => void;
+  /** Current chargen state */
+  chargenState: ChargenState | null;
+  /** Feature ID for preferences */
+  featureId: string;
+  /** Whether the sheet is locked/saved */
+  isSaved: boolean;
+  /** Function to set optimistic state */
+  setPredictedValue: (value: ChargenState) => void;
+};
+
+/**
+ * Options for creating a bump handler.
+ */
+export type BumpHandlerOptions<T extends Record<string, number>> = {
+  /** Whether bumping is allowed for this ID (e.g., not locked by group) */
+  canBump?: (id: string, delta: number) => boolean;
+  /** Whether to delete entry when value becomes 0 (default: true) */
+  deleteOnZero?: boolean;
+  /** Maximum value getter */
+  getMax?: (id: string) => number;
+  /** Minimum value getter */
+  getMin?: (id: string) => number;
+  /** The section of state to update (e.g., 'attributes', 'skills') */
+  section: keyof ChargenState;
+  /** Selector for the current values */
+  selectValues: (state: ChargenState) => T;
+  /** Point budget validation */
+  validatePoints?: (id: string, current: number, next: number) => boolean;
+};
+
+/**
+ * Result of a bump operation.
+ */
+export type BumpFactoryResult = {
+  /** Error message if operation failed */
+  error?: string;
+  /** Whether the operation succeeded */
+  success: boolean;
+};
+
+/**
+ * Factory hook that creates bump handlers with standard boilerplate.
+ *
+ * This hook eliminates the repeated pattern of:
+ * 1. Check if saved
+ * 2. Call calculateBumpedValue
+ * 3. Check result.success
+ * 4. Create new state
+ * 5. Call setPredictedValue and act
+ *
+ * @example
+ * ```tsx
+ * const { createHandler } = useBumpFactory({
+ *   act, featureId, chargenState, setPredictedValue, isSaved
+ * });
+ *
+ * // Create a handler for attributes
+ * const handleBumpAttribute = createHandler({
+ *   section: 'attributes',
+ *   selectValues: (state) => state.attributes,
+ *   getMin: (id) => attrBoundsMap.get(id)?.min ?? 1,
+ *   getMax: (id) => attrBoundsMap.get(id)?.max ?? 6,
+ *   deleteOnZero: false,
+ * });
+ *
+ * // Use it
+ * <Button onClick={() => handleBumpAttribute('body', 1)} />
+ * ```
+ */
+export function useBumpFactory(config: BumpFactoryConfig) {
+  const { act, chargenState, featureId, isSaved, setPredictedValue } = config;
+
+  /**
+   * Creates a bump handler for a specific section.
+   */
+  const createHandler = useCallback(
+    <T extends Record<string, number>>(
+      options: BumpHandlerOptions<T>,
+    ): ((id: string, delta: number) => BumpFactoryResult) => {
+      return (id: string, delta: number): BumpFactoryResult => {
+        if (!chargenState) {
+          return { success: false, error: 'No chargen state' };
+        }
+        if (isSaved) {
+          return { success: false, error: 'Sheet is saved/locked' };
+        }
+
+        const currentValues = options.selectValues(chargenState);
+
+        const bumpConfig: BumpHandlerConfig<T> = {
+          currentValues,
+          getMin: options.getMin ?? (() => 0),
+          getMax: options.getMax ?? (() => 6),
+          canBump: options.canBump,
+          validatePoints: options.validatePoints,
+          deleteOnZero: options.deleteOnZero ?? true,
+        };
+
+        const result: BumpResult<T> = calculateBumpedValue(
+          id,
+          delta,
+          bumpConfig,
+        );
+
+        if (!result.success) {
+          return {
+            success: false,
+            error: 'Bump failed (bounds or validation)',
+          };
+        }
+
+        const newState = {
+          ...chargenState,
+          [options.section]: result.newValues,
+        };
+
+        setPredictedValue(newState);
+        act('set_preference', { preference: featureId, value: newState });
+
+        return { success: true };
+      };
+    },
+    [act, chargenState, featureId, isSaved, setPredictedValue],
+  );
+
+  return { createHandler };
+}

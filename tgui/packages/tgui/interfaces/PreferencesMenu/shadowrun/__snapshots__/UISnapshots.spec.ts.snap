@@ -1,0 +1,270 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Augment Grades Configuration AUGMENT_GRADES structure is stable 1`] = `
+{
+  "alphaware": {
+    "color": "#4fc3f7",
+    "costMultiplier": 2,
+    "description": "Higher quality, 20% less essence cost.",
+    "essenceMultiplier": 0.8,
+    "name": "Alphaware",
+  },
+  "betaware": {
+    "color": "#81c784",
+    "costMultiplier": 4,
+    "description": "Premium grade, 40% less essence cost.",
+    "essenceMultiplier": 0.6,
+    "name": "Betaware",
+  },
+  "deltaware": {
+    "color": "#ffb74d",
+    "costMultiplier": 10,
+    "description": "Top-tier quality, 50% less essence cost. Very rare.",
+    "essenceMultiplier": 0.5,
+    "name": "Deltaware",
+  },
+  "standard": {
+    "color": "#9b8fc7",
+    "costMultiplier": 1,
+    "description": "Factory-new augmentation at base stats.",
+    "essenceMultiplier": 1,
+    "name": "Standard",
+  },
+  "used": {
+    "color": "#888",
+    "costMultiplier": 0.75,
+    "description": "Second-hand cyberware. Higher essence cost, lower price.",
+    "essenceMultiplier": 1.25,
+    "name": "Used",
+  },
+}
+`;
+
+exports[`Awakening Types Configuration AWAKENING_TYPES is stable 1`] = `
+[
+  "mundane",
+  "mage",
+  "adept",
+  "mystic_adept",
+  "technomancer",
+]
+`;
+
+exports[`Lifestyle Tiers Configuration LIFESTYLE_TIERS is stable 1`] = `
+[
+  "street",
+  "squatter",
+  "low",
+  "middle",
+  "high",
+  "luxury",
+]
+`;
+
+exports[`Priority Letter Colors priority letter colors are stable 1`] = `
+{
+  "A": "#4caf50",
+  "B": "#8bc34a",
+  "C": "#ffeb3b",
+  "D": "#ff9800",
+  "E": "#f44336",
+}
+`;
+
+exports[`Priority System Configuration PRIORITY_CATEGORIES is stable 1`] = `
+[
+  "metatype",
+  "attributes",
+  "magic",
+  "skills",
+  "resources",
+]
+`;
+
+exports[`Priority System Configuration PRIORITY_LETTERS is stable 1`] = `
+[
+  "A",
+  "B",
+  "C",
+  "D",
+  "E",
+]
+`;
+
+exports[`Section Accent Colors section accent colors are stable 1`] = `
+{
+  "attributes": "#caa53d",
+  "augments": "#ff6b6b",
+  "biometrics": "#26c6da",
+  "career": "#e67e22",
+  "contacts": "#f1c40f",
+  "derived_stats": "#9b59b6",
+  "drones": "#4fc3f7",
+  "gear": "#ff9500",
+  "knowledge": "#2ecc71",
+  "lifestyle": "#ff9800",
+  "magic": "#9b59b6",
+  "notes": "#9e9e9e",
+  "priority": "#caa53d",
+  "sin_identity": "#00d4ff",
+  "skills": "#03fca1",
+}
+`;
+
+exports[`Skeleton Loader Configuration skeleton tab colors are stable 1`] = `
+{
+  "augments": {
+    "essence": "rgba(155, 143, 199, 0.5)",
+    "item": "rgba(255, 107, 107, 0.4)",
+  },
+  "connections": {
+    "header": "rgba(38, 166, 154, 0.5)",
+    "item": "rgba(38, 166, 154, 0.4)",
+  },
+  "core": {
+    "header": "rgba(92, 107, 192, 0.5)",
+    "identity": "rgba(0, 212, 255, 0.5)",
+    "stats": "rgba(155, 89, 182, 0.5)",
+  },
+  "drones": {
+    "budget": "rgba(255, 215, 0, 0.4)",
+    "item": "rgba(141, 110, 99, 0.4)",
+  },
+  "gear": {
+    "budget": "rgba(255, 215, 0, 0.4)",
+    "item": "rgba(255, 149, 0, 0.4)",
+  },
+  "magic": {
+    "border": "rgba(155, 89, 182, 0.3)",
+    "header": "rgba(155, 89, 182, 0.15)",
+    "item": "rgba(155, 89, 182, 0.4)",
+  },
+  "skills": {
+    "bar": "rgba(3, 252, 161, 0.4)",
+    "header": "rgba(3, 252, 161, 0.5)",
+  },
+}
+`;
+
+exports[`UI Configuration Snapshots Tab Display Configuration TAB_COLORS matches expected color palette 1`] = `
+{
+  "augments": "#ff7043",
+  "build": "#4a90d9",
+  "connections": "#26a69a",
+  "core": "#5c6bc0",
+  "drones": "#8d6e63",
+  "gear": "#ffc107",
+  "magic": "#9c27b0",
+  "occupations": "#78909c",
+  "qualities": "#66bb6a",
+  "summary": "#9b8fc7",
+}
+`;
+
+exports[`UI Configuration Snapshots Tab Display Configuration TAB_DISPLAY_INFO structure is stable 1`] = `
+{
+  "augments": {
+    "accentColor": "#ff7043",
+    "hint": "Cyberware, bioware, and other bodily augmentations. Trade essence for capabilities.",
+    "icon": "microchip",
+    "label": "Augments",
+  },
+  "build": {
+    "accentColor": "#4a90d9",
+    "hint": "Set your priority selections, allocate attribute and skill points.",
+    "icon": "sliders-h",
+    "label": "Build",
+  },
+  "connections": {
+    "accentColor": "#26a69a",
+    "hint": "Manage your network of contacts - the people who provide information, services, and favors.",
+    "icon": "address-book",
+    "label": "Contacts",
+  },
+  "core": {
+    "accentColor": "#5c6bc0",
+    "hint": "Your System Identification Number - the digital identity that defines who you are in the Sixth World.",
+    "icon": "id-card",
+    "label": "SIN",
+  },
+  "drones": {
+    "accentColor": "#8d6e63",
+    "hint": "Purchase and customize drones for surveillance, combat, and utility operations.",
+    "icon": "robot",
+    "label": "Drones",
+  },
+  "gear": {
+    "accentColor": "#ffc107",
+    "hint": "Purchase starting equipment with your nuyen. Weapons, armor, electronics, and more.",
+    "icon": "shopping-cart",
+    "label": "Gear",
+  },
+  "magic": {
+    "accentColor": "#9c27b0",
+    "hint": "Configure magical traditions, spells, adept powers, and mentor spirits for awakened characters.",
+    "icon": "hat-wizard",
+    "label": "Magic",
+  },
+  "occupations": {
+    "accentColor": "#78909c",
+    "hint": "Select your assignment/role for the run.",
+    "icon": "id-badge",
+    "label": "Jobs",
+  },
+  "qualities": {
+    "accentColor": "#66bb6a",
+    "hint": "Positive and negative qualities that define your character edges and flaws.",
+    "icon": "star",
+    "label": "Qualities",
+  },
+  "summary": {
+    "accentColor": "#9b8fc7",
+    "hint": "Complete overview of your character build with validation status.",
+    "icon": "clipboard-list",
+    "label": "Summary",
+  },
+}
+`;
+
+exports[`UI Configuration Snapshots Tab Display Configuration TAB_GROUPS organization is stable 1`] = `
+[
+  {
+    "icon": "user",
+    "id": "character",
+    "name": "Character",
+    "tabs": [
+      "build",
+      "core",
+      "magic",
+    ],
+  },
+  {
+    "icon": "toolbox",
+    "id": "equipment",
+    "name": "Equipment",
+    "tabs": [
+      "augments",
+      "gear",
+      "drones",
+    ],
+  },
+  {
+    "icon": "users",
+    "id": "social",
+    "name": "Social",
+    "tabs": [
+      "connections",
+      "qualities",
+      "occupations",
+    ],
+  },
+  {
+    "icon": "clipboard-list",
+    "id": "summary",
+    "name": "Summary",
+    "tabs": [
+      "summary",
+    ],
+  },
+]
+`;

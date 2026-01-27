@@ -4,7 +4,10 @@ module.exports = {
     '<rootDir>/packages/**/__tests__/*.{js,ts,tsx}',
     '<rootDir>/packages/**/*.{spec,test}.{js,ts,tsx}',
   ],
-  testPathIgnorePatterns: ['<rootDir>/packages/tgui-bench'],
+  testPathIgnorePatterns: [
+    '<rootDir>/packages/tgui-bench',
+    '<rootDir>/packages/tgui/__tests__/shadowrun-e2e',
+  ],
   testEnvironment: 'jsdom',
   testRunner: require.resolve('jest-circus/runner'),
   transform: {

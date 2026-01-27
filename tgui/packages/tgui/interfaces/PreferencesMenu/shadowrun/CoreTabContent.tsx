@@ -1,8 +1,8 @@
 /**
  * Core Tab Content for Shadowrun Character Sheet
  *
- * Contains: SIN (Identity), Lifestyle, Character Notes, Biometrics & Metatype,
- * and Derived Statistics sections.
+ * Contains: SIN (Identity), Lifestyle, Character Notes, Character Portraits,
+ * Biometrics & Metatype, and Derived Statistics sections.
  */
 
 import { memo, ReactNode } from 'react';
@@ -21,6 +21,7 @@ import { createSetPreference } from '../data';
 import { Gender, GENDERS } from '../preferences/gender';
 import { CollapsibleSection } from './components';
 import { MetatypeSelectorProps } from './MetatypeSelector';
+import { PortraitsSection } from './PortraitUpload';
 import {
   ChargenConstData,
   ChargenState,
@@ -1279,6 +1280,37 @@ export const CoreTabContent = memo((props: CoreTabContentProps) => {
             </Box>
           </Box>
         </Box>
+      </CollapsibleSection>
+
+      {/* Character Portraits Section */}
+      <CollapsibleSection
+        title="Character Portraits"
+        icon="image"
+        stateKey={`sr_portraits_${data.active_slot}`}
+        defaultOpen={false}
+      >
+        <PortraitsSection
+          portraitHeadshot={chargenState?.portrait_headshot}
+          portraitBodyshot={chargenState?.portrait_bodyshot}
+          disabled={isSaved}
+          onUpdate={(updates) => {
+            if (!chargenState) return;
+            const newState = { ...chargenState, ...updates };
+            setPredictedValue(newState);
+
+            // Send update to server
+            if (updates.portrait_headshot !== undefined) {
+              act('update_chargen', {
+                portrait_headshot: updates.portrait_headshot,
+              });
+            }
+            if (updates.portrait_bodyshot !== undefined) {
+              act('update_chargen', {
+                portrait_bodyshot: updates.portrait_bodyshot,
+              });
+            }
+          }}
+        />
       </CollapsibleSection>
 
       {/* Biometrics Section with Metatype - Collapsible */}

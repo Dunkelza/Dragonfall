@@ -16,6 +16,7 @@ import {
   AWAKENING,
   isAwakened as checkAwakened,
   isMagicUser,
+  LIFESTYLE,
 } from './constants';
 import {
   AttributeMeta,
@@ -284,7 +285,7 @@ export function useNuyenCalculation(
 
     // Calculate lifestyle cost (1 month prepaid)
     const lifestyles = chargenConstData?.lifestyles || [];
-    const selectedLifestyle = chargenState.lifestyle || 'low';
+    const selectedLifestyle = chargenState.lifestyle || LIFESTYLE.LOW;
     const lifestyleData = lifestyles.find(
       (l: LifestyleMeta) => l.id === selectedLifestyle,
     );

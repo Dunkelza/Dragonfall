@@ -1076,3 +1076,180 @@ function validateSuggestions(
     });
   }
 }
+
+// ============================================================================
+// Portrait Validation
+// ============================================================================
+
+/**
+ * Maximum allowed file size for portraits (6MB in bytes).
+ */
+export const PORTRAIT_MAX_SIZE_BYTES = 6 * 1024 * 1024;
+
+/**
+ * Allowed image file extensions for portraits.
+ */
+export const PORTRAIT_ALLOWED_EXTENSIONS = ['.png', '.jpg', '.jpeg'] as const;
+
+/**
+ * The required host domain for portrait images.
+ */
+export const PORTRAIT_REQUIRED_HOST = 'files.catbox.moe';
+
+/**
+ * Result of portrait URL validation.
+ */
+export type PortraitValidationResult = {
+  /** Whether the URL is valid. */
+  isValid: boolean;
+  /** Error message if invalid, undefined if valid. */
+  error?: string;
+  /** Warning message (e.g., for size check that couldn't be performed). */
+  warning?: string;
+};
+
+/**
+ * Validates a portrait URL for the character sheet.
+ *
+ * Requirements:
+ * - Must be hosted on https://files.catbox.moe/
+ * - Must have a .png or .jpg/.jpeg file extension
+ * - Image must be under 6MB (checked async if checkSize is true)
+ *
+ * @param url - The URL to validate
+ * @returns Validation result with isValid flag and optional error message
+ *
+ * @example
+ * ```typescript
+ * const result = validatePortraitUrl('https://files.catbox.moe/abc123.png');
+ * if (!result.isValid) {
+ *   console.error(result.error);
+ * }
+ * ```
+ */
+export function validatePortraitUrl(url: string): PortraitValidationResult {
+  // Empty URL is valid (portrait is optional)
+  if (!url || url.trim() === '') {
+    return { isValid: true };
+  }
+
+  const trimmedUrl = url.trim();
+
+  // Check URL format
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(trimmedUrl);
+  } catch {
+    return {
+      isValid: false,
+      error: 'Invalid URL format',
+    };
+  }
+
+  // Check protocol
+  if (parsedUrl.protocol !== 'https:') {
+    return {
+      isValid: false,
+      error: 'URL must use HTTPS protocol',
+    };
+  }
+
+  // Check host
+  if (parsedUrl.host !== PORTRAIT_REQUIRED_HOST) {
+    return {
+      isValid: false,
+      error: `Images must be hosted on ${PORTRAIT_REQUIRED_HOST}`,
+    };
+  }
+
+  // Check file extension
+  const pathname = parsedUrl.pathname.toLowerCase();
+  const hasValidExtension = PORTRAIT_ALLOWED_EXTENSIONS.some((ext) =>
+    pathname.endsWith(ext),
+  );
+
+  if (!hasValidExtension) {
+    return {
+      isValid: false,
+      error: 'Image must be a .png or .jpg file',
+    };
+  }
+
+  return {
+    isValid: true,
+    warning: 'Image size will be verified when loaded. Maximum size is 6MB.',
+  };
+}
+
+/**
+ * Asynchronously validates a portrait image's file size.
+ *
+ * Fetches the image headers to check Content-Length.
+ * Returns a validation result indicating if the image is under 6MB.
+ *
+ * @param url - The image URL to check
+ * @returns Promise resolving to validation result
+ *
+ * @example
+ * ```typescript
+ * const result = await validatePortraitSize('https://files.catbox.moe/abc.png');
+ * if (!result.isValid) {
+ *   console.error(result.error); // "Image exceeds 6MB limit"
+ * }
+ * ```
+ */
+export async function validatePortraitSize(
+  url: string,
+): Promise<PortraitValidationResult> {
+  if (!url || url.trim() === '') {
+    return { isValid: true };
+  }
+
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+
+    if (!response.ok) {
+      return {
+        isValid: false,
+        error: `Failed to load image: ${response.status} ${response.statusText}`,
+      };
+    }
+
+    const contentLength = response.headers.get('content-length');
+    if (contentLength) {
+      const sizeBytes = parseInt(contentLength, 10);
+      if (sizeBytes > PORTRAIT_MAX_SIZE_BYTES) {
+        const sizeMB = (sizeBytes / (1024 * 1024)).toFixed(2);
+        return {
+          isValid: false,
+          error: `Image is ${sizeMB}MB, which exceeds the 6MB limit`,
+        };
+      }
+    } else {
+      return {
+        isValid: true,
+        warning: 'Could not verify image size. Maximum allowed is 6MB.',
+      };
+    }
+
+    return { isValid: true };
+  } catch (error) {
+    return {
+      isValid: false,
+      error: 'Failed to verify image. Please check the URL is accessible.',
+    };
+  }
+}
+
+/**
+ * Formats a portrait URL for display (truncates long URLs).
+ *
+ * @param url - The URL to format
+ * @param maxLength - Maximum length before truncation (default 40)
+ * @returns Formatted URL string
+ */
+export function formatPortraitUrl(url: string, maxLength = 40): string {
+  if (!url) return '';
+  if (url.length <= maxLength) return url;
+  return url.substring(0, maxLength - 3) + '...';
+}
