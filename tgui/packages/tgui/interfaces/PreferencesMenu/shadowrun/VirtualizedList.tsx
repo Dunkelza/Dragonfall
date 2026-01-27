@@ -31,6 +31,12 @@ import { Box } from '../../../components';
 // TYPES
 // ============================================================================
 
+/**
+ * Style object passed to renderItem - compatible with both React CSSProperties
+ * and TGUI Box's Partial<CSSStyleDeclaration>
+ */
+export type ItemStyle = Record<string, unknown>;
+
 export type VirtualizedListProps<T> = {
   /** Additional class name for the container */
   className?: string;
@@ -52,7 +58,7 @@ export type VirtualizedListProps<T> = {
    * @param index - Index of the item in the array
    * @param style - Style object that MUST be applied to the outer element for positioning
    */
-  renderItem: (item: T, index: number, style: CSSProperties) => ReactNode;
+  renderItem: (item: T, index: number, style: ItemStyle) => ReactNode;
   /** Width of the list (default: 100%) */
   width?: number | string;
 };
@@ -207,7 +213,7 @@ export type VariableSizeListProps<T> = {
    * @param index - Index of the item in the array
    * @param style - Style object that MUST be applied to the outer element for positioning
    */
-  renderItem: (item: T, index: number, style: CSSProperties) => ReactNode;
+  renderItem: (item: T, index: number, style: ItemStyle) => ReactNode;
   /** Width of the list (default: 100%) */
   width?: number | string;
 };
@@ -363,7 +369,7 @@ export type VirtualizedGridProps<T> = {
    * @param index - Index of the item in the array
    * @param style - Style object for the cell
    */
-  renderItem: (item: T, index: number, style: CSSProperties) => ReactNode;
+  renderItem: (item: T, index: number, style: ItemStyle) => ReactNode;
   /** Height of each row in pixels */
   rowHeight: number;
   /** Width of the grid (default: 100%) */

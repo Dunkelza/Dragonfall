@@ -17,6 +17,8 @@ import {
   DroneMeta,
   DroneModMeta,
 } from './types';
+import { useCachedComputation } from './useDeferredComputation';
+import { VirtualizedList } from './VirtualizedList';
 
 // === ACCENT COLORS ===
 const ACCENT_BLUE = '#4fc3f7';
@@ -105,15 +107,19 @@ export const DroneSection = memo((props: DroneSectionProps) => {
 
   const nuyenRemaining = dashboardData?.nuyenRemaining || 0;
 
-  // Get drones for current category
-  const categoryDrones = useMemo(() => {
-    const drones = dronesByCategory[selectedCategory] || [];
-    return [...drones].sort(
-      (a: DroneMeta, b: DroneMeta) => (a.sort || 0) - (b.sort || 0),
-    );
-  }, [dronesByCategory, selectedCategory]);
+  // Get drones for current category (cached across tab switches)
+  const categoryDrones = useCachedComputation(
+    `drones-category-${selectedCategory}`,
+    () => {
+      const drones = dronesByCategory[selectedCategory] || [];
+      return [...drones].sort(
+        (a: DroneMeta, b: DroneMeta) => (a.sort || 0) - (b.sort || 0),
+      );
+    },
+    [dronesByCategory, selectedCategory],
+  );
 
-  // Calculate total drone cost (including mods)
+  // Calculate total drone cost (including mods) - uses useMemo since it depends on selection state
   const totalDroneCost = useMemo(() => {
     let total = 0;
     for (const droneId of Object.keys(selectedDrones)) {
@@ -487,284 +493,12 @@ export const DroneSection = memo((props: DroneSectionProps) => {
       <Box
         style={{
           flexGrow: '1',
-          overflow: 'auto',
           background: 'rgba(0, 0, 0, 0.2)',
           borderRadius: '6px',
           padding: '0.5rem',
         }}
       >
-        {categoryDrones.map((drone: DroneMeta) => {
-          const isSelected = !!selectedDrones[drone.id];
-          const modCost = isSelected
-            ? (selectedDrones[drone.id]?.mods || []).reduce((sum, modId) => {
-                const mod = droneModCatalog[modId];
-                return sum + (mod?.cost || 0);
-              }, 0)
-            : 0;
-          const canAfford =
-            drone.cost <=
-            nuyenRemaining + (isSelected ? drone.cost + modCost : 0);
-          const droneBonuses = isSelected ? getDroneStatBonuses(drone.id) : {};
-          const droneModCount = selectedDrones[drone.id]?.mods?.length || 0;
-
-          return (
-            <Box
-              key={drone.id}
-              style={{
-                padding: '0.75rem',
-                marginBottom: '0.5rem',
-                background: isSelected
-                  ? 'rgba(79, 195, 247, 0.1)'
-                  : 'rgba(0, 0, 0, 0.25)',
-                borderRadius: '6px',
-                borderLeft: `3px solid ${isSelected ? ACCENT_BLUE : 'transparent'}`,
-                opacity: !canAfford && !isSelected ? '0.5' : '1',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              <Stack justify="space-between" align="flex-start">
-                <Stack.Item grow>
-                  {/* Drone Name and Legality */}
-                  <Box
-                    style={{
-                      fontWeight: 'bold',
-                      color: isSelected ? ACCENT_BLUE : '#fff',
-                      marginBottom: '0.35rem',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                    }}
-                  >
-                    <Icon
-                      name={getCategoryIcon(drone.category)}
-                      style={{ opacity: '0.7' }}
-                    />
-                    <Tooltip
-                      content={
-                        drone.desc ||
-                        `${drone.name} - ¥${drone.cost?.toLocaleString()}`
-                      }
-                      position="right"
-                    >
-                      <span>{drone.name}</span>
-                    </Tooltip>
-                    {drone.legality && (
-                      <Box
-                        as="span"
-                        style={{
-                          padding: '0.1rem 0.4rem',
-                          background:
-                            drone.legality === 'F'
-                              ? 'rgba(220, 53, 69, 0.3)'
-                              : 'rgba(255, 140, 0, 0.3)',
-                          border: `1px solid ${drone.legality === 'F' ? FORBIDDEN_RED : RESTRICTED_ORANGE}`,
-                          borderRadius: '3px',
-                          fontSize: '0.7rem',
-                          color:
-                            drone.legality === 'F'
-                              ? FORBIDDEN_RED
-                              : RESTRICTED_ORANGE,
-                        }}
-                      >
-                        <Icon
-                          name={
-                            drone.legality === 'F'
-                              ? 'ban'
-                              : 'exclamation-triangle'
-                          }
-                          mr={0.25}
-                        />
-                        {drone.legality === 'F' ? 'Forbidden' : 'Restricted'}
-                      </Box>
-                    )}
-                    {isSelected && (
-                      <Box
-                        as="span"
-                        style={{
-                          padding: '0.1rem 0.4rem',
-                          background: 'rgba(76, 175, 80, 0.2)',
-                          border: `1px solid ${SUCCESS_GREEN}`,
-                          borderRadius: '3px',
-                          fontSize: '0.7rem',
-                          color: SUCCESS_GREEN,
-                        }}
-                      >
-                        <Icon name="check" mr={0.25} />
-                        Owned
-                      </Box>
-                    )}
-                  </Box>
-
-                  {/* Description */}
-                  {drone.desc && (
-                    <Box
-                      style={{
-                        fontSize: '0.8rem',
-                        color: 'rgba(255, 255, 255, 0.5)',
-                        marginBottom: '0.5rem',
-                        lineHeight: '1.3',
-                      }}
-                    >
-                      {drone.desc.length > 100
-                        ? `${drone.desc.substring(0, 100)}...`
-                        : drone.desc}
-                    </Box>
-                  )}
-
-                  {/* Stats Row 1 */}
-                  <Box style={{ marginBottom: '0.25rem' }}>
-                    <StatPill
-                      label="BOD"
-                      val={drone.body}
-                      bonus={droneBonuses.body}
-                      color="#ff6b6b"
-                    />
-                    <StatPill
-                      label="HND"
-                      val={drone.handling}
-                      bonus={droneBonuses.handling}
-                      color="#4fc3f7"
-                    />
-                    <StatPill
-                      label="SPD"
-                      val={drone.speed}
-                      bonus={droneBonuses.speed}
-                      color="#81c784"
-                    />
-                    <StatPill
-                      label="ARM"
-                      val={drone.armor ?? 0}
-                      bonus={droneBonuses.armor}
-                      color="#ffb74d"
-                    />
-                  </Box>
-
-                  {/* Stats Row 2 */}
-                  <Box>
-                    <StatPill
-                      label="Pilot"
-                      val={drone.pilot}
-                      bonus={droneBonuses.pilot}
-                      color="#ce93d8"
-                    />
-                    <StatPill
-                      label="Sensor"
-                      val={drone.sensor}
-                      bonus={droneBonuses.sensor}
-                      color="#90caf9"
-                    />
-                    <StatPill
-                      label="Device"
-                      val={drone.device_rating ?? 0}
-                      color="#fff176"
-                    />
-                  </Box>
-
-                  {/* Mods installed badge */}
-                  {isSelected && droneModCount > 0 && (
-                    <Box
-                      style={{
-                        marginTop: '0.5rem',
-                        fontSize: '0.8rem',
-                        color: SUCCESS_GREEN,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.25rem',
-                      }}
-                    >
-                      <Icon name="cog" />
-                      {droneModCount} mod{droneModCount !== 1 ? 's' : ''}{' '}
-                      installed
-                    </Box>
-                  )}
-                </Stack.Item>
-
-                {/* Price and Actions */}
-                <Stack.Item>
-                  <Box style={{ textAlign: 'right', marginBottom: '0.5rem' }}>
-                    <Box
-                      style={{
-                        fontWeight: 'bold',
-                        fontSize: '1.1rem',
-                        color:
-                          canAfford || isSelected ? NUYEN_GOLD : DANGER_RED,
-                      }}
-                    >
-                      ¥{drone.cost.toLocaleString()}
-                      {isSelected && modCost > 0 && (
-                        <Box
-                          as="span"
-                          style={{
-                            color: SUCCESS_GREEN,
-                            fontSize: '0.85rem',
-                            marginLeft: '0.25rem',
-                          }}
-                        >
-                          +¥{modCost.toLocaleString()}
-                        </Box>
-                      )}
-                    </Box>
-                    <Box
-                      style={{
-                        fontSize: '0.75rem',
-                        color: 'rgba(255,255,255,0.5)',
-                      }}
-                    >
-                      Avail: {drone.availability}
-                    </Box>
-                  </Box>
-
-                  <Stack vertical>
-                    {isSelected ? (
-                      <>
-                        <Stack.Item>
-                          <Button
-                            fluid
-                            icon="cog"
-                            disabled={isSaved}
-                            onClick={() => setCustomizingDroneId(drone.id)}
-                            style={{
-                              background: ACCENT_BLUE_DIM,
-                              border: `1px solid ${ACCENT_BLUE_BORDER}`,
-                            }}
-                          >
-                            Customize
-                          </Button>
-                        </Stack.Item>
-                        <Stack.Item>
-                          <Button
-                            fluid
-                            icon="trash"
-                            color="bad"
-                            disabled={isSaved}
-                            onClick={() => handleRemoveDrone(drone.id)}
-                          >
-                            Remove
-                          </Button>
-                        </Stack.Item>
-                      </>
-                    ) : (
-                      <Stack.Item>
-                        <Button
-                          fluid
-                          icon="plus"
-                          color="good"
-                          disabled={isSaved || !canAfford}
-                          onClick={() => handleAddDrone(drone.id)}
-                        >
-                          Add
-                        </Button>
-                      </Stack.Item>
-                    )}
-                  </Stack>
-                </Stack.Item>
-              </Stack>
-            </Box>
-          );
-        })}
-
-        {/* Empty State */}
-        {categoryDrones.length === 0 && (
+        {categoryDrones.length === 0 ? (
           <Box
             style={{
               textAlign: 'center',
@@ -782,6 +516,320 @@ export const DroneSection = memo((props: DroneSectionProps) => {
             />
             <Box>No drones in this category.</Box>
           </Box>
+        ) : (
+          <VirtualizedList
+            items={categoryDrones}
+            itemHeight={180}
+            height={450}
+            minItemsForVirtualization={15}
+            renderItem={(drone: DroneMeta, _index, style) => {
+              const isSelected = !!selectedDrones[drone.id];
+              const modCost = isSelected
+                ? (selectedDrones[drone.id]?.mods || []).reduce(
+                    (sum, modId) => {
+                      const mod = droneModCatalog[modId];
+                      return sum + (mod?.cost || 0);
+                    },
+                    0,
+                  )
+                : 0;
+              const canAfford =
+                drone.cost <=
+                nuyenRemaining + (isSelected ? drone.cost + modCost : 0);
+              const droneBonuses = isSelected
+                ? getDroneStatBonuses(drone.id)
+                : {};
+              const droneModCount = selectedDrones[drone.id]?.mods?.length || 0;
+
+              return (
+                <Box
+                  key={drone.id}
+                  style={{
+                    ...style,
+                    paddingRight: '0.5rem',
+                    paddingBottom: '0.5rem',
+                  }}
+                >
+                  <Box
+                    style={{
+                      padding: '0.75rem',
+                      height: '100%',
+                      boxSizing: 'border-box',
+                      background: isSelected
+                        ? 'rgba(79, 195, 247, 0.1)'
+                        : 'rgba(0, 0, 0, 0.25)',
+                      borderRadius: '6px',
+                      borderLeft: `3px solid ${isSelected ? ACCENT_BLUE : 'transparent'}`,
+                      opacity: !canAfford && !isSelected ? '0.5' : '1',
+                      transition: 'all 0.2s ease',
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <Stack justify="space-between" align="flex-start">
+                      <Stack.Item grow>
+                        {/* Drone Name and Legality */}
+                        <Box
+                          style={{
+                            fontWeight: 'bold',
+                            color: isSelected ? ACCENT_BLUE : '#fff',
+                            marginBottom: '0.35rem',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                          }}
+                        >
+                          <Icon
+                            name={getCategoryIcon(drone.category)}
+                            style={{ opacity: '0.7' }}
+                          />
+                          <Tooltip
+                            content={
+                              drone.desc ||
+                              `${drone.name} - ¥${drone.cost?.toLocaleString()}`
+                            }
+                            position="right"
+                          >
+                            <span>{drone.name}</span>
+                          </Tooltip>
+                          {drone.legality && (
+                            <Box
+                              as="span"
+                              style={{
+                                padding: '0.1rem 0.4rem',
+                                background:
+                                  drone.legality === 'F'
+                                    ? 'rgba(220, 53, 69, 0.3)'
+                                    : 'rgba(255, 140, 0, 0.3)',
+                                border: `1px solid ${drone.legality === 'F' ? FORBIDDEN_RED : RESTRICTED_ORANGE}`,
+                                borderRadius: '3px',
+                                fontSize: '0.7rem',
+                                color:
+                                  drone.legality === 'F'
+                                    ? FORBIDDEN_RED
+                                    : RESTRICTED_ORANGE,
+                              }}
+                            >
+                              <Icon
+                                name={
+                                  drone.legality === 'F'
+                                    ? 'ban'
+                                    : 'exclamation-triangle'
+                                }
+                                mr={0.25}
+                              />
+                              {drone.legality === 'F'
+                                ? 'Forbidden'
+                                : 'Restricted'}
+                            </Box>
+                          )}
+                          {isSelected && (
+                            <Box
+                              as="span"
+                              style={{
+                                padding: '0.1rem 0.4rem',
+                                background: 'rgba(76, 175, 80, 0.2)',
+                                border: `1px solid ${SUCCESS_GREEN}`,
+                                borderRadius: '3px',
+                                fontSize: '0.7rem',
+                                color: SUCCESS_GREEN,
+                              }}
+                            >
+                              <Icon name="check" mr={0.25} />
+                              Owned
+                            </Box>
+                          )}
+                        </Box>
+
+                        {/* Description */}
+                        {drone.desc && (
+                          <Box
+                            style={{
+                              fontSize: '0.8rem',
+                              color: 'rgba(255, 255, 255, 0.5)',
+                              marginBottom: '0.5rem',
+                              lineHeight: '1.3',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
+                            }}
+                          >
+                            {drone.desc.length > 80
+                              ? `${drone.desc.substring(0, 80)}...`
+                              : drone.desc}
+                          </Box>
+                        )}
+
+                        {/* Stats Row 1 */}
+                        <Box style={{ marginBottom: '0.25rem' }}>
+                          <StatPill
+                            label="BOD"
+                            val={drone.body}
+                            bonus={droneBonuses.body}
+                            color="#ff6b6b"
+                          />
+                          <StatPill
+                            label="HND"
+                            val={drone.handling}
+                            bonus={droneBonuses.handling}
+                            color="#4fc3f7"
+                          />
+                          <StatPill
+                            label="SPD"
+                            val={drone.speed}
+                            bonus={droneBonuses.speed}
+                            color="#81c784"
+                          />
+                          <StatPill
+                            label="ARM"
+                            val={drone.armor ?? 0}
+                            bonus={droneBonuses.armor}
+                            color="#ffb74d"
+                          />
+                        </Box>
+
+                        {/* Stats Row 2 */}
+                        <Box>
+                          <StatPill
+                            label="Pilot"
+                            val={drone.pilot}
+                            bonus={droneBonuses.pilot}
+                            color="#ce93d8"
+                          />
+                          <StatPill
+                            label="Sensor"
+                            val={drone.sensor}
+                            bonus={droneBonuses.sensor}
+                            color="#90caf9"
+                          />
+                          <StatPill
+                            label="Device"
+                            val={drone.device_rating ?? 0}
+                            color="#fff176"
+                          />
+                        </Box>
+
+                        {/* Mods installed badge */}
+                        {isSelected && droneModCount > 0 && (
+                          <Box
+                            style={{
+                              marginTop: '0.5rem',
+                              fontSize: '0.8rem',
+                              color: SUCCESS_GREEN,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.25rem',
+                            }}
+                          >
+                            <Icon name="cog" />
+                            {droneModCount} mod{droneModCount !== 1 ? 's' : ''}{' '}
+                            installed
+                          </Box>
+                        )}
+                      </Stack.Item>
+
+                      {/* Price and Actions */}
+                      <Stack.Item>
+                        <Box
+                          style={{ textAlign: 'right', marginBottom: '0.5rem' }}
+                        >
+                          <Box
+                            style={{
+                              fontWeight: 'bold',
+                              fontSize: '1.1rem',
+                              color:
+                                canAfford || isSelected
+                                  ? NUYEN_GOLD
+                                  : DANGER_RED,
+                            }}
+                          >
+                            ¥{drone.cost.toLocaleString()}
+                            {isSelected && modCost > 0 && (
+                              <Box
+                                as="span"
+                                style={{
+                                  color: SUCCESS_GREEN,
+                                  fontSize: '0.85rem',
+                                  marginLeft: '0.25rem',
+                                }}
+                              >
+                                +¥{modCost.toLocaleString()}
+                              </Box>
+                            )}
+                          </Box>
+                          <Box
+                            style={{
+                              fontSize: '0.75rem',
+                              color: 'rgba(255,255,255,0.5)',
+                            }}
+                          >
+                            Avail: {drone.availability}
+                          </Box>
+                        </Box>
+
+                        <Stack vertical>
+                          {isSelected ? (
+                            <>
+                              <Stack.Item>
+                                <Button
+                                  fluid
+                                  icon="cog"
+                                  disabled={isSaved}
+                                  onClick={() =>
+                                    setCustomizingDroneId(drone.id)
+                                  }
+                                  style={{
+                                    background: ACCENT_BLUE_DIM,
+                                    border: `1px solid ${ACCENT_BLUE_BORDER}`,
+                                  }}
+                                >
+                                  Customize
+                                </Button>
+                              </Stack.Item>
+                              <Stack.Item>
+                                <Button
+                                  fluid
+                                  icon="trash"
+                                  color="bad"
+                                  disabled={isSaved}
+                                  onClick={() => handleRemoveDrone(drone.id)}
+                                >
+                                  Remove
+                                </Button>
+                              </Stack.Item>
+                            </>
+                          ) : (
+                            <Stack.Item>
+                              <Button
+                                fluid
+                                icon="plus"
+                                color="good"
+                                disabled={isSaved || !canAfford}
+                                onClick={() => handleAddDrone(drone.id)}
+                              >
+                                Add
+                              </Button>
+                            </Stack.Item>
+                          )}
+                        </Stack>
+                      </Stack.Item>
+                    </Stack>
+                  </Box>
+                </Box>
+              );
+            }}
+            emptyContent={
+              <Box
+                style={{
+                  textAlign: 'center',
+                  color: 'rgba(255, 255, 255, 0.4)',
+                  padding: '3rem',
+                }}
+              >
+                <Icon name="robot" size={2} />
+                <Box mt={1}>No drones in this category.</Box>
+              </Box>
+            }
+          />
         )}
       </Box>
 

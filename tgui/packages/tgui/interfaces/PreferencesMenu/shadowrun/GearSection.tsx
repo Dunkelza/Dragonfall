@@ -17,6 +17,7 @@ import {
   GearItemMeta,
   GearSelection,
 } from './types';
+import { useCachedComputation } from './useDeferredComputation';
 import { VirtualizedList } from './VirtualizedList';
 
 // === ACCENT COLORS ===
@@ -83,56 +84,72 @@ export const GearSection = memo((props: GearSectionProps) => {
 
   const nuyenRemaining = dashboardData?.nuyenRemaining || 0;
 
-  // Get items for current category
-  const categoryItems = useMemo(() => {
-    const items = gearByCategory[selectedCategory] || [];
-    // Sort by subcategory, then by sort order
-    return [...items].sort((a: GearItemMeta, b: GearItemMeta) => {
-      if (a.subcategory !== b.subcategory) {
-        return (a.subcategory || '').localeCompare(b.subcategory || '');
+  // Get items for current category (cached across tab switches)
+  const categoryItems = useCachedComputation(
+    `gear-category-items-${selectedCategory}`,
+    () => {
+      const items = gearByCategory[selectedCategory] || [];
+      // Sort by subcategory, then by sort order
+      return [...items].sort((a: GearItemMeta, b: GearItemMeta) => {
+        if (a.subcategory !== b.subcategory) {
+          return (a.subcategory || '').localeCompare(b.subcategory || '');
+        }
+        return (a.sort || 0) - (b.sort || 0);
+      });
+    },
+    [gearByCategory, selectedCategory],
+  );
+
+  // Filter by search (cached across tab switches)
+  const filteredItems = useCachedComputation(
+    `gear-filtered-items-${selectedCategory}-${searchFilter}`,
+    () => {
+      if (!searchFilter.trim()) return categoryItems;
+      const filter = searchFilter.toLowerCase();
+      return categoryItems.filter(
+        (item: GearItemMeta) =>
+          item.name?.toLowerCase().includes(filter) ||
+          item.desc?.toLowerCase().includes(filter) ||
+          item.subcategory?.toLowerCase().includes(filter),
+      );
+    },
+    [categoryItems, searchFilter],
+  );
+
+  // Group items by subcategory (cached across tab switches)
+  const groupedItems = useCachedComputation(
+    `gear-grouped-items-${selectedCategory}-${searchFilter}`,
+    () => {
+      const groups: Record<string, GearItemMeta[]> = {};
+      for (const item of filteredItems) {
+        const sub = item.subcategory || 'General';
+        if (!groups[sub]) groups[sub] = [];
+        groups[sub].push(item);
       }
-      return (a.sort || 0) - (b.sort || 0);
-    });
-  }, [gearByCategory, selectedCategory]);
-
-  // Filter by search
-  const filteredItems = useMemo(() => {
-    if (!searchFilter.trim()) return categoryItems;
-    const filter = searchFilter.toLowerCase();
-    return categoryItems.filter(
-      (item: GearItemMeta) =>
-        item.name?.toLowerCase().includes(filter) ||
-        item.desc?.toLowerCase().includes(filter) ||
-        item.subcategory?.toLowerCase().includes(filter),
-    );
-  }, [categoryItems, searchFilter]);
-
-  // Group items by subcategory
-  const groupedItems = useMemo(() => {
-    const groups: Record<string, GearItemMeta[]> = {};
-    for (const item of filteredItems) {
-      const sub = item.subcategory || 'General';
-      if (!groups[sub]) groups[sub] = [];
-      groups[sub].push(item);
-    }
-    return groups;
-  }, [filteredItems]);
+      return groups;
+    },
+    [filteredItems],
+  );
 
   // Flatten items for virtualization: interleave headers and items
   type FlatListItem =
     | { count: number; subcategory: string; type: 'header' }
     | { item: GearItemMeta; type: 'item' };
 
-  const flattenedItems = useMemo<FlatListItem[]>(() => {
-    const result: FlatListItem[] = [];
-    for (const [subcategory, items] of Object.entries(groupedItems)) {
-      result.push({ type: 'header', subcategory, count: items.length });
-      for (const item of items) {
-        result.push({ type: 'item', item });
+  const flattenedItems = useCachedComputation<FlatListItem[]>(
+    `gear-flattened-items-${selectedCategory}-${searchFilter}`,
+    () => {
+      const result: FlatListItem[] = [];
+      for (const [subcategory, items] of Object.entries(groupedItems)) {
+        result.push({ type: 'header', subcategory, count: items.length });
+        for (const item of items) {
+          result.push({ type: 'item', item });
+        }
       }
-    }
-    return result;
-  }, [groupedItems]);
+      return result;
+    },
+    [groupedItems],
+  );
 
   // Check if an item is selected
   const isItemSelected = (itemId: string) => {

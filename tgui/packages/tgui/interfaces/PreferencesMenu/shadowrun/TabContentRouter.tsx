@@ -265,19 +265,17 @@ type TabContentRouterProps = {
   value: ChargenState | null;
 };
 
-// Lazy Tab Loading Placeholder
-const TabLoadingPlaceholder = () => (
-  <Box
-    style={{
-      padding: '2rem',
-      textAlign: 'center',
-      color: 'rgba(255,255,255,0.5)',
-    }}
-  >
-    <Icon name="spinner" spin size={2} />
-    <Box mt={1}>Loading...</Box>
-  </Box>
-);
+// Import tab-specific skeleton loaders
+import {
+  AugmentsSkeleton,
+  ConnectionsSkeleton,
+  CoreSkeleton,
+  DronesSkeleton,
+  GearSkeleton,
+  GenericTabSkeleton,
+  MagicSkeleton,
+  SkillsSkeleton,
+} from './SkeletonLoaders';
 
 export const TabContentRouter = memo((props: TabContentRouterProps) => {
   const {
@@ -312,7 +310,7 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
   switch (tab) {
     case ShadowrunTab.Build:
       return (
-        <Suspense fallback={<TabLoadingPlaceholder />}>
+        <Suspense fallback={<GenericTabSkeleton />}>
           {/* Quick Start Preset Selector */}
           <PresetSelector
             chargenState={chargenState}
@@ -404,7 +402,7 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
 
     case ShadowrunTab.Magic:
       return (
-        <Suspense fallback={<TabLoadingPlaceholder />}>
+        <Suspense fallback={<MagicSkeleton />}>
           {/* Magic/Resonance Rating Allocator - uses special attribute points */}
           <CollapsibleSection
             title={
@@ -442,7 +440,7 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
 
     case ShadowrunTab.Connections:
       return (
-        <Suspense fallback={<TabLoadingPlaceholder />}>
+        <Suspense fallback={<ConnectionsSkeleton />}>
           <LazyContactsSelector
             chargenState={chargenState}
             chargenConstData={chargenConstData}
@@ -458,7 +456,7 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
 
     case ShadowrunTab.Core:
       return (
-        <Suspense fallback={<TabLoadingPlaceholder />}>
+        <Suspense fallback={<CoreSkeleton />}>
           <LazyCoreTabContent
             act={act}
             chargenConstData={chargenConstData}
@@ -486,7 +484,7 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
 
     case ShadowrunTab.Augments:
       return (
-        <Suspense fallback={<TabLoadingPlaceholder />}>
+        <Suspense fallback={<AugmentsSkeleton />}>
           <Box className="PreferencesMenu__ShadowrunSheet__augmentsContent">
             <LazyAugmentsSection
               chargenState={chargenState}
@@ -505,7 +503,7 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
 
     case ShadowrunTab.Gear:
       return (
-        <Suspense fallback={<TabLoadingPlaceholder />}>
+        <Suspense fallback={<GearSkeleton />}>
           <Box className="PreferencesMenu__ShadowrunSheet__gearContent">
             <LazyGearSection
               chargenState={chargenState}
@@ -523,7 +521,7 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
 
     case ShadowrunTab.Drones:
       return (
-        <Suspense fallback={<TabLoadingPlaceholder />}>
+        <Suspense fallback={<DronesSkeleton />}>
           <Box className="PreferencesMenu__ShadowrunSheet__dronesContent">
             <LazyDroneSection
               chargenState={chargenState}

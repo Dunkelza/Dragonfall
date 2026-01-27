@@ -852,6 +852,66 @@ $sr-font-mono: 'Consolas', 'Monaco', monospace;
     left: 100%;
   }
 }
+
+// ============================================================================
+// SKELETON LOADING ANIMATIONS
+// ============================================================================
+
+// Base skeleton element
+.Shadowrun__skeleton {
+  background: rgba(255, 255, 255, 0.08);
+  position: relative;
+  overflow: hidden;
+}
+
+// Shimmer animation overlay
+.Shadowrun__skeleton--shimmer {
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      transparent 100%
+    );
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  }
+}
+
+// Pulse animation variant (alternative to shimmer)
+.Shadowrun__skeleton--pulse {
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+// Skeleton card container
+.Shadowrun__skeleton-card {
+  transition: opacity 0.2s ease;
+}
+
 // Clickable validation issue in SaveResetBar
 .PreferencesMenu__ShadowrunSheet__validationIssue--clickable {
   &:hover {

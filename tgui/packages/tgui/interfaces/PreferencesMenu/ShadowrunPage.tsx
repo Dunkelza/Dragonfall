@@ -19,6 +19,7 @@ import { ServerPreferencesFetcher } from './ServerPreferencesFetcher';
 // Import extracted Shadowrun components
 import {
   ChargenState,
+  ComputationCacheProvider,
   DashboardTile,
   HintedLabel,
   MetatypeSelector,
@@ -908,31 +909,33 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
 
                   {/* Tab Content with Animation */}
                   <Box className="PreferencesMenu__ShadowrunSheet__tabContent">
-                    <TabContentRouter
-                      act={act}
-                      chargenConstData={chargenConstData}
-                      chargenState={chargenState}
-                      dashboardData={dashboardData}
-                      data={data}
-                      derivedStats={derivedStats}
-                      featureId={featureId}
-                      hasBiocompatibility={hasBiocompatibility}
-                      isEditingName={isEditingName}
-                      isSaved={isSaved}
-                      MetatypeSelector={MetatypeSelector}
-                      multiNameInputOpen={multiNameInputOpen}
-                      nameDraft={nameDraft}
-                      nameKey={nameKey}
-                      nameLocked={nameLocked}
-                      renderPreference={renderPreference}
-                      setIsEditingName={setIsEditingName}
-                      setMultiNameInputOpen={setMultiNameInputOpen}
-                      setNameDraft={setNameDraft}
-                      setPredictedValue={setPredictedValue}
-                      tab={tab}
-                      validation={validation}
-                      value={value}
-                    />
+                    <ComputationCacheProvider>
+                      <TabContentRouter
+                        act={act}
+                        chargenConstData={chargenConstData}
+                        chargenState={chargenState}
+                        dashboardData={dashboardData}
+                        data={data}
+                        derivedStats={derivedStats}
+                        featureId={featureId}
+                        hasBiocompatibility={hasBiocompatibility}
+                        isEditingName={isEditingName}
+                        isSaved={isSaved}
+                        MetatypeSelector={MetatypeSelector}
+                        multiNameInputOpen={multiNameInputOpen}
+                        nameDraft={nameDraft}
+                        nameKey={nameKey}
+                        nameLocked={nameLocked}
+                        renderPreference={renderPreference}
+                        setIsEditingName={setIsEditingName}
+                        setMultiNameInputOpen={setMultiNameInputOpen}
+                        setNameDraft={setNameDraft}
+                        setPredictedValue={setPredictedValue}
+                        tab={tab}
+                        validation={validation}
+                        value={value}
+                      />
+                    </ComputationCacheProvider>
                   </Box>
                 </Stack>
               </Box>

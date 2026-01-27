@@ -32,6 +32,8 @@ import {
   SpellMeta,
   TraditionMeta,
 } from './types';
+import { useCachedComputation } from './useDeferredComputation';
+import { VirtualizedList } from './VirtualizedList';
 
 // ============================================================================
 // ACCENT COLORS
@@ -317,8 +319,9 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
     act('set_preference', { preference: featureId, value: newState });
   };
 
-  // Group spells by category
-  const spellsByCategory = useMemo(
+  // Group spells by category (cached across tab switches)
+  const spellsByCategory = useCachedComputation(
+    'magic-spells-by-category',
     () =>
       spells.reduce((acc: Record<string, SpellMeta[]>, spell: SpellMeta) => {
         const cat = spell.category || 'other';
@@ -329,8 +332,9 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
     [spells],
   );
 
-  // Group complex forms by category
-  const formsByCategory = useMemo(
+  // Group complex forms by category (cached across tab switches)
+  const formsByCategory = useCachedComputation(
+    'magic-forms-by-category',
     () =>
       complexForms.reduce(
         (acc: Record<string, ComplexFormMeta[]>, form: ComplexFormMeta) => {
@@ -344,8 +348,9 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
     [complexForms],
   );
 
-  // Group adept powers by category
-  const powersByCategory = useMemo(
+  // Group adept powers by category (cached across tab switches)
+  const powersByCategory = useCachedComputation(
+    'magic-powers-by-category',
     () =>
       adeptPowers.reduce(
         (acc: Record<string, AdeptPowerMeta[]>, power: AdeptPowerMeta) => {
@@ -717,14 +722,12 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
           </Tabs>
 
           {/* Spell List */}
-          <Box
-            style={{
-              maxHeight: '14rem',
-              overflowY: 'auto',
-              marginTop: '0.5rem',
-            }}
-          >
-            {(spellsByCategory[spellCategory] || []).map((spell: SpellMeta) => {
+          <VirtualizedList
+            items={spellsByCategory[spellCategory] || []}
+            itemHeight={50}
+            height={220}
+            minItemsForVirtualization={25}
+            renderItem={(spell: SpellMeta, _index, style) => {
               const isSelected = selectedSpells.includes(spell.id);
               const catInfo =
                 SPELL_CATEGORY_COLORS[spell.category || 'other'] ||
@@ -735,68 +738,77 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
               return (
                 <Box
                   key={spell.id}
-                  onClick={() => canSelect && handleToggleSpell(spell.id)}
                   style={{
-                    background: isSelected
-                      ? `rgba(${catInfo.color === '#ff6b6b' ? '255,107,107' : '155,89,182'}, 0.15)`
-                      : 'rgba(0, 0, 0, 0.2)',
-                    border: `1px solid ${isSelected ? catInfo.color : 'rgba(255, 255, 255, 0.1)'}`,
-                    borderLeft: `3px solid ${catInfo.color}`,
-                    borderRadius: '4px',
-                    padding: '0.5rem 0.75rem',
-                    marginBottom: '0.35rem',
-                    cursor: canSelect ? 'pointer' : 'not-allowed',
-                    opacity: isSaved ? '0.6' : '1',
-                    transition: 'all 0.15s ease',
+                    ...style,
+                    paddingRight: '0.25rem',
+                    paddingBottom: '0.35rem',
                   }}
                 >
-                  <Stack align="center">
-                    <Stack.Item grow>
-                      <Tooltip
-                        content={spell.description || spell.name}
-                        position="right"
-                      >
+                  <Box
+                    onClick={() => canSelect && handleToggleSpell(spell.id)}
+                    style={{
+                      background: isSelected
+                        ? `rgba(${catInfo.color === '#ff6b6b' ? '255,107,107' : '155,89,182'}, 0.15)`
+                        : 'rgba(0, 0, 0, 0.2)',
+                      border: `1px solid ${isSelected ? catInfo.color : 'rgba(255, 255, 255, 0.1)'}`,
+                      borderLeft: `3px solid ${catInfo.color}`,
+                      borderRadius: '4px',
+                      padding: '0.5rem 0.75rem',
+                      height: '100%',
+                      boxSizing: 'border-box',
+                      cursor: canSelect ? 'pointer' : 'not-allowed',
+                      opacity: isSaved ? '0.6' : '1',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <Stack align="center">
+                      <Stack.Item grow>
+                        <Tooltip
+                          content={spell.description || spell.name}
+                          position="right"
+                        >
+                          <Box
+                            style={{
+                              fontSize: '0.85rem',
+                              fontWeight: isSelected ? 'bold' : 'normal',
+                              cursor: 'help',
+                            }}
+                          >
+                            {spell.name}
+                          </Box>
+                        </Tooltip>
+                      </Stack.Item>
+                      <Stack.Item>
                         <Box
                           style={{
-                            fontSize: '0.85rem',
-                            fontWeight: isSelected ? 'bold' : 'normal',
-                            cursor: 'help',
+                            fontSize: '0.7rem',
+                            color: '#ffd700',
+                            background: 'rgba(255, 215, 0, 0.1)',
+                            padding: '0.1rem 0.35rem',
+                            borderRadius: '3px',
                           }}
                         >
-                          {spell.name}
+                          <Icon name="bolt" size={0.7} mr={0.25} />
+                          {spell.drain}
                         </Box>
-                      </Tooltip>
-                    </Stack.Item>
-                    <Stack.Item>
-                      <Box
-                        style={{
-                          fontSize: '0.7rem',
-                          color: '#ffd700',
-                          background: 'rgba(255, 215, 0, 0.1)',
-                          padding: '0.1rem 0.35rem',
-                          borderRadius: '3px',
-                        }}
-                      >
-                        <Icon name="bolt" size={0.7} mr={0.25} />
-                        {spell.drain}
-                      </Box>
-                    </Stack.Item>
-                    <Stack.Item>
-                      {isSelected ? (
-                        <Icon name="check-circle" color="#4caf50" size={1} />
-                      ) : (
-                        <Icon
-                          name="circle"
-                          color="rgba(255, 255, 255, 0.2)"
-                          size={1}
-                        />
-                      )}
-                    </Stack.Item>
-                  </Stack>
+                      </Stack.Item>
+                      <Stack.Item>
+                        {isSelected ? (
+                          <Icon name="check-circle" color="#4caf50" size={1} />
+                        ) : (
+                          <Icon
+                            name="circle"
+                            color="rgba(255, 255, 255, 0.2)"
+                            size={1}
+                          />
+                        )}
+                      </Stack.Item>
+                    </Stack>
+                  </Box>
                 </Box>
               );
-            })}
-          </Box>
+            }}
+          />
         </Box>
       )}
 
@@ -866,13 +878,12 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
           </Box>
 
           {/* Powers List */}
-          <Box
-            style={{
-              maxHeight: '14rem',
-              overflowY: 'auto',
-            }}
-          >
-            {(powersByCategory['powers'] || []).map((power: AdeptPowerMeta) => {
+          <VirtualizedList
+            items={powersByCategory['powers'] || []}
+            itemHeight={50}
+            height={220}
+            minItemsForVirtualization={25}
+            renderItem={(power: AdeptPowerMeta, _index, style) => {
               const currentLevel = Number(selectedPowers[power.id]) || 0;
               const isActive = currentLevel > 0;
               const canIncrease =
@@ -885,118 +896,127 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
                 <Box
                   key={power.id}
                   style={{
-                    background: isActive
-                      ? 'rgba(255, 107, 107, 0.1)'
-                      : 'rgba(0, 0, 0, 0.2)',
-                    border: `1px solid ${isActive ? 'rgba(255, 107, 107, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-                    borderLeft: `3px solid ${ADEPT_ACCENT}`,
-                    borderRadius: '4px',
-                    padding: '0.5rem 0.75rem',
-                    marginBottom: '0.35rem',
-                    opacity: isSaved ? '0.6' : '1',
+                    ...style,
+                    paddingRight: '0.25rem',
+                    paddingBottom: '0.35rem',
                   }}
                 >
-                  <Stack align="center">
-                    <Stack.Item grow>
-                      <Tooltip
-                        content={power.description || power.name}
-                        position="right"
-                      >
-                        <Box
-                          style={{
-                            fontSize: '0.85rem',
-                            fontWeight: isActive ? 'bold' : 'normal',
-                            cursor: 'help',
-                          }}
+                  <Box
+                    style={{
+                      background: isActive
+                        ? 'rgba(255, 107, 107, 0.1)'
+                        : 'rgba(0, 0, 0, 0.2)',
+                      border: `1px solid ${isActive ? 'rgba(255, 107, 107, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+                      borderLeft: `3px solid ${ADEPT_ACCENT}`,
+                      borderRadius: '4px',
+                      padding: '0.5rem 0.75rem',
+                      height: '100%',
+                      boxSizing: 'border-box',
+                      opacity: isSaved ? '0.6' : '1',
+                    }}
+                  >
+                    <Stack align="center">
+                      <Stack.Item grow>
+                        <Tooltip
+                          content={power.description || power.name}
+                          position="right"
                         >
-                          {power.name}
-                          {power.max_level > 1 && currentLevel > 0 && (
-                            <Box
-                              as="span"
-                              style={{
-                                marginLeft: '0.5rem',
-                                color: ADEPT_ACCENT,
-                                fontSize: '0.75rem',
-                              }}
-                            >
-                              [Lvl {currentLevel}]
-                            </Box>
-                          )}
-                        </Box>
-                      </Tooltip>
-                    </Stack.Item>
-                    <Stack.Item>
-                      <Box
-                        style={{
-                          fontSize: '0.7rem',
-                          color: ADEPT_ACCENT,
-                          background: 'rgba(255, 107, 107, 0.1)',
-                          padding: '0.1rem 0.35rem',
-                          borderRadius: '3px',
-                          fontWeight: 'bold',
-                        }}
-                      >
-                        {power.pp_cost} PP
-                      </Box>
-                    </Stack.Item>
-                    <Stack.Item>
-                      <Stack align="center">
-                        <Stack.Item>
-                          <Button
-                            icon="minus"
-                            disabled={!canDecrease}
-                            onClick={() => handleBumpPower(power.id, -1)}
-                            style={{
-                              minWidth: '1.4rem',
-                              height: '1.4rem',
-                              padding: '0',
-                              fontSize: '0.7rem',
-                              background: canDecrease
-                                ? 'rgba(255, 107, 107, 0.2)'
-                                : 'transparent',
-                              border: `1px solid ${canDecrease ? 'rgba(255, 107, 107, 0.4)' : 'rgba(255, 255, 255, 0.1)'}`,
-                            }}
-                          />
-                        </Stack.Item>
-                        <Stack.Item>
                           <Box
                             style={{
-                              minWidth: '1.5rem',
-                              textAlign: 'center',
-                              fontSize: '0.95rem',
-                              fontWeight: 'bold',
-                              color: isActive
-                                ? ADEPT_ACCENT
-                                : 'rgba(255, 255, 255, 0.3)',
+                              fontSize: '0.85rem',
+                              fontWeight: isActive ? 'bold' : 'normal',
+                              cursor: 'help',
                             }}
                           >
-                            {currentLevel}
+                            {power.name}
+                            {power.max_level > 1 && currentLevel > 0 && (
+                              <Box
+                                as="span"
+                                style={{
+                                  marginLeft: '0.5rem',
+                                  color: ADEPT_ACCENT,
+                                  fontSize: '0.75rem',
+                                }}
+                              >
+                                [Lvl {currentLevel}]
+                              </Box>
+                            )}
                           </Box>
-                        </Stack.Item>
-                        <Stack.Item>
-                          <Button
-                            icon="plus"
-                            disabled={!canIncrease}
-                            onClick={() => handleBumpPower(power.id, 1)}
-                            style={{
-                              minWidth: '1.4rem',
-                              height: '1.4rem',
-                              padding: '0',
-                              fontSize: '0.7rem',
-                              background: canIncrease
-                                ? 'rgba(76, 175, 80, 0.2)'
-                                : 'transparent',
-                              border: `1px solid ${canIncrease ? 'rgba(76, 175, 80, 0.4)' : 'rgba(255, 255, 255, 0.1)'}`,
-                            }}
-                          />
-                        </Stack.Item>
-                      </Stack>
-                    </Stack.Item>
-                  </Stack>
+                        </Tooltip>
+                      </Stack.Item>
+                      <Stack.Item>
+                        <Box
+                          style={{
+                            fontSize: '0.7rem',
+                            color: ADEPT_ACCENT,
+                            background: 'rgba(255, 107, 107, 0.1)',
+                            padding: '0.1rem 0.35rem',
+                            borderRadius: '3px',
+                            fontWeight: 'bold',
+                          }}
+                        >
+                          {power.pp_cost} PP
+                        </Box>
+                      </Stack.Item>
+                      <Stack.Item>
+                        <Stack align="center">
+                          <Stack.Item>
+                            <Button
+                              icon="minus"
+                              disabled={!canDecrease}
+                              onClick={() => handleBumpPower(power.id, -1)}
+                              style={{
+                                minWidth: '1.4rem',
+                                height: '1.4rem',
+                                padding: '0',
+                                fontSize: '0.7rem',
+                                background: canDecrease
+                                  ? 'rgba(255, 107, 107, 0.2)'
+                                  : 'transparent',
+                                border: `1px solid ${canDecrease ? 'rgba(255, 107, 107, 0.4)' : 'rgba(255, 255, 255, 0.1)'}`,
+                              }}
+                            />
+                          </Stack.Item>
+                          <Stack.Item>
+                            <Box
+                              style={{
+                                minWidth: '1.5rem',
+                                textAlign: 'center',
+                                fontSize: '0.95rem',
+                                fontWeight: 'bold',
+                                color: isActive
+                                  ? ADEPT_ACCENT
+                                  : 'rgba(255, 255, 255, 0.3)',
+                              }}
+                            >
+                              {currentLevel}
+                            </Box>
+                          </Stack.Item>
+                          <Stack.Item>
+                            <Button
+                              icon="plus"
+                              disabled={!canIncrease}
+                              onClick={() => handleBumpPower(power.id, 1)}
+                              style={{
+                                minWidth: '1.4rem',
+                                height: '1.4rem',
+                                padding: '0',
+                                fontSize: '0.7rem',
+                                background: canIncrease
+                                  ? 'rgba(76, 175, 80, 0.2)'
+                                  : 'transparent',
+                                border: `1px solid ${canIncrease ? 'rgba(76, 175, 80, 0.4)' : 'rgba(255, 255, 255, 0.1)'}`,
+                              }}
+                            />
+                          </Stack.Item>
+                        </Stack>
+                      </Stack.Item>
+                    </Stack>
+                  </Box>
                 </Box>
               );
-            })}
-          </Box>
+            }}
+          />
         </Box>
       )}
 
@@ -1088,22 +1108,26 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
           </Tabs>
 
           {/* Forms List */}
-          <Box
-            style={{
-              maxHeight: '14rem',
-              overflowY: 'auto',
-              marginTop: '0.5rem',
-            }}
-          >
-            {(formsByCategory[formCategory] || []).map(
-              (form: ComplexFormMeta) => {
-                const isSelected = selectedForms.includes(form.id);
-                const canSelect =
-                  !isSaved && (isSelected || selectedForms.length < maxForms);
+          <VirtualizedList
+            items={formsByCategory[formCategory] || []}
+            itemHeight={50}
+            height={220}
+            minItemsForVirtualization={25}
+            renderItem={(form: ComplexFormMeta, _index, style) => {
+              const isSelected = selectedForms.includes(form.id);
+              const canSelect =
+                !isSaved && (isSelected || selectedForms.length < maxForms);
 
-                return (
+              return (
+                <Box
+                  key={form.id}
+                  style={{
+                    ...style,
+                    paddingRight: '0.25rem',
+                    paddingBottom: '0.35rem',
+                  }}
+                >
                   <Box
-                    key={form.id}
                     onClick={() => canSelect && handleToggleForm(form.id)}
                     style={{
                       background: isSelected
@@ -1113,7 +1137,8 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
                       borderLeft: `3px solid ${MATRIX_ACCENT}`,
                       borderRadius: '4px',
                       padding: '0.5rem 0.75rem',
-                      marginBottom: '0.35rem',
+                      height: '100%',
+                      boxSizing: 'border-box',
                       cursor: canSelect ? 'pointer' : 'not-allowed',
                       opacity: isSaved ? '0.6' : '1',
                       transition: 'all 0.15s ease',
@@ -1168,10 +1193,10 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
                       </Stack.Item>
                     </Stack>
                   </Box>
-                );
-              },
-            )}
-          </Box>
+                </Box>
+              );
+            }}
+          />
         </Box>
       )}
     </Box>

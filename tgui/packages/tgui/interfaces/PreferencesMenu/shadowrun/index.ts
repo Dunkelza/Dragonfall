@@ -237,3 +237,34 @@ export {
   SkillsSectionCompound,
   useSkills,
 } from './SkillsCompound';
+
+// Deferred Computation (performance optimization)
+export {
+  ComputationCacheProvider,
+  TabContext,
+  type TabContextValue,
+  useCachedComputation,
+  useComputationCache,
+  useDeferredComputation,
+  useDeferredComputationWithDefault,
+  useTabContext,
+  useTabVisitState,
+} from './useDeferredComputation';
+
+// Skeleton Loaders (loading placeholders for lazy-loaded tabs)
+export {
+  AugmentsSkeleton,
+  ConnectionsSkeleton,
+  CoreSkeleton,
+  DronesSkeleton,
+  GearSkeleton,
+  GenericTabSkeleton,
+  MagicSkeleton,
+  SkeletonBox,
+  SkeletonCard,
+  SkeletonLine,
+  SkeletonSectionHeader,
+  SkillsSkeleton,
+  SkeletonStatBar,
+  SkeletonTabs,
+} from './SkeletonLoaders';

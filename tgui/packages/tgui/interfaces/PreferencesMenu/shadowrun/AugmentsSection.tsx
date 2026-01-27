@@ -35,6 +35,8 @@ import {
   ChargenState,
   CyberwareSuiteMeta,
 } from './types';
+import { useCachedComputation } from './useDeferredComputation';
+import { VirtualizedList } from './VirtualizedList';
 
 // ============================================================================
 // ACCENT COLORS
@@ -216,22 +218,31 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
   // Get cyberware suites from server data
   const cyberwareSuites = chargenConstData?.cyberware_suites || [];
 
-  // Get augments for the current category
-  const categoryAugments: AugmentMeta[] =
-    activeCategory === 'suites'
-      ? []
-      : chargenConstData?.augments_by_category?.[activeCategory] || [];
+  // Get augments for the current category (cached across tab switches)
+  const categoryAugments = useCachedComputation<AugmentMeta[]>(
+    `augments-category-${activeCategory}`,
+    () =>
+      activeCategory === 'suites'
+        ? []
+        : chargenConstData?.augments_by_category?.[activeCategory] || [],
+    [chargenConstData?.augments_by_category, activeCategory],
+  );
 
-  // Filter augments by search text
-  const filteredAugments = categoryAugments.filter((aug) => {
-    if (!filterText) return true;
-    const search = filterText.toLowerCase();
-    return (
-      aug.name?.toLowerCase().includes(search) ||
-      aug.description?.toLowerCase().includes(search) ||
-      aug.slot?.toLowerCase().includes(search)
-    );
-  });
+  // Filter augments by search text (cached across tab switches)
+  const filteredAugments = useCachedComputation<AugmentMeta[]>(
+    `augments-filtered-${activeCategory}-${filterText}`,
+    () =>
+      categoryAugments.filter((aug) => {
+        if (!filterText) return true;
+        const search = filterText.toLowerCase();
+        return (
+          aug.name?.toLowerCase().includes(search) ||
+          aug.description?.toLowerCase().includes(search) ||
+          aug.slot?.toLowerCase().includes(search)
+        );
+      }),
+    [categoryAugments, filterText],
+  );
 
   const handleToggleAugment = (
     augmentId: string,
@@ -1158,8 +1169,6 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
       {activeCategory !== 'suites' && (
         <Box
           style={{
-            maxHeight: '28rem',
-            overflowY: 'auto',
             background: 'rgba(0, 0, 0, 0.15)',
             padding: '0.5rem',
             borderRadius: '4px',
@@ -1182,357 +1191,406 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
               </Box>
             </Box>
           ) : (
-            filteredAugments.map((augment: AugmentMeta) => {
-              const isSelected = !!selectedAugments[augment.id];
-              const currentGrade =
-                selectedAugments[augment.id]?.grade || 'standard';
-              const gradeData =
-                AUGMENT_GRADES[currentGrade] || AUGMENT_GRADES.standard;
-              const baseEssence = augment.essence_cost || 0;
-              const baseNuyen = augment.nuyen_cost || 0;
-              // Apply biocompatibility reduction (10% less essence cost)
-              const biocompMult = hasBiocompatibility
-                ? BIOCOMPATIBILITY_ESSENCE_REDUCTION
-                : 1.0;
-              const effectiveEssence =
-                baseEssence * gradeData.essenceMultiplier * biocompMult;
-              const effectiveNuyen = baseNuyen * gradeData.costMultiplier;
-              const canAffordEssence =
-                essenceRemaining >= effectiveEssence || isSelected;
-              const canAffordNuyen =
-                nuyenRemaining >= effectiveNuyen || isSelected;
-              const canAfford = canAffordEssence && canAffordNuyen;
+            <VirtualizedList
+              items={filteredAugments}
+              itemHeight={140}
+              height={450}
+              minItemsForVirtualization={20}
+              renderItem={(augment: AugmentMeta, _index, style) => {
+                const isSelected = !!selectedAugments[augment.id];
+                const currentGrade =
+                  selectedAugments[augment.id]?.grade || 'standard';
+                const gradeData =
+                  AUGMENT_GRADES[currentGrade] || AUGMENT_GRADES.standard;
+                const baseEssence = augment.essence_cost || 0;
+                const baseNuyen = augment.nuyen_cost || 0;
+                // Apply biocompatibility reduction (10% less essence cost)
+                const biocompMult = hasBiocompatibility
+                  ? BIOCOMPATIBILITY_ESSENCE_REDUCTION
+                  : 1.0;
+                const effectiveEssence =
+                  baseEssence * gradeData.essenceMultiplier * biocompMult;
+                const effectiveNuyen = baseNuyen * gradeData.costMultiplier;
+                const canAffordEssence =
+                  essenceRemaining >= effectiveEssence || isSelected;
+                const canAffordNuyen =
+                  nuyenRemaining >= effectiveNuyen || isSelected;
+                const canAfford = canAffordEssence && canAffordNuyen;
 
-              // Determine card accent color based on category and grade
-              const cardAccent = isSelected
-                ? gradeData.color
-                : getCategoryColor(activeCategory);
+                // Determine card accent color based on category and grade
+                const cardAccent = isSelected
+                  ? gradeData.color
+                  : getCategoryColor(activeCategory);
 
-              return (
-                <Box
-                  key={augment.id}
-                  style={{
-                    padding: '0.75rem',
-                    marginBottom: '0.5rem',
-                    background: isSelected
-                      ? `rgba(${gradeData.color === '#888' ? '136,136,136' : gradeData.color === '#fff' ? '255,255,255' : gradeData.color === '#4fc3f7' ? '79,195,247' : gradeData.color === '#4caf50' ? '76,175,80' : '233,30,99'}, 0.1)`
-                      : 'rgba(0, 0, 0, 0.3)',
-                    border: `1px solid ${isSelected ? gradeData.color : 'rgba(255, 255, 255, 0.1)'}`,
-                    borderLeft: `3px solid ${cardAccent}`,
-                    borderRadius: '4px',
-                    opacity: !canAfford && !isSelected ? '0.5' : '1',
-                    transition: 'all 0.15s ease',
-                  }}
-                >
-                  <Stack justify="space-between" align="flex-start">
-                    <Stack.Item grow>
-                      {/* Augment Name & Description */}
-                      <Box
-                        style={{
-                          fontWeight: 'bold',
-                          color: isSelected ? gradeData.color : '#fff',
-                          marginBottom: '0.25rem',
-                        }}
-                      >
-                        <Tooltip
-                          content={
-                            augment.description ||
-                            `${augment.name} - ${formatNuyen(effectiveNuyen)}`
-                          }
-                          position="right"
-                        >
-                          <span>{augment.name}</span>
-                        </Tooltip>
-                        {augment.slot && (
+                return (
+                  <Box
+                    key={augment.id}
+                    style={{
+                      ...style,
+                      paddingRight: '0.5rem',
+                      paddingBottom: '0.5rem',
+                    }}
+                  >
+                    <Box
+                      style={{
+                        padding: '0.75rem',
+                        height: '100%',
+                        boxSizing: 'border-box',
+                        background: isSelected
+                          ? `rgba(${gradeData.color === '#888' ? '136,136,136' : gradeData.color === '#fff' ? '255,255,255' : gradeData.color === '#4fc3f7' ? '79,195,247' : gradeData.color === '#4caf50' ? '76,175,80' : '233,30,99'}, 0.1)`
+                          : 'rgba(0, 0, 0, 0.3)',
+                        border: `1px solid ${isSelected ? gradeData.color : 'rgba(255, 255, 255, 0.1)'}`,
+                        borderLeft: `3px solid ${cardAccent}`,
+                        borderRadius: '4px',
+                        opacity: !canAfford && !isSelected ? '0.5' : '1',
+                        transition: 'all 0.15s ease',
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <Stack justify="space-between" align="flex-start">
+                        <Stack.Item grow>
+                          {/* Augment Name & Description */}
                           <Box
-                            as="span"
-                            ml={0.5}
                             style={{
-                              fontSize: '0.75rem',
-                              padding: '0.1rem 0.3rem',
-                              background: 'rgba(255, 255, 255, 0.1)',
-                              borderRadius: '3px',
-                              color: 'rgba(255, 255, 255, 0.6)',
+                              fontWeight: 'bold',
+                              color: isSelected ? gradeData.color : '#fff',
+                              marginBottom: '0.25rem',
                             }}
                           >
-                            {augment.slot}
-                          </Box>
-                        )}
-                      </Box>
-                      <Box
-                        style={{
-                          fontSize: '0.8rem',
-                          color: 'rgba(255, 255, 255, 0.7)',
-                          marginBottom: '0.5rem',
-                        }}
-                      >
-                        {augment.description}
-                      </Box>
-
-                      {/* Grade Selector Row (when selected) */}
-                      {isSelected && (
-                        <Box style={{ marginBottom: '0.25rem' }}>
-                          <Dropdown
-                            width="8rem"
-                            disabled={isSaved}
-                            selected={currentGrade}
-                            options={Object.entries(AUGMENT_GRADES).map(
-                              ([gId, gData]) => ({
-                                value: gId,
-                                displayText: gData.name,
-                              }),
+                            <Tooltip
+                              content={
+                                augment.description ||
+                                `${augment.name} - ${formatNuyen(effectiveNuyen)}`
+                              }
+                              position="right"
+                            >
+                              <span>{augment.name}</span>
+                            </Tooltip>
+                            {augment.slot && (
+                              <Box
+                                as="span"
+                                ml={0.5}
+                                style={{
+                                  fontSize: '0.75rem',
+                                  padding: '0.1rem 0.3rem',
+                                  background: 'rgba(255, 255, 255, 0.1)',
+                                  borderRadius: '3px',
+                                  color: 'rgba(255, 255, 255, 0.6)',
+                                }}
+                              >
+                                {augment.slot}
+                              </Box>
                             )}
-                            onSelected={(val) =>
-                              handleChangeGrade(augment.id, val)
-                            }
-                          />
-                        </Box>
-                      )}
-
-                      {/* Cyberlimb Stats (when selected and is cyberlimb) */}
-                      {isSelected && augment.is_cyberlimb && (
-                        <Box
-                          style={{
-                            display: 'flex',
-                            gap: '0.5rem',
-                            padding: '0.25rem',
-                            background: 'rgba(0, 0, 0, 0.3)',
-                            borderRadius: '4px',
-                          }}
-                        >
-                          <Tooltip content="Agility upgrade: +1 AGI costs ¥5,000">
-                            <Box
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.25rem',
-                              }}
-                            >
-                              <Box
-                                style={{ fontSize: '0.7rem', color: '#4fc3f7' }}
-                              >
-                                AGI
-                              </Box>
-                              <Box
-                                style={{ fontWeight: 'bold', color: '#4fc3f7' }}
-                              >
-                                {CYBERLIMB_BASE_STATS +
-                                  (selectedAugments[augment.id]?.agi_upgrade ||
-                                    0)}
-                              </Box>
-                              <Stack vertical style={{ gap: '0' }}>
-                                <Button
-                                  compact
-                                  icon="plus"
-                                  disabled={
-                                    isSaved ||
-                                    (selectedAugments[augment.id]
-                                      ?.agi_upgrade || 0) >=
-                                      CYBERLIMB_MAX_UPGRADE ||
-                                    nuyenRemaining < CYBERLIMB_UPGRADE_COST
-                                  }
-                                  onClick={() =>
-                                    handleChangeCyberlimbUpgrade(
-                                      augment.id,
-                                      'agi',
-                                      (selectedAugments[augment.id]
-                                        ?.agi_upgrade || 0) + 1,
-                                    )
-                                  }
-                                />
-                                <Button
-                                  compact
-                                  icon="minus"
-                                  disabled={
-                                    isSaved ||
-                                    (selectedAugments[augment.id]
-                                      ?.agi_upgrade || 0) <= 0
-                                  }
-                                  onClick={() =>
-                                    handleChangeCyberlimbUpgrade(
-                                      augment.id,
-                                      'agi',
-                                      (selectedAugments[augment.id]
-                                        ?.agi_upgrade || 0) - 1,
-                                    )
-                                  }
-                                />
-                              </Stack>
-                            </Box>
-                          </Tooltip>
-                          <Tooltip content="Strength upgrade: +1 STR costs ¥5,000">
-                            <Box
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '0.25rem',
-                              }}
-                            >
-                              <Box
-                                style={{ fontSize: '0.7rem', color: '#ff6b6b' }}
-                              >
-                                STR
-                              </Box>
-                              <Box
-                                style={{ fontWeight: 'bold', color: '#ff6b6b' }}
-                              >
-                                {CYBERLIMB_BASE_STATS +
-                                  (selectedAugments[augment.id]?.str_upgrade ||
-                                    0)}
-                              </Box>
-                              <Stack vertical style={{ gap: '0' }}>
-                                <Button
-                                  compact
-                                  icon="plus"
-                                  disabled={
-                                    isSaved ||
-                                    (selectedAugments[augment.id]
-                                      ?.str_upgrade || 0) >=
-                                      CYBERLIMB_MAX_UPGRADE ||
-                                    nuyenRemaining < CYBERLIMB_UPGRADE_COST
-                                  }
-                                  onClick={() =>
-                                    handleChangeCyberlimbUpgrade(
-                                      augment.id,
-                                      'str',
-                                      (selectedAugments[augment.id]
-                                        ?.str_upgrade || 0) + 1,
-                                    )
-                                  }
-                                />
-                                <Button
-                                  compact
-                                  icon="minus"
-                                  disabled={
-                                    isSaved ||
-                                    (selectedAugments[augment.id]
-                                      ?.str_upgrade || 0) <= 0
-                                  }
-                                  onClick={() =>
-                                    handleChangeCyberlimbUpgrade(
-                                      augment.id,
-                                      'str',
-                                      (selectedAugments[augment.id]
-                                        ?.str_upgrade || 0) - 1,
-                                    )
-                                  }
-                                />
-                              </Stack>
-                            </Box>
-                          </Tooltip>
-                        </Box>
-                      )}
-
-                      {/* Show mods count badge if augment has mods */}
-                      {isSelected &&
-                        (selectedAugments[augment.id]?.mods?.length || 0) >
-                          0 && (
-                          <Box
-                            style={{
-                              marginTop: '0.25rem',
-                              fontSize: '0.75rem',
-                              color: '#4caf50',
-                            }}
-                          >
-                            <Icon name="cog" mr={0.25} />
-                            {selectedAugments[augment.id]?.mods?.length} mod
-                            {(selectedAugments[augment.id]?.mods?.length ||
-                              0) !== 1
-                              ? 's'
-                              : ''}{' '}
-                            installed
                           </Box>
-                        )}
-                    </Stack.Item>
-
-                    {/* Cost & Buttons Column */}
-                    <Stack.Item>
-                      <Box
-                        style={{
-                          textAlign: 'right',
-                          marginBottom: '0.5rem',
-                        }}
-                      >
-                        <Box
-                          style={{
-                            fontWeight: 'bold',
-                            color:
-                              canAfford || isSelected ? '#ffd700' : '#ff6b6b',
-                          }}
-                        >
-                          {formatNuyen(effectiveNuyen)}
-                        </Box>
-                        <Tooltip
-                          content={`Base: ${baseEssence.toFixed(2)} ESS × ${gradeData.name} (${(gradeData.essenceMultiplier * 100).toFixed(0)}%)`}
-                        >
                           <Box
                             style={{
                               fontSize: '0.8rem',
-                              color: isSelected ? gradeData.color : '#ff9800',
-                              fontWeight: 'bold',
+                              color: 'rgba(255, 255, 255, 0.7)',
+                              marginBottom: '0.5rem',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap',
                             }}
                           >
-                            -{effectiveEssence.toFixed(2)} ESS
+                            {augment.description}
                           </Box>
-                        </Tooltip>
-                        <Box
-                          style={{
-                            fontSize: '0.7rem',
-                            color: 'rgba(255,255,255,0.5)',
-                          }}
-                        >
-                          Avail: {augment.availability || '-'}
-                        </Box>
-                      </Box>
-                      <Stack vertical>
-                        {isSelected ? (
-                          <>
-                            <Stack.Item>
-                              <Button
-                                fluid
-                                icon="cog"
-                                color="transparent"
+
+                          {/* Grade Selector Row (when selected) */}
+                          {isSelected && (
+                            <Box style={{ marginBottom: '0.25rem' }}>
+                              <Dropdown
+                                width="8rem"
                                 disabled={isSaved}
-                                onClick={() =>
-                                  setCustomizingAugmentId(augment.id)
+                                selected={currentGrade}
+                                options={Object.entries(AUGMENT_GRADES).map(
+                                  ([gId, gData]) => ({
+                                    value: gId,
+                                    displayText: gData.name,
+                                  }),
+                                )}
+                                onSelected={(val) =>
+                                  handleChangeGrade(augment.id, val)
                                 }
-                              >
-                                Customize
-                              </Button>
-                            </Stack.Item>
-                            <Stack.Item>
-                              <Button
-                                fluid
-                                icon="trash"
-                                color="bad"
-                                disabled={isSaved}
-                                onClick={() => handleToggleAugment(augment.id)}
-                              >
-                                Remove
-                              </Button>
-                            </Stack.Item>
-                          </>
-                        ) : (
-                          <Stack.Item>
-                            <Button
-                              fluid
-                              icon="plus"
-                              color="good"
-                              disabled={isSaved || !canAfford}
-                              onClick={() =>
-                                handleToggleAugment(augment.id, 'standard')
-                              }
+                              />
+                            </Box>
+                          )}
+
+                          {/* Cyberlimb Stats (when selected and is cyberlimb) */}
+                          {isSelected && augment.is_cyberlimb && (
+                            <Box
+                              style={{
+                                display: 'flex',
+                                gap: '0.5rem',
+                                padding: '0.25rem',
+                                background: 'rgba(0, 0, 0, 0.3)',
+                                borderRadius: '4px',
+                              }}
                             >
-                              Add
-                            </Button>
-                          </Stack.Item>
-                        )}
+                              <Tooltip content="Agility upgrade: +1 AGI costs ¥5,000">
+                                <Box
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem',
+                                  }}
+                                >
+                                  <Box
+                                    style={{
+                                      fontSize: '0.7rem',
+                                      color: '#4fc3f7',
+                                    }}
+                                  >
+                                    AGI
+                                  </Box>
+                                  <Box
+                                    style={{
+                                      fontWeight: 'bold',
+                                      color: '#4fc3f7',
+                                    }}
+                                  >
+                                    {CYBERLIMB_BASE_STATS +
+                                      (selectedAugments[augment.id]
+                                        ?.agi_upgrade || 0)}
+                                  </Box>
+                                  <Stack vertical style={{ gap: '0' }}>
+                                    <Button
+                                      compact
+                                      icon="plus"
+                                      disabled={
+                                        isSaved ||
+                                        (selectedAugments[augment.id]
+                                          ?.agi_upgrade || 0) >=
+                                          CYBERLIMB_MAX_UPGRADE ||
+                                        nuyenRemaining < CYBERLIMB_UPGRADE_COST
+                                      }
+                                      onClick={() =>
+                                        handleChangeCyberlimbUpgrade(
+                                          augment.id,
+                                          'agi',
+                                          (selectedAugments[augment.id]
+                                            ?.agi_upgrade || 0) + 1,
+                                        )
+                                      }
+                                    />
+                                    <Button
+                                      compact
+                                      icon="minus"
+                                      disabled={
+                                        isSaved ||
+                                        (selectedAugments[augment.id]
+                                          ?.agi_upgrade || 0) <= 0
+                                      }
+                                      onClick={() =>
+                                        handleChangeCyberlimbUpgrade(
+                                          augment.id,
+                                          'agi',
+                                          (selectedAugments[augment.id]
+                                            ?.agi_upgrade || 0) - 1,
+                                        )
+                                      }
+                                    />
+                                  </Stack>
+                                </Box>
+                              </Tooltip>
+                              <Tooltip content="Strength upgrade: +1 STR costs ¥5,000">
+                                <Box
+                                  style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '0.25rem',
+                                  }}
+                                >
+                                  <Box
+                                    style={{
+                                      fontSize: '0.7rem',
+                                      color: '#ff6b6b',
+                                    }}
+                                  >
+                                    STR
+                                  </Box>
+                                  <Box
+                                    style={{
+                                      fontWeight: 'bold',
+                                      color: '#ff6b6b',
+                                    }}
+                                  >
+                                    {CYBERLIMB_BASE_STATS +
+                                      (selectedAugments[augment.id]
+                                        ?.str_upgrade || 0)}
+                                  </Box>
+                                  <Stack vertical style={{ gap: '0' }}>
+                                    <Button
+                                      compact
+                                      icon="plus"
+                                      disabled={
+                                        isSaved ||
+                                        (selectedAugments[augment.id]
+                                          ?.str_upgrade || 0) >=
+                                          CYBERLIMB_MAX_UPGRADE ||
+                                        nuyenRemaining < CYBERLIMB_UPGRADE_COST
+                                      }
+                                      onClick={() =>
+                                        handleChangeCyberlimbUpgrade(
+                                          augment.id,
+                                          'str',
+                                          (selectedAugments[augment.id]
+                                            ?.str_upgrade || 0) + 1,
+                                        )
+                                      }
+                                    />
+                                    <Button
+                                      compact
+                                      icon="minus"
+                                      disabled={
+                                        isSaved ||
+                                        (selectedAugments[augment.id]
+                                          ?.str_upgrade || 0) <= 0
+                                      }
+                                      onClick={() =>
+                                        handleChangeCyberlimbUpgrade(
+                                          augment.id,
+                                          'str',
+                                          (selectedAugments[augment.id]
+                                            ?.str_upgrade || 0) - 1,
+                                        )
+                                      }
+                                    />
+                                  </Stack>
+                                </Box>
+                              </Tooltip>
+                            </Box>
+                          )}
+
+                          {/* Show mods count badge if augment has mods */}
+                          {isSelected &&
+                            (selectedAugments[augment.id]?.mods?.length || 0) >
+                              0 && (
+                              <Box
+                                style={{
+                                  marginTop: '0.25rem',
+                                  fontSize: '0.75rem',
+                                  color: '#4caf50',
+                                }}
+                              >
+                                <Icon name="cog" mr={0.25} />
+                                {selectedAugments[augment.id]?.mods?.length} mod
+                                {(selectedAugments[augment.id]?.mods?.length ||
+                                  0) !== 1
+                                  ? 's'
+                                  : ''}{' '}
+                                installed
+                              </Box>
+                            )}
+                        </Stack.Item>
+
+                        {/* Cost & Buttons Column */}
+                        <Stack.Item>
+                          <Box
+                            style={{
+                              textAlign: 'right',
+                              marginBottom: '0.5rem',
+                            }}
+                          >
+                            <Box
+                              style={{
+                                fontWeight: 'bold',
+                                color:
+                                  canAfford || isSelected
+                                    ? '#ffd700'
+                                    : '#ff6b6b',
+                              }}
+                            >
+                              {formatNuyen(effectiveNuyen)}
+                            </Box>
+                            <Tooltip
+                              content={`Base: ${baseEssence.toFixed(2)} ESS × ${gradeData.name} (${(gradeData.essenceMultiplier * 100).toFixed(0)}%)`}
+                            >
+                              <Box
+                                style={{
+                                  fontSize: '0.8rem',
+                                  color: isSelected
+                                    ? gradeData.color
+                                    : '#ff9800',
+                                  fontWeight: 'bold',
+                                }}
+                              >
+                                -{effectiveEssence.toFixed(2)} ESS
+                              </Box>
+                            </Tooltip>
+                            <Box
+                              style={{
+                                fontSize: '0.7rem',
+                                color: 'rgba(255,255,255,0.5)',
+                              }}
+                            >
+                              Avail: {augment.availability || '-'}
+                            </Box>
+                          </Box>
+                          <Stack vertical>
+                            {isSelected ? (
+                              <>
+                                <Stack.Item>
+                                  <Button
+                                    fluid
+                                    icon="cog"
+                                    color="transparent"
+                                    disabled={isSaved}
+                                    onClick={() =>
+                                      setCustomizingAugmentId(augment.id)
+                                    }
+                                  >
+                                    Customize
+                                  </Button>
+                                </Stack.Item>
+                                <Stack.Item>
+                                  <Button
+                                    fluid
+                                    icon="trash"
+                                    color="bad"
+                                    disabled={isSaved}
+                                    onClick={() =>
+                                      handleToggleAugment(augment.id)
+                                    }
+                                  >
+                                    Remove
+                                  </Button>
+                                </Stack.Item>
+                              </>
+                            ) : (
+                              <Stack.Item>
+                                <Button
+                                  fluid
+                                  icon="plus"
+                                  color="good"
+                                  disabled={isSaved || !canAfford}
+                                  onClick={() =>
+                                    handleToggleAugment(augment.id, 'standard')
+                                  }
+                                >
+                                  Add
+                                </Button>
+                              </Stack.Item>
+                            )}
+                          </Stack>
+                        </Stack.Item>
                       </Stack>
-                    </Stack.Item>
-                  </Stack>
+                    </Box>
+                  </Box>
+                );
+              }}
+              emptyContent={
+                <Box
+                  style={{
+                    textAlign: 'center',
+                    padding: '2rem',
+                    opacity: '0.6',
+                  }}
+                >
+                  <Icon name="info-circle" size={2} />
+                  <Box mt={1}>No augments match your search.</Box>
                 </Box>
-              );
-            })
+              }
+            />
           )}
         </Box>
       )}
