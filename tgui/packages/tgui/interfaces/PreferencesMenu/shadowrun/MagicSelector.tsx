@@ -83,6 +83,7 @@ type MagicSelectorProps = {
   value: unknown;
 };
 
+// eslint-disable-next-line complexity
 export const MagicSelector = memo((props: MagicSelectorProps) => {
   const {
     chargenState,
@@ -379,7 +380,6 @@ export const MagicSelector = memo((props: MagicSelectorProps) => {
         borderRadius: '8px',
         padding: '1rem',
         position: 'relative',
-        overflow: 'hidden',
       }}
     >
       {/* Decorative corner accent */}

@@ -126,9 +126,6 @@ export type CatalogItemRenderProps<T> = {
  * Props for the SelectionCatalog component
  */
 export type SelectionCatalogProps<TItem, TSelection = TItem> = {
-  /** Whether the catalog is in add-only mode (no remove buttons) */
-  addOnly?: boolean;
-
   /**
    * Function to check if an item can be afforded/added.
    * Return false to grey out the item.

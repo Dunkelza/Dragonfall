@@ -212,7 +212,6 @@ export const KnowledgeSkillsSelector = memo(
           border: `1px solid ${ACCENT_GREEN_BORDER}`,
           padding: '1rem',
           position: 'relative',
-          overflow: 'hidden',
         }}
       >
         {/* Decorative corner accent */}

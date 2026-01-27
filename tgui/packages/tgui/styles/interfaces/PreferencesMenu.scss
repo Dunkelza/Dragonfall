@@ -433,15 +433,25 @@ $sr-gold: #caa53d;
   gap: 0.25em;
   flex-wrap: wrap;
   overflow: visible;
+  // Align all tabs to a consistent baseline
+  align-items: stretch;
 
   .Tabs__Tab {
     flex: 0 0 auto;
     margin-right: 0.25em;
     margin-bottom: 0.25em;
     border: 2px solid rgba(255, 255, 255, 0.15);
+    // Remove clip-path to ensure border alignment is visible
+    clip-path: none;
     background: rgba(0, 0, 0, 0.18);
     font-family: 'Libre Baskerville';
     letter-spacing: 0.01em;
+    // Ensure consistent vertical alignment
+    display: inline-flex;
+    align-items: center;
+    // Consistent height across all tabs
+    min-height: 2.25em;
+    box-sizing: border-box;
   }
 
   .Tabs__Tab--selected {
@@ -931,6 +941,23 @@ $sr-gold: #caa53d;
     animation: sr-pulse-bad 1.5s infinite;
   }
 
+  &--warn {
+    border-color: rgba(#ff9800, 0.8);
+    box-shadow:
+      0 0 10px rgba(#ff9800, 0.25),
+      inset 0 0 12px rgba(#ff9800, 0.08);
+
+    .PreferencesMenu__ShadowrunSheet__dashboardTile__icon {
+      color: #ff9800;
+      text-shadow: 0 0 8px rgba(#ff9800, 0.5);
+    }
+
+    .PreferencesMenu__ShadowrunSheet__dashboardTile__value {
+      color: #ff9800;
+      text-shadow: 0 0 6px rgba(#ff9800, 0.4);
+    }
+  }
+
   &--good {
     border-color: rgba(#00ff88, 0.7);
     box-shadow: 0 0 8px rgba(#00ff88, 0.15);
@@ -985,7 +1012,8 @@ $sr-gold: #caa53d;
   height: 16px;
   border-radius: 50%;
   font-size: 0.7rem;
-  margin-left: 0.35rem;
+  // margin handled by Tab__right container when used in rightSlot
+  flex-shrink: 0;
 
   &--good {
     background: rgba(colors.$green, 0.25);

@@ -19,6 +19,7 @@ import {
 } from './constants';
 import {
   AttributeMeta,
+  AugmentMeta,
   AugmentSelection,
   ChargenConstData,
   ChargenState,
@@ -192,14 +193,19 @@ export function useEssenceCalculation(
     // Biocompatibility reduces essence cost by 10%
     const biocompMultiplier = hasBiocompatibility ? 0.9 : 1.0;
 
+    // Build augment lookup from augments array or use as-is if it's a Record
+    // Server sends augments as a Record keyed by ID at runtime
+    const augmentLookup =
+      (chargenConstData?.augments as unknown as Record<string, AugmentMeta>) ||
+      {};
+
     const essenceCost = Object.entries(selectedAugments).reduce(
       (
         total,
         [augmentId, augmentData]: [string, AugmentSelection | undefined],
       ) => {
         if (!augmentData) return total;
-        const baseCost =
-          chargenConstData?.augment_catalog?.[augmentId]?.essence_cost || 0;
+        const baseCost = augmentLookup[augmentId]?.essence_cost || 0;
         const grade = augmentData.grade || 'standard';
         const gradeData = AUGMENT_GRADES[grade];
         const gradeMultiplier = gradeData?.essenceMultiplier || 1.0;
@@ -245,22 +251,26 @@ export function useNuyenCalculation(
     const cyberlimbUpgradeCost =
       chargenConstData?.cyberlimb_upgrade_cost || 5000;
 
+    // Build augment lookup from augments (server sends as Record at runtime)
+    const augmentLookup =
+      (chargenConstData?.augments as unknown as Record<string, AugmentMeta>) ||
+      {};
+
     const augmentNuyenSpent = Object.entries(selectedAugments).reduce(
       (
         total,
         [augmentId, augmentData]: [string, AugmentSelection | undefined],
       ) => {
         if (!augmentData) return total;
-        const baseCost =
-          chargenConstData?.augment_catalog?.[augmentId]?.nuyen_cost || 0;
+        const augmentMeta = augmentLookup[augmentId];
+        const baseCost = augmentMeta?.nuyen_cost || 0;
         const grade = augmentData.grade || 'standard';
         const gradeData = AUGMENT_GRADES[grade];
         const costMultiplier = gradeData?.costMultiplier || 1.0;
         let cost = baseCost * costMultiplier;
 
         // Add cyberlimb upgrade costs
-        const isCyberlimb =
-          chargenConstData?.augment_catalog?.[augmentId]?.is_cyberlimb || false;
+        const isCyberlimb = augmentMeta?.is_cyberlimb || false;
         if (isCyberlimb) {
           const agiUpgrade = augmentData.agi_upgrade || 0;
           const strUpgrade = augmentData.str_upgrade || 0;

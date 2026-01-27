@@ -77,6 +77,14 @@ export {
   usePointAllocation,
 } from './hooks';
 
+// Local Draft Storage
+export {
+  type LocalDraftStorageConfig,
+  type LocalDraftStorageResult,
+  useAutoSaveDraft,
+  useLocalDraftStorage,
+} from './useLocalDraftStorage';
+
 // Common UI Components
 export {
   AnimatedNumber,
@@ -113,13 +121,23 @@ export { CareerSection, type CareerSectionProps } from './CareerSection';
 export { ContactsSelector } from './ContactsSelector';
 export { CoreTabContent, type CoreTabContentProps } from './CoreTabContent';
 export { DroneSection } from './DroneSection';
+export { EdgeAllocator } from './EdgeAllocator';
 export { GearSection } from './GearSection';
 export { KnowledgeSkillsSelector } from './KnowledgeSkillsSelector';
+export { MagicRatingAllocator } from './MagicRatingAllocator';
 export { MagicSelector } from './MagicSelector';
 export {
   MetatypeSelector,
   type MetatypeSelectorProps,
 } from './MetatypeSelector';
+export {
+  CHARACTER_PRESETS,
+  type CharacterPreset,
+  getPresetById,
+  getPresetsByCategory,
+  presetToChargenState,
+} from './presets';
+export { PresetSelector } from './PresetSelector';
 export { PrioritySelector } from './PrioritySelector';
 export { getSectionTab, SaveResetBar } from './SaveResetBar';
 export { SkillsSection } from './SkillsSection';

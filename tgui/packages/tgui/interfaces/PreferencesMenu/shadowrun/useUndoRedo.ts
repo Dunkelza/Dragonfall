@@ -447,7 +447,7 @@ export function useUndoRedo<T>(
       // We don't add it to history to avoid duplicate entries
       setPresent(initialState);
     }
-  }, [initialState]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [initialState]);
 
   return useMemo(
     () => ({

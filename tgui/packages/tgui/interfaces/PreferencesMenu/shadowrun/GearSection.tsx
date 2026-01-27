@@ -17,6 +17,7 @@ import {
   GearItemMeta,
   GearSelection,
 } from './types';
+import { VirtualizedList } from './VirtualizedList';
 
 // === ACCENT COLORS ===
 const ACCENT_ORANGE = '#ff9500';
@@ -116,6 +117,22 @@ export const GearSection = memo((props: GearSectionProps) => {
     }
     return groups;
   }, [filteredItems]);
+
+  // Flatten items for virtualization: interleave headers and items
+  type FlatListItem =
+    | { count: number; subcategory: string; type: 'header' }
+    | { item: GearItemMeta; type: 'item' };
+
+  const flattenedItems = useMemo<FlatListItem[]>(() => {
+    const result: FlatListItem[] = [];
+    for (const [subcategory, items] of Object.entries(groupedItems)) {
+      result.push({ type: 'header', subcategory, count: items.length });
+      for (const item of items) {
+        result.push({ type: 'item', item });
+      }
+    }
+    return result;
+  }, [groupedItems]);
 
   // Check if an item is selected
   const isItemSelected = (itemId: string) => {
@@ -519,47 +536,76 @@ export const GearSection = memo((props: GearSectionProps) => {
         </Box>
       )}
 
-      {/* Gear List */}
+      {/* Gear List - Virtualized for performance */}
       <Box
         style={{
           flexGrow: '1',
-          overflow: 'auto',
           background: 'rgba(0, 0, 0, 0.2)',
           borderRadius: '6px',
           padding: '0.5rem',
         }}
       >
-        {Object.entries(groupedItems).map(([subcategory, items]) => (
-          <Box key={subcategory} mb={1}>
-            {/* Subcategory Header */}
-            <Box
+        {filteredItems.length === 0 ? (
+          <Box
+            style={{
+              textAlign: 'center',
+              color: 'rgba(255, 255, 255, 0.4)',
+              padding: '3rem',
+            }}
+          >
+            <Icon
+              name="search"
+              size={2}
               style={{
-                fontWeight: 'bold',
-                color: ACCENT_ORANGE,
-                borderBottom: `1px solid ${ACCENT_ORANGE_BORDER}`,
-                marginBottom: '0.5rem',
-                paddingBottom: '0.25rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
+                marginBottom: '1rem',
+                opacity: 0.5,
               }}
-            >
-              <Icon name="folder-open" size={0.8} />
-              {subcategory}
-              <Box
-                as="span"
-                style={{
-                  fontSize: '0.75rem',
-                  color: 'rgba(255, 255, 255, 0.5)',
-                  fontWeight: 'normal',
-                }}
-              >
-                ({items.length})
-              </Box>
-            </Box>
+            />
+            <Box>No gear found matching your search.</Box>
+          </Box>
+        ) : (
+          <VirtualizedList
+            items={flattenedItems}
+            itemHeight={70}
+            height={450}
+            minItemsForVirtualization={30}
+            renderItem={(listItem, index, style) => {
+              if (listItem.type === 'header') {
+                // Subcategory Header
+                return (
+                  <Box
+                    key={`header-${listItem.subcategory}`}
+                    style={{
+                      ...style,
+                      fontWeight: 'bold',
+                      color: ACCENT_ORANGE,
+                      borderBottom: `1px solid ${ACCENT_ORANGE_BORDER}`,
+                      paddingBottom: '0.25rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      height: 'auto',
+                      minHeight: 32,
+                    }}
+                  >
+                    <Icon name="folder-open" size={0.8} />
+                    {listItem.subcategory}
+                    <Box
+                      as="span"
+                      style={{
+                        fontSize: '0.75rem',
+                        color: 'rgba(255, 255, 255, 0.5)',
+                        fontWeight: 'normal',
+                      }}
+                    >
+                      ({listItem.count})
+                    </Box>
+                  </Box>
+                );
+              }
 
-            {/* Gear Items */}
-            {items.map((item: GearItemMeta) => {
+              // Gear Item
+              const item = listItem.item;
               const isSelected = isItemSelected(item.id);
               const quantity = getItemQuantity(item.id);
               const canAfford = nuyenRemaining >= item.cost || isSelected;
@@ -573,6 +619,7 @@ export const GearSection = memo((props: GearSectionProps) => {
                 <Box
                   key={item.id}
                   style={{
+                    ...style,
                     padding: '0.6rem 0.75rem',
                     marginBottom: '0.35rem',
                     background: isSelected
@@ -581,7 +628,7 @@ export const GearSection = memo((props: GearSectionProps) => {
                     borderRadius: '4px',
                     borderLeft: `3px solid ${isSelected ? SUCCESS_GREEN : 'transparent'}`,
                     opacity: canAfford || isSelected ? '1' : '0.5',
-                    transition: 'all 0.2s ease',
+                    boxSizing: 'border-box',
                   }}
                 >
                   <Stack align="center">
@@ -655,7 +702,7 @@ export const GearSection = memo((props: GearSectionProps) => {
                         )}
                       </Box>
 
-                      {/* Description */}
+                      {/* Description - truncated for virtualization */}
                       {item.desc && (
                         <Box
                           style={{
@@ -663,10 +710,13 @@ export const GearSection = memo((props: GearSectionProps) => {
                             color: 'rgba(255, 255, 255, 0.5)',
                             marginTop: '0.25rem',
                             lineHeight: '1.3',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
                           }}
                         >
-                          {item.desc.length > 80
-                            ? `${item.desc.substring(0, 80)}...`
+                          {item.desc.length > 60
+                            ? `${item.desc.substring(0, 60)}...`
                             : item.desc}
                         </Box>
                       )}
@@ -724,29 +774,8 @@ export const GearSection = memo((props: GearSectionProps) => {
                   </Stack>
                 </Box>
               );
-            })}
-          </Box>
-        ))}
-
-        {/* Empty State */}
-        {filteredItems.length === 0 && (
-          <Box
-            style={{
-              textAlign: 'center',
-              color: 'rgba(255, 255, 255, 0.4)',
-              padding: '3rem',
             }}
-          >
-            <Icon
-              name="search"
-              size={2}
-              style={{
-                marginBottom: '1rem',
-                opacity: 0.5,
-              }}
-            />
-            <Box>No gear found matching your search.</Box>
-          </Box>
+          />
         )}
       </Box>
 

@@ -69,6 +69,7 @@
 .Dropdown__over {
   top: auto;
   bottom: 100%;
+  border-radius: base.em(2px) base.em(2px) 0 0;
 }
 
 .Dropdown__selected-text {

@@ -519,7 +519,6 @@ export const AugmentsSection = memo((props: AugmentsSectionProps) => {
         borderRadius: '8px',
         padding: '1rem',
         position: 'relative',
-        overflow: 'hidden',
       }}
     >
       {/* Decorative corner accent */}

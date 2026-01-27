@@ -63,6 +63,7 @@ export type {
   DroneId,
   DroneModId,
   EmbeddableChargenProps,
+  FixAction,
   GearId,
   KnowledgeSkillId,
   LanguageId,

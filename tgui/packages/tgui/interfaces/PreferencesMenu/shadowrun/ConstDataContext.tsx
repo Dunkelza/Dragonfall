@@ -77,29 +77,8 @@ export type ConstDataContextValue = {
   droneModsByCategory: Record<string, DroneModMeta[]>;
   dronesByCategory: Record<string, DroneMeta[]>;
   gearByCategory: Record<string, GearItemMeta[]>;
-  mentorSpirits: MentorSpiritMeta[];
-  skillGroups: SkillGroupMeta[];
-  skills: SkillMeta[];
-  spells: SpellMeta[];
-  traditions: TraditionMeta[];
-
-  // Priority tables
-  priorityTables: PriorityTables | null;
-
-  gearCategories: GearCategoryMeta[];
-  languages: LanguageMeta[];
-  knowledgeSkills: KnowledgeSkillMeta[];
-  /** Whether data is loaded */
-  isLoaded: boolean;
-
-  // Metatype bounds
-  metatypeAttributeBounds: Record<string, Record<string, [number, number]>>;
-
-  lifestyles: LifestyleMeta[];
-  /** Raw constant data from server */
-  raw: ChargenConstData | null;
   gearCatalog: Record<string, GearItemMeta>;
-
+  gearCategories: GearCategoryMeta[];
   // Helper methods
   getAugment: (id: string) => AugmentMeta | undefined;
   getDrone: (id: string) => DroneMeta | undefined;
@@ -108,6 +87,22 @@ export type ConstDataContextValue = {
   getSkill: (id: string) => SkillMeta | undefined;
   getSpell: (id: string) => SpellMeta | undefined;
   getTradition: (id: string) => TraditionMeta | undefined;
+  /** Whether data is loaded */
+  isLoaded: boolean;
+  knowledgeSkills: KnowledgeSkillMeta[];
+  languages: LanguageMeta[];
+  lifestyles: LifestyleMeta[];
+  mentorSpirits: MentorSpiritMeta[];
+  // Metatype bounds
+  metatypeAttributeBounds: Record<string, Record<string, [number, number]>>;
+  // Priority tables
+  priorityTables: PriorityTables | null;
+  /** Raw constant data from server */
+  raw: ChargenConstData | null;
+  skillGroups: SkillGroupMeta[];
+  skills: SkillMeta[];
+  spells: SpellMeta[];
+  traditions: TraditionMeta[];
 };
 
 // ============================================================================

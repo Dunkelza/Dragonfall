@@ -233,10 +233,26 @@ export const AnimatedResource = memo((props: AnimatedResourceProps) => {
 // DASHBOARD TILE
 // ============================================================================
 
+// Color constants for dashboard tiles (matching AugmentsSection)
+const TILE_COLORS = {
+  essence: { primary: '#26c6da', dim: 'rgba(38, 198, 218, 0.15)' },
+  karma: { primary: '#ffc107', dim: 'rgba(255, 193, 7, 0.15)' },
+  nuyen: { primary: '#ffd700', dim: 'rgba(255, 215, 0, 0.15)' },
+  warning: { primary: '#ff9800', dim: 'rgba(255, 152, 0, 0.15)' },
+  danger: { primary: '#ff6b6b', dim: 'rgba(255, 107, 107, 0.15)' },
+  success: { primary: '#4caf50', dim: 'rgba(76, 175, 80, 0.15)' },
+} as const;
+
 export type DashboardTileProps = {
   colorType?: 'physical' | 'mental' | 'special' | 'resources';
   icon: string;
   label: string;
+  /** Current value for progress calculation */
+  progressCurrent?: number;
+  /** Maximum value for progress calculation */
+  progressMax?: number;
+  /** Whether to show progress bar */
+  showProgress?: boolean;
   status?: 'good' | 'bad' | 'warn' | 'neutral';
   subtext?: string;
   tooltip?: string;
@@ -244,7 +260,34 @@ export type DashboardTileProps = {
 };
 
 export const DashboardTile = (props: DashboardTileProps) => {
-  const { icon, label, value, subtext, colorType, status, tooltip } = props;
+  const {
+    icon,
+    label,
+    value,
+    subtext,
+    colorType,
+    status,
+    tooltip,
+    showProgress = false,
+    progressCurrent = 0,
+    progressMax = 100,
+  } = props;
+
+  // Calculate progress percentage
+  const progressPercent =
+    progressMax > 0
+      ? Math.max(0, Math.min((progressCurrent / progressMax) * 100, 100))
+      : 0;
+
+  // Determine color based on status and colorType
+  const getProgressColor = () => {
+    if (status === 'bad') return TILE_COLORS.danger.primary;
+    if (status === 'warn') return TILE_COLORS.warning.primary;
+    if (colorType === 'special') return TILE_COLORS.essence.primary;
+    if (colorType === 'resources') return TILE_COLORS.nuyen.primary;
+    if (colorType === 'mental') return TILE_COLORS.karma.primary;
+    return TILE_COLORS.success.primary;
+  };
 
   const classNames = [
     'PreferencesMenu__ShadowrunSheet__dashboardTile',
@@ -257,9 +300,14 @@ export const DashboardTile = (props: DashboardTileProps) => {
     status === 'good'
       ? 'PreferencesMenu__ShadowrunSheet__dashboardTile--good'
       : '',
+    status === 'warn'
+      ? 'PreferencesMenu__ShadowrunSheet__dashboardTile--warn'
+      : '',
   ]
     .filter(Boolean)
     .join(' ');
+
+  const progressColor = getProgressColor();
 
   const content = (
     <Box className={classNames}>
@@ -275,6 +323,28 @@ export const DashboardTile = (props: DashboardTileProps) => {
       {subtext && (
         <Box className="PreferencesMenu__ShadowrunSheet__dashboardTile__subtext">
           {subtext}
+        </Box>
+      )}
+      {showProgress && (
+        <Box
+          className="PreferencesMenu__ShadowrunSheet__dashboardTile__progressBar"
+          style={{
+            marginTop: '0.4rem',
+            height: '4px',
+            background: 'rgba(0, 0, 0, 0.4)',
+            borderRadius: '2px',
+            overflow: 'hidden',
+          }}
+        >
+          <Box
+            style={{
+              height: '100%',
+              width: `${progressPercent}%`,
+              background: `linear-gradient(90deg, ${progressColor}, ${progressColor}aa)`,
+              transition: 'width 0.3s ease, background 0.3s ease',
+              boxShadow: `0 0 4px ${progressColor}66`,
+            }}
+          />
         </Box>
       )}
     </Box>
@@ -834,11 +904,24 @@ export const GroupedTabs = (props: GroupedTabsProps) => {
                 icon={info.icon}
                 selected={isSelected}
                 onClick={() => onTabChange(tab)}
+                rightSlot={
+                  <ValidationBadge
+                    status={
+                      hasError
+                        ? 'bad'
+                        : isSaved
+                          ? 'good'
+                          : hasWarning
+                            ? 'warn'
+                            : 'none'
+                    }
+                  />
+                }
                 style={
                   isSelected
                     ? {
-                        borderBottomColor: info.accentColor,
-                        boxShadow: `0 2px 0 0 ${info.accentColor}`,
+                        borderColor: info.accentColor,
+                        borderBottomWidth: '3px',
                       }
                     : undefined
                 }
@@ -852,17 +935,6 @@ export const GroupedTabs = (props: GroupedTabsProps) => {
                 >
                   <HintedLabel text={info.label} hint={info.hint} />
                 </span>
-                <ValidationBadge
-                  status={
-                    hasError
-                      ? 'bad'
-                      : isSaved
-                        ? 'good'
-                        : hasWarning
-                          ? 'warn'
-                          : 'none'
-                  }
-                />
               </Tabs.Tab>
             );
           })}
@@ -965,7 +1037,7 @@ export const BreadcrumbNav = (props: BreadcrumbNavProps) => {
                 ? 'PreferencesMenu__ShadowrunSheet__breadcrumb__item--clickable'
                 : ''
             }`}
-            onClick={segment.onClick}
+            onClick={segment.onClick ? () => segment.onClick?.() : undefined}
           >
             {segment.icon && <Icon name={segment.icon} mr={0.3} />}
             {segment.label}

@@ -63,14 +63,14 @@ type SkillsContextValue = {
   groupRemaining: number;
   /** Group points spent */
   groupSpent: number;
-  /** Whether the sheet is locked/saved */
-  isSaved: boolean;
-  /** Handle skill rating change */
-  handleBumpSkill: (skillId: string, delta: number) => void;
   /** Handle skill group rating change */
   handleBumpGroup: (groupId: string, delta: number) => void;
+  /** Handle skill rating change */
+  handleBumpSkill: (skillId: string, delta: number) => void;
   /** Set skill specialization */
   handleSetSpecialization: (skillId: string, specValue: string) => void;
+  /** Whether the sheet is locked/saved */
+  isSaved: boolean;
   /** Skill group metadata from server */
   skillGroupsMeta: SkillGroupMeta[];
   /** Skill ratings spent (without specializations) */

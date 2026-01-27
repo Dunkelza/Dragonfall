@@ -90,6 +90,20 @@ $ui-notch-path: polygon(
     min-width: 1.333em;
     text-align: center;
   }
+
+  // Icon-only buttons: use flexbox centering when no text content
+  &:not(.Button--hasContent) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    .fa,
+    .fas,
+    .far {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
 }
 
 .Button--hasContent {

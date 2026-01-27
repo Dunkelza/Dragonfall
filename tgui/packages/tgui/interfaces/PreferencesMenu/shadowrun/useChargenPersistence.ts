@@ -207,12 +207,11 @@ export type ChargenPersistenceResult = {
     nuyen: ChargenState['nuyen'],
     options?: PersistenceOptions,
   ) => void;
-  /** Update SIN status */
-  updateSinStatus: (
-    status: ChargenState['sin_status'],
+  /** Update positive qualities */
+  updatePositiveQualities: (
+    qualities: ChargenState['positive_qualities'],
     options?: PersistenceOptions,
   ) => void;
-
   /** Update selected powers */
   updatePowers: (
     powers: ChargenState['selected_powers'],
@@ -229,10 +228,9 @@ export type ChargenPersistenceResult = {
     religion: ChargenState['religion'],
     options?: PersistenceOptions,
   ) => void;
-
-  /** Update positive qualities */
-  updatePositiveQualities: (
-    qualities: ChargenState['positive_qualities'],
+  /** Update SIN status */
+  updateSinStatus: (
+    status: ChargenState['sin_status'],
     options?: PersistenceOptions,
   ) => void;
   /** Update skill groups */

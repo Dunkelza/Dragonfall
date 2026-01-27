@@ -1258,7 +1258,7 @@
 		return (get_magic_rating(magic_letter) > 0) ? "mage" : "mundane"
 
 	switch(raw_value)
-		if ("mundane", "mage", "adept")
+		if ("mundane", "mage", "adept", "mystic_adept", "technomancer")
 			return raw_value
 
 	return "mundane"

@@ -196,7 +196,6 @@ export const CoreTabContent = memo((props: CoreTabContentProps) => {
             padding: '1rem',
             marginBottom: '1rem',
             position: 'relative',
-            overflow: 'hidden',
           }}
         >
           {/* Decorative corner accent */}

@@ -198,11 +198,34 @@ export type ValidationField =
   | `skill_${string}`; // e.g., skill_firearms
 
 /**
+ * An actionable fix suggestion that can be applied automatically.
+ * Used for "click to fix" functionality.
+ */
+export interface FixAction {
+  /** Amount to adjust (for numeric changes) */
+  amount?: number;
+  /** Label for the fix action button */
+  label: string;
+  /** Target ID (attribute id, skill id, augment id, etc.) */
+  targetId?: string;
+  /** Type of action to perform */
+  type:
+    | 'reduce_attribute'
+    | 'reduce_skill'
+    | 'reduce_special'
+    | 'remove_augment'
+    | 'remove_gear'
+    | 'other';
+}
+
+/**
  * A single validation issue.
  */
 export interface ValidationIssue {
   /** The specific field this issue relates to (for inline indicators) */
   field?: ValidationField;
+  /** Optional actionable fix that can be applied */
+  fixAction?: FixAction;
   /** Human-readable message describing the issue */
   message: string;
   /** Prerequisites that are not met (for prerequisite errors) */

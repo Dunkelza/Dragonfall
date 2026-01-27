@@ -5,7 +5,7 @@
 import { memo } from 'react';
 import { Tooltip } from 'tgui-core/components';
 
-import { Box, Dropdown, Icon, Stack } from '../../../components';
+import { Box, Icon, Stack } from '../../../components';
 import {
   PRIORITY_CATEGORIES,
   PRIORITY_LETTERS,
@@ -117,7 +117,7 @@ export const PrioritySelector = memo((props: PrioritySelectorProps) => {
         padding: embedded ? '0' : '1rem',
         marginTop: embedded ? '0' : '0.5rem',
         position: 'relative',
-        overflow: 'hidden',
+        // Note: overflow: visible to allow dropdown menus to extend outside container
       }}
     >
       {/* Decorative corner accent */}
@@ -191,9 +191,10 @@ export const PrioritySelector = memo((props: PrioritySelectorProps) => {
               key={category}
               style={{
                 background: 'rgba(0, 0, 0, 0.3)',
-                borderRadius: '6px',
-                padding: '0.6rem 0.75rem',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
                 borderLeft: `3px solid ${letterColor}`,
+                borderRadius: '4px',
+                padding: '0.5rem 0.75rem',
                 transition: 'all 0.2s ease',
               }}
             >
@@ -250,26 +251,70 @@ export const PrioritySelector = memo((props: PrioritySelectorProps) => {
                       {currentLetter}
                     </Box>
                   ) : (
-                    <Dropdown
-                      width="3.5rem"
-                      selected={currentLetter}
-                      options={PRIORITY_LETTERS.map((l) => {
-                        // Find if another category has this letter
-                        const usedBy = Object.entries(priorities).find(
-                          ([cat, letter]) => cat !== category && letter === l,
+                    <Box
+                      style={{
+                        display: 'flex',
+                        gap: '0.25rem',
+                      }}
+                    >
+                      {PRIORITY_LETTERS.map((letter) => {
+                        const isSelected = currentLetter === letter;
+                        const pillColor = getLetterColor(letter);
+                        // Find which category currently has this letter
+                        const usedByCategory = Object.entries(priorities).find(
+                          ([cat, l]) => cat !== category && l === letter,
                         );
-                        const usedByName = usedBy
-                          ? displayNames[usedBy[0]] || usedBy[0]
+                        const usedByName = usedByCategory
+                          ? displayNames[usedByCategory[0]] || usedByCategory[0]
                           : null;
-                        return {
-                          value: l,
-                          displayText: usedByName ? `${l} ⟷ ${usedByName}` : l,
-                        };
+
+                        return (
+                          <Tooltip
+                            key={letter}
+                            content={
+                              isSelected
+                                ? `Current: ${letter}`
+                                : usedByName
+                                  ? `Swap with ${usedByName}`
+                                  : `Set to ${letter}`
+                            }
+                            position="top"
+                          >
+                            <Box
+                              onClick={() =>
+                                handleSetPriority(category, letter)
+                              }
+                              style={{
+                                width: '1.75rem',
+                                height: '1.75rem',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: '4px',
+                                fontSize: '0.85rem',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                transition: 'all 0.15s ease',
+                                background: isSelected
+                                  ? `${pillColor}30`
+                                  : 'rgba(0, 0, 0, 0.3)',
+                                border: isSelected
+                                  ? `2px solid ${pillColor}`
+                                  : '1px solid rgba(255, 255, 255, 0.15)',
+                                color: isSelected
+                                  ? pillColor
+                                  : 'rgba(255, 255, 255, 0.5)',
+                                boxShadow: isSelected
+                                  ? `0 0 6px ${pillColor}40`
+                                  : 'none',
+                              }}
+                            >
+                              {letter}
+                            </Box>
+                          </Tooltip>
+                        );
                       })}
-                      onSelected={(v) =>
-                        handleSetPriority(category, v as PriorityLetter)
-                      }
-                    />
+                    </Box>
                   )}
                 </Stack.Item>
               </Stack>

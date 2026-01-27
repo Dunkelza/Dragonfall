@@ -18,6 +18,7 @@ import {
   DashboardData,
   DerivedStats,
   DroneSelection,
+  FixAction,
   GearSelection,
   LifestyleMeta,
   ValidationIssue,
@@ -378,6 +379,330 @@ export function calculateCompletionPercent(
 }
 
 // ============================================================================
+// Fix Suggestion Helpers
+// ============================================================================
+
+/** Result of generating a fix suggestion */
+type FixSuggestionResult = {
+  action?: FixAction;
+  text: string;
+};
+
+/** Readable attribute names */
+const ATTR_NAMES: Record<string, string> = {
+  body: 'Body',
+  agility: 'Agility',
+  reaction: 'Reaction',
+  strength: 'Strength',
+  willpower: 'Willpower',
+  logic: 'Logic',
+  intuition: 'Intuition',
+  charisma: 'Charisma',
+};
+
+/**
+ * Generate actionable fix suggestion for overspent attributes.
+ * Finds the highest-rated attribute(s) and suggests reducing them.
+ */
+function generateAttributeFixSuggestion(
+  state: ChargenState,
+  overspent: number,
+): FixSuggestionResult {
+  const attributes = state.attributes || {};
+
+  // Find attributes with ratings above minimum (1)
+  const adjustable = Object.entries(attributes)
+    .filter(([, rating]) => rating > 1)
+    .sort((a, b) => b[1] - a[1]); // Sort by rating descending
+
+  if (adjustable.length === 0) {
+    return { text: 'Reduce attribute ratings to free up points.' };
+  }
+
+  // Get highest rated attribute(s)
+  const [highestId, highestRating] = adjustable[0];
+  const highestName = ATTR_NAMES[highestId] || highestId;
+
+  // Calculate how much to reduce
+  const maxReduction = highestRating - 1; // Can't go below 1
+  const reduction = Math.min(overspent, maxReduction);
+
+  if (reduction >= overspent) {
+    // Single attribute reduction can fix it
+    return {
+      text: `Remove ${overspent} point(s) from ${highestName} (${highestRating} → ${highestRating - overspent}) to fix.`,
+      action: {
+        label: `Reduce ${highestName} by ${overspent}`,
+        type: 'reduce_attribute',
+        targetId: highestId,
+        amount: overspent,
+      },
+    };
+  }
+
+  // Need to reduce multiple attributes
+  const suggestions: string[] = [];
+  let remaining = overspent;
+
+  for (const [attrId, rating] of adjustable) {
+    if (remaining <= 0) break;
+    const attrName = ATTR_NAMES[attrId] || attrId;
+    const canReduce = Math.min(remaining, rating - 1);
+    if (canReduce > 0) {
+      suggestions.push(`${attrName} by ${canReduce}`);
+      remaining -= canReduce;
+    }
+  }
+
+  return {
+    text: `Reduce ${suggestions.join(', or ')} to free ${overspent} point(s).`,
+    action: {
+      label: `Reduce ${highestName} by ${reduction}`,
+      type: 'reduce_attribute',
+      targetId: highestId,
+      amount: reduction,
+    },
+  };
+}
+
+/**
+ * Generate actionable fix suggestion for overspent skills.
+ * Finds the highest-rated skills and suggests reducing them.
+ */
+function generateSkillFixSuggestion(
+  state: ChargenState,
+  overspent: number,
+): FixSuggestionResult {
+  const skills = state.skills || {};
+
+  // Find skills with ratings above 0
+  const adjustable = Object.entries(skills)
+    .filter(([, rating]) => rating > 0)
+    .sort((a, b) => b[1] - a[1]); // Sort by rating descending
+
+  if (adjustable.length === 0) {
+    return { text: 'Reduce skill ratings to free up points.' };
+  }
+
+  // Get highest rated skill(s)
+  const [highestId, highestRating] = adjustable[0];
+  const highestName = formatSkillName(highestId);
+
+  // Calculate how much to reduce
+  const reduction = Math.min(overspent, highestRating);
+
+  if (reduction >= overspent) {
+    return {
+      text: `Remove ${overspent} point(s) from ${highestName} (${highestRating} → ${highestRating - overspent}) to fix.`,
+      action: {
+        label: `Reduce ${highestName} by ${overspent}`,
+        type: 'reduce_skill',
+        targetId: highestId,
+        amount: overspent,
+      },
+    };
+  }
+
+  // Need to reduce multiple skills
+  const suggestions: string[] = [];
+  let remaining = overspent;
+
+  for (const [skillId, rating] of adjustable) {
+    if (remaining <= 0) break;
+    const skillName = formatSkillName(skillId);
+    const canReduce = Math.min(remaining, rating);
+    if (canReduce > 0) {
+      suggestions.push(`${skillName} by ${canReduce}`);
+      remaining -= canReduce;
+    }
+    if (suggestions.length >= 3) break; // Limit suggestions
+  }
+
+  return {
+    text: `Reduce ${suggestions.join(', or ')} to free ${overspent} point(s).`,
+    action: {
+      label: `Reduce ${highestName} by ${reduction}`,
+      type: 'reduce_skill',
+      targetId: highestId,
+      amount: reduction,
+    },
+  };
+}
+
+/** Format skill ID to readable name (e.g., "unarmed_combat" -> "Unarmed Combat") */
+function formatSkillName(skillId: string): string {
+  return skillId
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+/**
+ * Generate actionable fix suggestion for overspent special points.
+ */
+function generateSpecialFixSuggestion(
+  state: ChargenState,
+  overspent: number,
+): FixSuggestionResult {
+  const special = state.special || {};
+
+  // Check magic and edge ratings
+  const magic = special['magic'] || 0;
+  const edge = special['edge'] || 0;
+  const resonance = special['resonance'] || 0;
+
+  const suggestions: string[] = [];
+
+  if (magic > 1) {
+    const reduction = Math.min(overspent, magic - 1);
+    suggestions.push(`Magic by ${reduction}`);
+    if (reduction >= overspent) {
+      return {
+        text: `Remove ${overspent} point(s) from Magic (${magic} → ${magic - overspent}) to fix.`,
+        action: {
+          label: `Reduce Magic by ${overspent}`,
+          type: 'reduce_special',
+          targetId: 'magic',
+          amount: overspent,
+        },
+      };
+    }
+  }
+
+  if (resonance > 1) {
+    const reduction = Math.min(overspent, resonance - 1);
+    suggestions.push(`Resonance by ${reduction}`);
+    if (reduction >= overspent && suggestions.length === 1) {
+      return {
+        text: `Remove ${overspent} point(s) from Resonance (${resonance} → ${resonance - overspent}) to fix.`,
+        action: {
+          label: `Reduce Resonance by ${overspent}`,
+          type: 'reduce_special',
+          targetId: 'resonance',
+          amount: overspent,
+        },
+      };
+    }
+  }
+
+  if (edge > 1) {
+    const reduction = Math.min(overspent, edge - 1);
+    suggestions.push(`Edge by ${reduction}`);
+  }
+
+  if (suggestions.length === 0) {
+    return { text: 'Reduce Magic, Resonance, or Edge to free up points.' };
+  }
+
+  return {
+    text: `Reduce ${suggestions.join(', or ')} to free ${overspent} point(s).`,
+  };
+}
+
+/**
+ * Generate actionable fix suggestion for essence overspend.
+ * Suggests removing or downgrading augments.
+ */
+function generateEssenceFixSuggestion(
+  state: ChargenState,
+  overspent: number,
+): FixSuggestionResult {
+  const augments = state.augments || {};
+  const augmentList = Object.entries(augments);
+
+  if (augmentList.length === 0) {
+    return { text: 'Remove augments to restore essence.' };
+  }
+
+  // Find augments with higher grades (can be downgraded) or recently added
+  const suggestions: string[] = [];
+
+  // Count augments by grade
+  const gradeCount: Record<string, number> = {};
+  for (const [, aug] of augmentList) {
+    const grade = aug.grade || 'standard';
+    gradeCount[grade] = (gradeCount[grade] || 0) + 1;
+  }
+
+  // If using high-grade augments, suggest downgrading
+  if (
+    gradeCount['deltaware'] ||
+    gradeCount['betaware'] ||
+    gradeCount['alphaware']
+  ) {
+    suggestions.push(
+      'consider using lower-grade augments (Used grade costs 125% essence but is cheaper)',
+    );
+  }
+
+  // Suggest removing the most recent/any augment
+  const lastAugmentId = augmentList[augmentList.length - 1]?.[0];
+  if (lastAugmentId) {
+    const augName = formatSkillName(lastAugmentId.replace(/_/g, ' '));
+    return {
+      text: `Remove ${augName} or downgrade augment grades to restore ${overspent.toFixed(2)} essence.`,
+      action: {
+        label: `Remove ${augName}`,
+        type: 'remove_augment',
+        targetId: lastAugmentId,
+      },
+    };
+  }
+
+  return {
+    text: `Remove augments to restore ${overspent.toFixed(2)} essence.`,
+  };
+}
+
+/**
+ * Generate actionable fix suggestion for nuyen overspend.
+ * Suggests removing gear, drones, or downgrading augments.
+ */
+function generateNuyenFixSuggestion(
+  state: ChargenState,
+  overspent: number,
+): FixSuggestionResult {
+  const gear = state.gear || [];
+  const drones = state.drones || {};
+  const augments = state.augments || {};
+
+  const suggestions: string[] = [];
+
+  // Check what categories have items
+  if (gear.length > 0) {
+    suggestions.push('remove gear items');
+  }
+  if (Object.keys(drones).length > 0) {
+    suggestions.push('remove drones');
+  }
+  if (Object.keys(augments).length > 0) {
+    suggestions.push('remove or downgrade augments');
+  }
+
+  if (suggestions.length === 0) {
+    return { text: `Reduce purchases to free ¥${overspent.toLocaleString()}.` };
+  }
+
+  // Suggest removing the most recent gear item if any
+  if (gear.length > 0) {
+    const lastGear = gear[gear.length - 1];
+    const gearName = lastGear.name || formatSkillName(lastGear.id || 'item');
+    return {
+      text: `Remove ${gearName} or ${suggestions.slice(1).join(', ')} to free ¥${overspent.toLocaleString()}.`,
+      action: {
+        label: `Remove ${gearName}`,
+        type: 'remove_gear',
+        targetId: lastGear.id,
+      },
+    };
+  }
+
+  return {
+    text: `${suggestions.map((s) => s.charAt(0).toUpperCase() + s.slice(1)).join(' or ')} to free ¥${overspent.toLocaleString()}.`,
+  };
+}
+
+// ============================================================================
 // Validation
 // ============================================================================
 
@@ -444,11 +769,18 @@ export function validateChargenState(
 
   // Attribute points validation
   if (dashboardData.attrRemaining < 0) {
+    const overspent = Math.abs(dashboardData.attrRemaining);
+    const attrSuggestion = generateAttributeFixSuggestion(
+      chargenState,
+      overspent,
+    );
     issues.push({
-      message: `Overspent ${Math.abs(dashboardData.attrRemaining)} attribute point(s)`,
+      message: `Overspent ${overspent} attribute point(s)`,
       severity: 'error',
       section: 'attributes',
       field: 'attributes',
+      suggestion: attrSuggestion.text,
+      fixAction: attrSuggestion.action,
     });
   } else if (dashboardData.attrRemaining > 0) {
     issues.push({
@@ -462,11 +794,15 @@ export function validateChargenState(
 
   // Skill points validation
   if (dashboardData.skillRemaining < 0) {
+    const overspent = Math.abs(dashboardData.skillRemaining);
+    const skillSuggestion = generateSkillFixSuggestion(chargenState, overspent);
     issues.push({
-      message: `Overspent ${Math.abs(dashboardData.skillRemaining)} skill point(s)`,
+      message: `Overspent ${overspent} skill point(s)`,
       severity: 'error',
       section: 'skills',
       field: 'skills',
+      suggestion: skillSuggestion.text,
+      fixAction: skillSuggestion.action,
     });
   } else if (dashboardData.skillRemaining > 0) {
     issues.push({
@@ -480,11 +816,18 @@ export function validateChargenState(
 
   // Special points validation
   if (dashboardData.specialRemaining < 0) {
+    const overspent = Math.abs(dashboardData.specialRemaining);
+    const specialSuggestion = generateSpecialFixSuggestion(
+      chargenState,
+      overspent,
+    );
     issues.push({
-      message: `Overspent ${Math.abs(dashboardData.specialRemaining)} special point(s)`,
+      message: `Overspent ${overspent} special point(s)`,
       severity: 'error',
       section: 'special',
       field: 'special',
+      suggestion: specialSuggestion.text,
+      fixAction: specialSuggestion.action,
     });
   } else if (
     dashboardData.specialRemaining > 0 &&
@@ -538,21 +881,35 @@ export function validateChargenState(
 
   // Essence validation
   if (dashboardData.essenceRemaining < 0) {
+    const essenceOverspent = Math.abs(dashboardData.essenceRemaining);
+    const essenceSuggestion = generateEssenceFixSuggestion(
+      chargenState,
+      essenceOverspent,
+    );
     issues.push({
-      message: 'Essence cannot go below 0',
+      message: `Essence overspent by ${essenceOverspent.toFixed(2)}`,
       severity: 'error',
       section: 'augments',
       field: 'augments',
+      suggestion: essenceSuggestion.text,
+      fixAction: essenceSuggestion.action,
     });
   }
 
   // Nuyen validation
   if (dashboardData.nuyenRemaining < 0) {
+    const nuyenOverspent = Math.abs(dashboardData.nuyenRemaining);
+    const nuyenSuggestion = generateNuyenFixSuggestion(
+      chargenState,
+      nuyenOverspent,
+    );
     issues.push({
-      message: `Overspent ¥${Math.abs(dashboardData.nuyenRemaining).toLocaleString()} nuyen`,
+      message: `Overspent ¥${nuyenOverspent.toLocaleString()} nuyen`,
       severity: 'error',
       section: 'augments',
       field: 'nuyen',
+      suggestion: nuyenSuggestion.text,
+      fixAction: nuyenSuggestion.action,
     });
   }
 

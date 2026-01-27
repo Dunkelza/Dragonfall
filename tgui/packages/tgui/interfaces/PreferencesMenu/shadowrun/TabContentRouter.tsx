@@ -16,7 +16,10 @@ import { AttributeSelector } from './AttributeSelector';
 import { CareerSection } from './CareerSection';
 import {
   CollapsibleSection,
+  EdgeAllocator,
+  MagicRatingAllocator,
   MetatypeSelectorProps,
+  PresetSelector,
   PrioritySelector,
 } from './index';
 import {
@@ -196,8 +199,8 @@ export const TAB_DISPLAY_INFO: Record<ShadowrunTab, TabDisplayInfo> = {
   },
   [ShadowrunTab.Connections]: {
     icon: 'address-book',
-    label: 'Connections',
-    hint: 'Knowledge skills, languages, and contacts that represent your social network.',
+    label: 'Contacts',
+    hint: 'Manage your network of contacts - the people who provide information, services, and favors.',
     accentColor: TAB_COLORS.connections,
   },
   [ShadowrunTab.Qualities]: {
@@ -310,6 +313,18 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
     case ShadowrunTab.Build:
       return (
         <Suspense fallback={<TabLoadingPlaceholder />}>
+          {/* Quick Start Preset Selector */}
+          <PresetSelector
+            chargenState={chargenState}
+            chargenConstData={chargenConstData}
+            isSaved={isSaved}
+            act={act}
+            featureId={featureId}
+            setPredictedValue={setPredictedValue}
+            value={value}
+            embedded
+          />
+
           <CollapsibleSection
             title="Priority Selection"
             icon="list-ol"
@@ -346,6 +361,23 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
             />
           </CollapsibleSection>
 
+          {/* Edge Allocation - uses metatype special points */}
+          <CollapsibleSection
+            title="Edge"
+            icon="bolt"
+            stateKey={`sr_edge_tab_${data.active_slot}`}
+            defaultOpen
+          >
+            <EdgeAllocator
+              chargenState={chargenState}
+              chargenConstData={chargenConstData}
+              isSaved={isSaved}
+              act={act}
+              featureId={featureId}
+              setPredictedValue={setPredictedValue}
+            />
+          </CollapsibleSection>
+
           <LazySkillsSection
             chargenState={chargenState}
             chargenConstData={chargenConstData}
@@ -355,12 +387,46 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
             setPredictedValue={setPredictedValue}
             value={value}
           />
+
+          {/* Knowledge Skills - point allocation like active skills */}
+          <LazyKnowledgeSkillsSelector
+            chargenState={chargenState}
+            chargenConstData={chargenConstData}
+            isSaved={isSaved}
+            act={act}
+            featureId={featureId}
+            setPredictedValue={setPredictedValue}
+            value={value}
+            embedded
+          />
         </Suspense>
       );
 
     case ShadowrunTab.Magic:
       return (
         <Suspense fallback={<TabLoadingPlaceholder />}>
+          {/* Magic/Resonance Rating Allocator - uses special attribute points */}
+          <CollapsibleSection
+            title={
+              chargenState?.awakening === 'technomancer'
+                ? 'Resonance'
+                : 'Magic Rating'
+            }
+            icon={
+              chargenState?.awakening === 'technomancer' ? 'wifi' : 'hat-wizard'
+            }
+            stateKey={`sr_magic_rating_tab_${data.active_slot}`}
+            defaultOpen
+          >
+            <MagicRatingAllocator
+              chargenState={chargenState}
+              chargenConstData={chargenConstData}
+              isSaved={isSaved}
+              act={act}
+              featureId={featureId}
+              setPredictedValue={setPredictedValue}
+            />
+          </CollapsibleSection>
           <LazyMagicSelector
             chargenState={chargenState}
             chargenConstData={chargenConstData}
@@ -377,17 +443,6 @@ export const TabContentRouter = memo((props: TabContentRouterProps) => {
     case ShadowrunTab.Connections:
       return (
         <Suspense fallback={<TabLoadingPlaceholder />}>
-          <LazyKnowledgeSkillsSelector
-            chargenState={chargenState}
-            chargenConstData={chargenConstData}
-            isSaved={isSaved}
-            act={act}
-            featureId={featureId}
-            setPredictedValue={setPredictedValue}
-            value={value}
-            embedded
-          />
-
           <LazyContactsSelector
             chargenState={chargenState}
             chargenConstData={chargenConstData}

@@ -717,7 +717,6 @@ export const CareerSection: FC<CareerSectionProps> = () => {
         border: `1px solid ${CAREER_ACCENT_BORDER}`,
         padding: '1rem',
         position: 'relative',
-        overflow: 'hidden',
       }}
     >
       {/* Decorative corner accent */}

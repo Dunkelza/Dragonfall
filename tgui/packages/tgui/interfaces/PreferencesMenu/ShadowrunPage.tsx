@@ -1,8 +1,9 @@
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useBackend, useLocalState } from '../../backend';
 import {
   Box,
+  Button,
   Dropdown,
   Icon,
   LabeledList,
@@ -25,10 +26,12 @@ import {
   SaveResetBar,
   ShadowrunTab,
   TabContentRouter,
+  useAutoSaveDraft,
   useChargenValidation,
   useCompletionPercent,
   useDashboardData,
   useDerivedStats,
+  useLocalDraftStorage,
   ValidationBadge,
 } from './shadowrun';
 
@@ -42,6 +45,7 @@ export const ShadowrunPage = () => {
 };
 
 // Inner component that receives serverData
+// eslint-disable-next-line complexity
 const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
   const { serverData } = props;
   const { act, data } = useBackend<PreferencesMenuData>();
@@ -166,6 +170,9 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
       serverValue as ChargenState | null,
     );
 
+  // Track pending save to prevent useEffect from resetting optimistic update
+  const pendingSaveRef = useRef(false);
+
   // Sync predictedValue with serverValue when server state changes
   // This ensures we pick up changes from the server (e.g., after save/load)
   useEffect(() => {
@@ -180,9 +187,37 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
         typeof predictedValue === 'object' &&
         (predictedValue as any).saved;
 
+      // DEBUG: Log state sync
+      console.log('[SR5 Save Debug] useEffect triggered:', {
+        serverSaved,
+        predictedSaved,
+        pendingSave: pendingSaveRef.current,
+        willSync: serverSaved !== predictedSaved,
+      });
+
+      // If we have a pending save and server confirms saved, clear the flag
+      if (pendingSaveRef.current && serverSaved) {
+        console.log(
+          '[SR5 Save Debug] Server confirmed save, clearing pending flag',
+        );
+        pendingSaveRef.current = false;
+        // Don't sync - our optimistic update was correct
+        return;
+      }
+
+      // If we have a pending save but server says not saved, wait for next update
+      // This prevents resetting our optimistic update while server is processing
+      if (pendingSaveRef.current && !serverSaved && predictedSaved) {
+        console.log(
+          '[SR5 Save Debug] Pending save, ignoring stale server state',
+        );
+        return;
+      }
+
       // If server says saved but we don't, sync to server
       // If server says not saved but we do (after reset on server), sync to server
       if (serverSaved !== predictedSaved) {
+        console.log('[SR5 Save Debug] Syncing predictedValue to serverValue');
         setPredictedValue(serverValue);
       }
     }
@@ -194,6 +229,66 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
   const isSaved = Boolean(
     value && typeof value === 'object' && (value as any).saved,
   );
+
+  // ========================================================================
+  // LOCAL DRAFT STORAGE - Survives page refreshes
+  // ========================================================================
+
+  // State for showing draft recovery banner
+  const [showDraftRecovery, setShowDraftRecovery] = useState(false);
+  const [recoveredDraft, setRecoveredDraft] = useState<ChargenState | null>(
+    null,
+  );
+
+  // Handle draft loaded on mount
+  const handleDraftLoaded = useCallback(
+    (draft: ChargenState) => {
+      // Only show recovery if there's meaningful data and sheet isn't saved
+      if (draft && !draft.saved && !isSaved) {
+        setRecoveredDraft(draft);
+        setShowDraftRecovery(true);
+      }
+    },
+    [isSaved],
+  );
+
+  // Local draft storage hook
+  const {
+    saveDraft,
+    clearDraft,
+    hasDraft,
+    draftAge,
+    isSupported: isDraftStorageSupported,
+  } = useLocalDraftStorage({
+    key: `slot_${data.active_slot}`,
+    serverState: serverValue,
+    onDraftLoaded: handleDraftLoaded,
+  });
+
+  // Auto-save draft on state changes
+  useAutoSaveDraft(value as ChargenState | null, saveDraft, {
+    enabled: isDraftStorageSupported && !isSaved,
+  });
+
+  // Restore draft handler
+  const handleRestoreDraft = useCallback(() => {
+    if (recoveredDraft) {
+      setPredictedValue(recoveredDraft);
+      act('set_preference', {
+        preference: featureId,
+        value: recoveredDraft,
+      });
+      setShowDraftRecovery(false);
+      setRecoveredDraft(null);
+    }
+  }, [recoveredDraft, setPredictedValue, act, featureId]);
+
+  // Dismiss draft handler
+  const handleDismissDraft = useCallback(() => {
+    setShowDraftRecovery(false);
+    setRecoveredDraft(null);
+    clearDraft();
+  }, [clearDraft]);
 
   // Extract chargen state for dashboard and metatype selector
   const chargenState = useMemo(() => {
@@ -276,6 +371,12 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
 
   // Save sheet handler
   const onSaveSheet = () => {
+    console.log('[SR5 Save Debug] onSaveSheet called:', {
+      isSaved,
+      canSave: validation.canSave,
+      currentValueSaved: (value as any)?.saved,
+    });
+
     if (isSaved || !validation.canSave) return;
 
     const nextValue = {
@@ -283,11 +384,20 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
       saved: true,
     } as ChargenState;
 
+    // Set pending flag to prevent useEffect from resetting optimistic update
+    console.log('[SR5 Save Debug] Setting pendingSaveRef to true');
+    pendingSaveRef.current = true;
+
+    console.log('[SR5 Save Debug] Setting predictedValue with saved=true');
     setPredictedValue(nextValue);
+    console.log('[SR5 Save Debug] Sending act set_preference');
     act('set_preference', {
       preference: featureId,
       value: nextValue,
     });
+
+    // Clear draft on successful save
+    clearDraft();
   };
 
   // Reset all handler
@@ -322,6 +432,9 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
       preference: featureId,
       value: nextValue,
     });
+
+    // Clear draft on reset
+    clearDraft();
   };
 
   const nonContextualPrefs = Object.fromEntries(
@@ -392,6 +505,65 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
       }}
     >
       <Stack vertical fill>
+        {/* Draft Recovery Banner */}
+        {showDraftRecovery && recoveredDraft && (
+          <Stack.Item>
+            <Box
+              style={{
+                background:
+                  'linear-gradient(135deg, rgba(79, 195, 247, 0.15), rgba(0, 0, 0, 0.4))',
+                border: '1px solid rgba(79, 195, 247, 0.4)',
+                borderRadius: '6px',
+                padding: '0.75rem 1rem',
+                marginBottom: '0.5rem',
+              }}
+            >
+              <Stack align="center">
+                <Stack.Item>
+                  <Icon
+                    name="clock-rotate-left"
+                    size={1.3}
+                    color="#4fc3f7"
+                    mr={0.75}
+                  />
+                </Stack.Item>
+                <Stack.Item grow>
+                  <Box
+                    style={{
+                      fontWeight: 'bold',
+                      color: '#4fc3f7',
+                    }}
+                  >
+                    Unsaved Draft Found
+                  </Box>
+                  <Box
+                    style={{
+                      fontSize: '0.8rem',
+                      opacity: '0.7',
+                    }}
+                  >
+                    A work-in-progress was saved {draftAge}. Would you like to
+                    restore it?
+                  </Box>
+                </Stack.Item>
+                <Stack.Item>
+                  <Button icon="undo" color="good" onClick={handleRestoreDraft}>
+                    Restore Draft
+                  </Button>
+                </Stack.Item>
+                <Stack.Item ml={0.5}>
+                  <Button
+                    icon="times"
+                    color="transparent"
+                    onClick={handleDismissDraft}
+                    tooltip="Discard saved draft"
+                  />
+                </Stack.Item>
+              </Stack>
+            </Box>
+          </Stack.Item>
+        )}
+
         {multiNameInputOpen && (
           <MultiNameInput
             handleClose={() => setMultiNameInputOpen(false)}
@@ -487,6 +659,9 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                                 : 'good'
                           }
                           tooltip={`Essence remaining after augmentations. Low essence affects magic and resonance.`}
+                          showProgress
+                          progressCurrent={dashboardData.essenceRemaining}
+                          progressMax={dashboardData.essenceTotal}
                         />
                         <DashboardTile
                           icon="yin-yang"
@@ -520,7 +695,10 @@ const ShadowrunPageInner = (props: { serverData: ServerData | undefined }) => {
                                 ? 'warn'
                                 : 'good'
                           }
-                          tooltip={`¥${dashboardData.augmentNuyenSpent?.toLocaleString() || 0} augments + ¥${dashboardData.gearNuyenSpent?.toLocaleString() || 0} gear + ¥${dashboardData.lifestyleCost?.toLocaleString() || 0} lifestyle = ¥${dashboardData.nuyenSpent.toLocaleString()} spent`}
+                          tooltip={`¥${dashboardData.augmentNuyenSpent?.toLocaleString() || 0} augments + ¥${dashboardData.gearNuyenSpent?.toLocaleString() || 0} gear + ¥${dashboardData.lifestyleCost?.toLocaleString() || 0} lifestyle + ¥${dashboardData.droneNuyenSpent?.toLocaleString() || 0} drones = ¥${dashboardData.nuyenSpent.toLocaleString()} spent`}
+                          showProgress
+                          progressCurrent={dashboardData.nuyenRemaining}
+                          progressMax={dashboardData.resources}
                         />
                       </Box>
 
